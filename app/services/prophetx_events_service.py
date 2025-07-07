@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
-ProphetX Events Service
-Handles fetching upcoming events from ProphetX API
+ProphetX Events Service - FIXED VERSION
+Handles fetching upcoming events from ProphetX API with proper team name extraction
 """
 
 import requests
@@ -112,6 +112,42 @@ class ProphetXEventsService:
         except Exception as e:
             raise HTTPException(status_code=500, detail=f"Error fetching tournaments: {str(e)}")
     
+    def _extract_team_names(self, event_data: Dict[str, Any]) -> tuple[str, str]:
+        """
+        Extract home and away team names from ProphetX event data
+        
+        ProphetX uses a competitors array with side indicators
+        """
+        home_team = "Unknown Home"
+        away_team = "Unknown Away"
+        
+        # Check for competitors array (main structure)
+        competitors = event_data.get('competitors', [])
+        if competitors:
+            for competitor in competitors:
+                team_name = competitor.get('display_name') or competitor.get('name', 'Unknown')
+                side = competitor.get('side', '').lower()
+                
+                if side == 'home':
+                    home_team = team_name
+                elif side == 'away':
+                    away_team = team_name
+            
+            print(f"   📝 Extracted teams: {away_team} @ {home_team}")
+            return home_team, away_team
+        
+        # Fallback: try direct fields
+        home_team = event_data.get('home_team', event_data.get('home_competitor', {}).get('name', 'Unknown Home'))
+        away_team = event_data.get('away_team', event_data.get('away_competitor', {}).get('name', 'Unknown Away'))
+        
+        # Handle dict structures
+        if isinstance(home_team, dict):
+            home_team = home_team.get('name', 'Unknown Home')
+        if isinstance(away_team, dict):
+            away_team = away_team.get('name', 'Unknown Away')
+        
+        return str(home_team), str(away_team)
+    
     async def get_events_for_tournament(self, tournament_id: int) -> List[ProphetXEvent]:
         """
         Get all upcoming events for a specific tournament
@@ -155,22 +191,15 @@ class ProphetXEventsService:
                         else:
                             commence_time = datetime.now(timezone.utc) + timedelta(hours=24)
                         
-                        # Extract team names - ProphetX might use different fields
-                        home_team = event_data.get('home_team', event_data.get('home_competitor', {}).get('name', 'Unknown Home'))
-                        away_team = event_data.get('away_team', event_data.get('away_competitor', {}).get('name', 'Unknown Away'))
-                        
-                        # Some APIs might have different structures
-                        if isinstance(home_team, dict):
-                            home_team = home_team.get('name', 'Unknown Home')
-                        if isinstance(away_team, dict):
-                            away_team = away_team.get('name', 'Unknown Away')
+                        # **FIXED**: Extract team names using new method
+                        home_team, away_team = self._extract_team_names(event_data)
                         
                         event = ProphetXEvent(
                             event_id=event_data.get('event_id', event_data.get('id')),
-                            sport_name=event_data.get('sport_name', 'Tennis'),
+                            sport_name=event_data.get('sport_name', 'Baseball'),
                             tournament_name=event_data.get('tournament_name', 'Unknown Tournament'),
-                            home_team=str(home_team),
-                            away_team=str(away_team),
+                            home_team=home_team,
+                            away_team=away_team,
                             commence_time=commence_time,
                             status=event_data.get('status', 'not_started'),
                             raw_data=event_data
@@ -186,7 +215,7 @@ class ProphetXEventsService:
                 
                 # Show sample events for debugging
                 for event in events[:3]:
-                    print(f"   🎾 {event.display_name} (starts in {event.starts_in_hours:.1f}h)")
+                    print(f"   ⚾ {event.display_name} (starts in {event.starts_in_hours:.1f}h)")
                 
                 # Cache the results
                 self.events_cache[tournament_id] = events
@@ -326,12 +355,8 @@ class ProphetXEventsService:
         normalized = normalized.replace(",", "")
         
         # Handle common baseball name variations
-        # "Novak Djokovic" -> "djokovic novak"
-        parts = normalized.split()
-        if len(parts) >= 2:
-            # Sort parts to handle "First Last" vs "Last, First" variations
-            parts.sort()
-            normalized = " ".join(parts)
+        # For team names, just clean them up
+        normalized = normalized.replace("  ", " ")  # Remove double spaces
         
         return normalized
     
@@ -348,7 +373,7 @@ class ProphetXEventsService:
         if name1 in name2 or name2 in name1:
             return True
         
-        # Simple word overlap check for baseball players
+        # Simple word overlap check for baseball teams
         words1 = set(name1.split())
         words2 = set(name2.split())
         

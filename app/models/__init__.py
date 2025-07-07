@@ -15,6 +15,12 @@ from .market_models import (
     PortfolioSummary, RiskReport, RiskLimit
 )
 
+from .prophetx_market_models import (
+    ProphetXLine, ProphetXRawMarket, ProphetXEventMarkets,
+    MarketMatchResult, OutcomeMapping, EventMarketsMatch,
+    ProphetXMarketType, ProphetXLineStatus
+)
+
 __all__ = [
     # Odds models
     "OddsEvent", "ProcessedEvent", "ProcessedMarket", "ProcessedOutcome",
@@ -24,5 +30,10 @@ __all__ = [
     # Market models
     "ManagedEvent", "ProphetXMarket", "MarketSide", "ProphetXBet",
     "MarketStatus", "BetStatus", "PositionSide", 
-    "PortfolioSummary", "RiskReport", "RiskLimit"
+    "PortfolioSummary", "RiskReport", "RiskLimit",
+    
+    # ProphetX market models
+    "ProphetXLine", "ProphetXRawMarket", "ProphetXEventMarkets",
+    "MarketMatchResult", "OutcomeMapping", "EventMarketsMatch",
+    "ProphetXMarketType", "ProphetXLineStatus"
 ]

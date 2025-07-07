@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
-Event Matching Service
-Matches events between The Odds API (Pinnacle) and ProphetX
+Event Matching Service - FIXED VERSION
+Matches events between The Odds API (Pinnacle) and ProphetX with improved tolerance
 """
 
 import re
@@ -50,9 +50,9 @@ class EventMatchingService:
         # Name variations cache
         self.name_variations: Dict[str, List[str]] = {}
         
-        # Matching thresholds
-        self.min_confidence_threshold = 0.7
-        self.time_tolerance_hours = 3.0
+        # **UPDATED**: More lenient matching thresholds
+        self.min_confidence_threshold = 0.6  # Lowered from 0.7
+        self.time_tolerance_minutes = 15.0    # NEW: 15 minutes tolerance instead of hours
         
     async def find_matches_for_events(self, odds_api_events: List[ProcessedEvent]) -> List[MatchingAttempt]:
         """
@@ -182,19 +182,25 @@ class EventMatchingService:
         confidence = 0.0
         reasons = []
         
-        # Time proximity check (must be within tolerance)
-        time_diff_hours = abs((odds_event.commence_time - px_event.commence_time).total_seconds() / 3600)
-        if time_diff_hours > self.time_tolerance_hours:
-            return 0.0, [f"Time difference {time_diff_hours:.1f}h exceeds {self.time_tolerance_hours}h tolerance"]
+        # **UPDATED**: Time proximity check with minutes tolerance
+        time_diff_minutes = abs((odds_event.commence_time - px_event.commence_time).total_seconds() / 60)
+        if time_diff_minutes > self.time_tolerance_minutes:
+            return 0.0, [f"Time difference {time_diff_minutes:.1f}min exceeds {self.time_tolerance_minutes}min tolerance"]
         
-        # Time score (closer = better)
-        time_score = max(0, 1 - (time_diff_hours / self.time_tolerance_hours))
-        confidence += time_score * 0.3  # 30% weight for time
-        reasons.append(f"Time match: {time_score:.2f} (diff: {time_diff_hours:.1f}h)")
+        # **IMPROVED**: Time score (closer = better)
+        if time_diff_minutes <= 5:  # Perfect if within 5 minutes
+            time_score = 1.0
+        elif time_diff_minutes <= 10:  # Good if within 10 minutes  
+            time_score = 0.9
+        else:  # Acceptable up to 15 minutes
+            time_score = 0.7
         
-        # Team name matching
+        confidence += time_score * 0.4  # 40% weight for time
+        reasons.append(f"Time match: {time_score:.2f} (diff: {time_diff_minutes:.1f}min)")
+        
+        # **IMPROVED**: Team name matching
         team_score = self._calculate_team_name_score(odds_event, px_event)
-        confidence += team_score * 0.7  # 70% weight for team names
+        confidence += team_score * 0.6  # 60% weight for team names
         reasons.append(f"Team names: {team_score:.2f}")
         
         return min(confidence, 1.0), reasons
@@ -202,23 +208,34 @@ class EventMatchingService:
     def _calculate_team_name_score(self, odds_event: ProcessedEvent, px_event: ProphetXEvent) -> float:
         """Calculate team name similarity score"""
         
+        # **DEBUG**: Log team names being compared
+        print(f"   🔍 Comparing teams:")
+        print(f"      Odds API: {odds_event.home_team} vs {odds_event.away_team}")
+        print(f"      ProphetX: {px_event.home_team} vs {px_event.away_team}")
+        
         # Normalize all team names
-        odds_home = self._normalize_name(odds_event.home_team)
-        odds_away = self._normalize_name(odds_event.away_team)
-        px_home = self._normalize_name(px_event.home_team)
-        px_away = self._normalize_name(px_event.away_team)
+        odds_home = self._normalize_team_name(odds_event.home_team)
+        odds_away = self._normalize_team_name(odds_event.away_team)
+        px_home = self._normalize_team_name(px_event.home_team)
+        px_away = self._normalize_team_name(px_event.away_team)
+        
+        print(f"      Normalized - Odds API: {odds_home} vs {odds_away}")
+        print(f"      Normalized - ProphetX: {px_home} vs {px_away}")
         
         # Try both orientations (home/away might be swapped)
-        score1 = (self._name_similarity(odds_home, px_home) + 
-                 self._name_similarity(odds_away, px_away)) / 2
+        score1 = (self._team_similarity(odds_home, px_home) + 
+                 self._team_similarity(odds_away, px_away)) / 2
         
-        score2 = (self._name_similarity(odds_home, px_away) + 
-                 self._name_similarity(odds_away, px_home)) / 2
+        score2 = (self._team_similarity(odds_home, px_away) + 
+                 self._team_similarity(odds_away, px_home)) / 2
         
-        return max(score1, score2)
+        final_score = max(score1, score2)
+        print(f"      Team similarity score: {final_score:.3f} (orientation1: {score1:.3f}, orientation2: {score2:.3f})")
+        
+        return final_score
     
-    def _normalize_name(self, name: str) -> str:
-        """Normalize a player/team name for comparison"""
+    def _normalize_team_name(self, name: str) -> str:
+        """Normalize a team name for comparison"""
         if not name:
             return ""
         
@@ -229,18 +246,16 @@ class EventMatchingService:
         normalized = re.sub(r'[^\w\s]', '', normalized)
         normalized = re.sub(r'\s+', ' ', normalized)
         
-        # Split into words
+        # **IMPROVED**: Handle common team name variations
+        # Extract city and team name parts
         words = normalized.split()
         
-        # For baseball players, sort words to handle "First Last" vs "Last, First"
-        if len(words) >= 2:
-            words.sort()
-            normalized = ' '.join(words)
-        
+        # For MLB teams, keep both city and team name
+        # e.g., "detroit tigers" stays as "detroit tigers"
         return normalized
     
-    def _name_similarity(self, name1: str, name2: str) -> float:
-        """Calculate similarity between two normalized names"""
+    def _team_similarity(self, name1: str, name2: str) -> float:
+        """Calculate similarity between two normalized team names"""
         if not name1 or not name2:
             return 0.0
         
@@ -248,11 +263,11 @@ class EventMatchingService:
         if name1 == name2:
             return 1.0
         
-        # One contains the other
+        # One contains the other (handles "tigers" vs "detroit tigers")
         if name1 in name2 or name2 in name1:
-            return 0.9
+            return 0.95
         
-        # Word overlap for baseball players
+        # **IMPROVED**: Word overlap for team names
         words1 = set(name1.split())
         words2 = set(name2.split())
         
@@ -261,7 +276,7 @@ class EventMatchingService:
             union = words1.union(words2)
             jaccard = len(intersection) / len(union) if union else 0
             
-            # Boost score if last names match (common in baseball)
+            # **BONUS**: If any significant words match (like team name), boost score
             if intersection:
                 return min(0.95, jaccard + 0.2)
             else:
@@ -275,12 +290,12 @@ class EventMatchingService:
         reasons = []
         
         # Time analysis
-        time_diff = abs((odds_event.commence_time - px_event.commence_time).total_seconds() / 3600)
-        reasons.append(f"Time difference: {time_diff:.1f} hours")
+        time_diff = abs((odds_event.commence_time - px_event.commence_time).total_seconds() / 60)
+        reasons.append(f"Time difference: {time_diff:.1f} minutes")
         
         # Team name analysis
-        reasons.append(f"Teams: {odds_event.home_team} vs {odds_event.away_team}")
-        reasons.append(f"ProphetX: {px_event.home_team} vs {px_event.away_team}")
+        reasons.append(f"Odds API teams: {odds_event.home_team} vs {odds_event.away_team}")
+        reasons.append(f"ProphetX teams: {px_event.home_team} vs {px_event.away_team}")
         
         return reasons
     
@@ -367,5 +382,5 @@ class EventMatchingService:
             "refresh_timestamp": datetime.now().isoformat()
         }
 
-# Global event matching service instance
+# Global event matching service instance  
 event_matching_service = EventMatchingService()
