@@ -220,141 +220,154 @@ class MarketMakingStrategy:
     
     def calculate_true_arbitrage_bets(self, plus_odds: int, minus_odds: int) -> ArbitrageCalculation:
         """
-        Calculate true arbitrage bet amounts for guaranteed profit with EXACT equal payouts
+        Calculate exact arbitrage bet amounts for guaranteed equal payouts
         
         Strategy:
-        1. Always bet $100 on the higher odds side (positive odds)
-        2. Calculate the EXACT total payout for that bet (stake + net winnings after commission)
-        3. Calculate the EXACT amount to bet on lower odds side to achieve identical total payout
-        4. Guaranteed profit = total payout - total investment
+        1. Bet $100 on the MORE FAVORABLE odds (regardless of sign)
+        2. Calculate exact stake needed on less favorable odds to match payout exactly
+        3. Guaranteed profit = identical payout - total investment
         
         Args:
-            plus_odds: Our positive bet odds (e.g., +118)
-            minus_odds: Our negative bet odds (e.g., -109)
+            plus_odds: First bet odds (could be positive or negative)
+            minus_odds: Second bet odds (could be positive or negative)
             
         Returns:
-            ArbitrageCalculation with exact arbitrage amounts and equal payouts
+            ArbitrageCalculation with exact equal payouts
         """
-        print(f"   📊 Calculating true arbitrage for {plus_odds:+d} vs {minus_odds:+d}")
+        print(f"   📊 Calculating exact arbitrage for {plus_odds:+d} vs {minus_odds:+d}")
         
-        # Step 1: Always bet $100 on the positive odds side
-        plus_bet = self.base_plus_bet  # $100
+        # Step 1: Determine which odds are more favorable
+        # More favorable = higher positive OR less negative
+        if plus_odds > 0 and minus_odds > 0:
+            # Both positive: higher is better
+            more_favorable = plus_odds if plus_odds > minus_odds else minus_odds
+            less_favorable = minus_odds if plus_odds > minus_odds else plus_odds
+            better_is_first = plus_odds > minus_odds
+        elif plus_odds < 0 and minus_odds < 0:
+            # Both negative: less negative is better
+            more_favorable = plus_odds if plus_odds > minus_odds else minus_odds  # -105 > -110
+            less_favorable = minus_odds if plus_odds > minus_odds else plus_odds
+            better_is_first = plus_odds > minus_odds
+        elif plus_odds > 0 and minus_odds < 0:
+            # Mixed: positive is always better than negative
+            more_favorable = plus_odds
+            less_favorable = minus_odds
+            better_is_first = True
+        else:  # plus_odds < 0 and minus_odds > 0
+            # Mixed: positive is always better than negative
+            more_favorable = minus_odds
+            less_favorable = plus_odds
+            better_is_first = False
         
-        # Step 2: Calculate EXACT total payout for plus side
-        plus_gross_winnings = plus_bet * (plus_odds / 100)  # $100 * (118/100) = $118
-        plus_commission = plus_gross_winnings * self.commission_rate  # $118 * 0.03 = $3.54
-        plus_net_winnings = plus_gross_winnings - plus_commission  # $118 - $3.54 = $114.46
-        plus_total_payout = plus_bet + plus_net_winnings  # $100 + $114.46 = $214.46
+        print(f"   📈 More favorable: {more_favorable:+d}, Less favorable: {less_favorable:+d}")
         
-        print(f"   📈 Plus side ({plus_odds:+d}): Bet ${plus_bet:.2f}")
-        print(f"      Gross winnings: ${plus_gross_winnings:.2f}")
-        print(f"      Commission: ${plus_commission:.2f}")
-        print(f"      Net winnings: ${plus_net_winnings:.2f}")
-        print(f"      Total payout: ${plus_total_payout:.2f}")
+        # Step 2: Always bet $100 on more favorable odds
+        better_bet = self.base_plus_bet  # $100
         
-        # Step 3: Calculate EXACT stake for minus side to achieve identical total payout
-        # For negative odds: if we bet X, we win X * (100 / abs(minus_odds))
-        # Gross winnings = X * (100 / abs(minus_odds))
-        # Commission = gross_winnings * commission_rate  
-        # Net winnings = gross_winnings * (1 - commission_rate)
-        # Total payout = X + net_winnings = X + (X * (100/abs(minus_odds)) * (1 - commission_rate))
-        # We want: total_payout = plus_total_payout
+        # Step 3: Calculate exact total payout for the $100 bet on better odds
+        if more_favorable > 0:
+            # Positive odds
+            better_gross_winnings = better_bet * (more_favorable / 100)
+            better_commission = better_gross_winnings * self.commission_rate
+            better_net_winnings = better_gross_winnings - better_commission
+            target_payout = better_bet + better_net_winnings
+        else:
+            # Negative odds
+            better_gross_winnings = better_bet * (100 / abs(more_favorable))
+            better_commission = better_gross_winnings * self.commission_rate
+            better_net_winnings = better_gross_winnings - better_commission
+            target_payout = better_bet + better_net_winnings
         
-        win_rate = 100 / abs(minus_odds)  # For -109: 100/109 = 0.9174
-        net_win_rate = win_rate * (1 - self.commission_rate)  # 0.9174 * 0.97 = 0.8899
+        print(f"   💰 $100 bet on {more_favorable:+d}:")
+        print(f"      Gross winnings: ${better_gross_winnings:.2f}")
+        print(f"      Commission: ${better_commission:.2f}")
+        print(f"      Net winnings: ${better_net_winnings:.2f}")
+        print(f"      Target payout: ${target_payout:.2f}")
         
-        # Solve: X * (1 + net_win_rate) = plus_total_payout
-        minus_bet = plus_total_payout / (1 + net_win_rate)
+        # Step 4: Calculate exact stake needed on less favorable odds to achieve target payout
+        if less_favorable > 0:
+            # Positive odds: solve target_payout = X + (X * (less_favorable/100) * (1 - commission_rate))
+            win_rate = less_favorable / 100
+            net_win_rate = win_rate * (1 - self.commission_rate)
+            worse_bet = target_payout / (1 + net_win_rate)
+            
+            # Verify calculation
+            worse_gross_winnings = worse_bet * win_rate
+            worse_commission = worse_gross_winnings * self.commission_rate
+            worse_net_winnings = worse_gross_winnings - worse_commission
+            worse_total_payout = worse_bet + worse_net_winnings
+            
+        else:
+            # Negative odds: solve target_payout = X + (X * (100/abs(less_favorable)) * (1 - commission_rate))
+            win_rate = 100 / abs(less_favorable)
+            net_win_rate = win_rate * (1 - self.commission_rate)
+            worse_bet = target_payout / (1 + net_win_rate)
+            
+            # Verify calculation
+            worse_gross_winnings = worse_bet * win_rate
+            worse_commission = worse_gross_winnings * self.commission_rate
+            worse_net_winnings = worse_gross_winnings - worse_commission
+            worse_total_payout = worse_bet + worse_net_winnings
         
-        # Verify the calculation by computing minus side payout
-        minus_gross_winnings = minus_bet * win_rate
-        minus_commission = minus_gross_winnings * self.commission_rate
-        minus_net_winnings = minus_gross_winnings - minus_commission
-        minus_total_payout = minus_bet + minus_net_winnings
-        
-        print(f"   📉 Minus side ({minus_odds:+d}): Bet ${minus_bet:.2f}")
-        print(f"      Gross winnings: ${minus_gross_winnings:.2f}")
-        print(f"      Commission: ${minus_commission:.2f}")
-        print(f"      Net winnings: ${minus_net_winnings:.2f}")
-        print(f"      Total payout: ${minus_total_payout:.2f}")
+        print(f"   💰 ${worse_bet:.2f} bet on {less_favorable:+d}:")
+        print(f"      Gross winnings: ${worse_gross_winnings:.2f}")
+        print(f"      Commission: ${worse_commission:.2f}")
+        print(f"      Net winnings: ${worse_net_winnings:.2f}")
+        print(f"      Total payout: ${worse_total_payout:.2f}")
         
         # Verify payouts are equal (within rounding tolerance)
-        payout_difference = abs(plus_total_payout - minus_total_payout)
-        print(f"   🔍 Payout difference: ${payout_difference:.4f}")
+        payout_difference = abs(target_payout - worse_total_payout)
+        print(f"   🔍 Payout difference: ${payout_difference:.6f}")
         
         if payout_difference > 0.01:  # More than 1 cent difference
-            print(f"   ⚠️  WARNING: Payouts not equal! Difference: ${payout_difference:.4f}")
+            print(f"   ⚠️  WARNING: Payouts not equal! Difference: ${payout_difference:.6f}")
         
-        # Step 4: Calculate guaranteed profit
-        total_investment = plus_bet + minus_bet
-        guaranteed_profit = plus_total_payout - total_investment  # Same as minus_total_payout - total_investment
+        # Step 5: Calculate guaranteed profit
+        total_investment = better_bet + worse_bet
+        guaranteed_profit = target_payout - total_investment
         profit_margin = (guaranteed_profit / total_investment) * 100 if total_investment > 0 else 0
         
         print(f"   💰 Total investment: ${total_investment:.2f}")
-        print(f"   💰 Guaranteed profit: ${guaranteed_profit:.2f} ({profit_margin:.2f}%)")
+        print(f"   💰 Guaranteed profit: ${guaranteed_profit:.2f} ({profit_margin:.3f}%)")
+        
+        # Map back to plus_side_bet and minus_side_bet based on which was better
+        if better_is_first:
+            plus_side_bet = better_bet
+            minus_side_bet = worse_bet
+        else:
+            plus_side_bet = worse_bet
+            minus_side_bet = better_bet
         
         return ArbitrageCalculation(
-            plus_side_bet=plus_bet,
-            minus_side_bet=minus_bet,
+            plus_side_bet=plus_side_bet,
+            minus_side_bet=minus_side_bet,
             total_investment=total_investment,
             guaranteed_profit=guaranteed_profit,
             profit_margin=profit_margin,
             is_profitable=guaranteed_profit > 0
         )
+
+    def is_arbitrage_opportunity(self, odds1: int, odds2: int) -> bool:
         """
-        Calculate market making bet amounts for profitable spread
+        Check if two odds represent an arbitrage opportunity
         
-        For market making, we want to profit from the margin between plus and minus odds.
-        Example: +117 vs -114 gives us a 3-point margin for profit.
-        
-        Args:
-            plus_odds: Effective positive odds (after commission)
-            minus_odds: Effective negative odds (after commission)
-            
-        Returns:
-            ArbitrageCalculation with bet amounts and profit analysis
+        Rules:
+        1. Both positive: Always arbitrage
+        2. One positive, one negative: Only if positive > abs(negative)
+        3. Both negative: Never arbitrage
         """
-        # Always bet base amount on plus side
-        plus_bet = self.base_plus_bet  # $100
-        
-        # For market making, we want balanced risk on both sides
-        # If we risk $100 on plus side, we should risk similar amount on minus side
-        # But adjust for the odds difference to maintain roughly equal risk
-        
-        # Calculate what we win if plus side hits
-        plus_win_amount = plus_bet * (plus_odds / 100)  # $100 * (117/100) = $117
-        
-        # For minus side, bet amount that gives us similar win potential
-        # If minus odds are -114, we need to bet $114 to win $100
-        # But we want to scale this to match our plus side risk
-        minus_bet = plus_bet * (abs(minus_odds) / 100)  # $100 * (114/100) = $114
-        
-        # Calculate profit scenarios
-        # Scenario 1: Plus side wins
-        scenario1_profit = plus_win_amount - minus_bet  # Win $117, lose $114 = +$3
-        
-        # Scenario 2: Minus side wins  
-        minus_win_amount = minus_bet / (abs(minus_odds) / 100)  # $114 / (114/100) = $100
-        scenario2_profit = minus_win_amount - plus_bet  # Win $100, lose $100 = $0
-        
-        # Average expected profit (assuming 50/50 probability)
-        expected_profit = (scenario1_profit + scenario2_profit) / 2
-        
-        total_investment = plus_bet + minus_bet
-        profit_margin = (expected_profit / total_investment) * 100 if total_investment > 0 else 0
-        
-        # Market making is profitable if we have positive margin
-        # This happens when |plus_odds| > |minus_odds|
-        is_profitable = abs(plus_odds) > abs(minus_odds)
-        
-        return ArbitrageCalculation(
-            plus_side_bet=plus_bet,
-            minus_side_bet=minus_bet,
-            total_investment=total_investment,
-            guaranteed_profit=expected_profit,  # Expected profit, not guaranteed
-            profit_margin=profit_margin,
-            is_profitable=is_profitable
-        )
+        if odds1 > 0 and odds2 > 0:
+            # Both positive: always arbitrage
+            return True
+        elif odds1 > 0 and odds2 < 0:
+            # Positive vs negative: arbitrage if positive > abs(negative)
+            return odds1 > abs(odds2)
+        elif odds1 < 0 and odds2 > 0:
+            # Negative vs positive: arbitrage if positive > abs(negative)
+            return odds2 > abs(odds1)
+        else:
+            # Both negative: never arbitrage
+            return False
     
     def calculate_position_limits_simple(self, plus_odds: int, minus_odds: int) -> PositionLimits:
         """
@@ -675,6 +688,14 @@ class MarketMakingStrategy:
                 continue
             
             print(f"✅ {market_type} market is profitable!")
+
+            # Before calculating position limits, validate this is actually arbitrage
+            if not self.is_arbitrage_opportunity(plus_bet_odds, minus_bet_odds):
+                print(f"❌ Skipping {market_type}: not an arbitrage opportunity")
+                print(f"   Odds: {plus_bet_odds:+d} vs {minus_bet_odds:+d}")
+                continue
+
+            print(f"✅ {market_type} market is arbitrage opportunity!")
             
             # Calculate position limits (using our bet odds for commission calculations)
             limits = self.calculate_position_limits_simple(plus_bet_odds, minus_bet_odds)
