@@ -215,53 +215,87 @@ class MarketMakingStrategy:
     
     def calculate_true_arbitrage_bets(self, plus_odds: int, minus_odds: int) -> ArbitrageCalculation:
         """
-        Calculate true arbitrage bet amounts for guaranteed profit
+        Calculate true arbitrage bet amounts for guaranteed profit - FIXED VERSION
         
         Strategy:
-        1. Always bet $100 on the higher odds side (after commission)
-        2. Calculate exact amount to bet on lower odds side for equal returns
-        3. Guaranteed profit = return - total investment
+        1. Always bet $100 on the higher odds side 
+        2. Calculate exact total payout after commission for that bet
+        3. Calculate exact amount to bet on lower odds side for identical total payout
+        4. Guaranteed profit = total payout - total investment
         
         Args:
-            plus_odds: Our positive bet odds (before commission)
-            minus_odds: Our negative bet odds (before commission)
+            plus_odds: Our positive bet odds 
+            minus_odds: Our negative bet odds 
             
         Returns:
-            ArbitrageCalculation with true arbitrage amounts
+            ArbitrageCalculation with precise arbitrage amounts
         """
-        # Apply commission to get effective odds
-        eff_plus_odds = plus_odds * (1 - self.commission_rate)  # Reduced winnings
-        eff_minus_odds = minus_odds / (1 - self.commission_rate)  # Need to bet more
-        
-        print(f"   Commission adjustment: {plus_odds:+d} → {eff_plus_odds:+.2f}, {minus_odds:+d} → {eff_minus_odds:+.2f}")
-        
-        # Step 1: Always bet $100 on the higher effective odds side
+        # Step 1: Always bet base amount on plus side
         plus_bet = self.base_plus_bet  # $100
         
-        # Step 2: Calculate total return if plus side wins
-        plus_win_amount = plus_bet * (eff_plus_odds / 100)
-        total_return_target = plus_bet + plus_win_amount
+        # Step 2: Calculate EXACT total payout for plus bet (including commission effects)
+        # If we bet $100 at +118 and win:
+        # - Gross winnings: $100 * (118/100) = $118
+        # - Commission taken: $118 * 0.03 = $3.54  
+        # - Net winnings: $118 - $3.54 = $114.46
+        # - Total payout: $100 + $114.46 = $214.46
         
-        print(f"   Plus bet: ${plus_bet} at {eff_plus_odds:+.2f} → Total return ${total_return_target:.2f}")
+        gross_winnings_plus = plus_bet * (plus_odds / 100)
+        commission_amount_plus = gross_winnings_plus * self.commission_rate
+        net_winnings_plus = gross_winnings_plus - commission_amount_plus
+        target_total_payout = plus_bet + net_winnings_plus
         
-        # Step 3: Calculate minus bet amount to achieve same total return
-        # If we bet X at minus odds, total return = X + (X * win_rate)
-        # We want: X + (X * (100/abs(eff_minus_odds))) = total_return_target
-        # So: X * (1 + 100/abs(eff_minus_odds)) = total_return_target
-        # So: X = total_return_target / (1 + 100/abs(eff_minus_odds))
+        print(f"   Plus bet calculation:")
+        print(f"     Bet $100 at {plus_odds:+d}")
+        print(f"     Gross winnings: ${gross_winnings_plus:.2f}")
+        print(f"     Commission (3%): ${commission_amount_plus:.2f}")
+        print(f"     Net winnings: ${net_winnings_plus:.2f}")
+        print(f"     Total payout target: ${target_total_payout:.2f}")
         
-        minus_multiplier = 1 + (100 / abs(eff_minus_odds))
-        minus_bet = total_return_target / minus_multiplier
+        # Step 3: Calculate EXACT minus bet amount for identical total payout
+        # If we bet $X at -109 and win:
+        # - Gross winnings: $X * (100/109) 
+        # - Commission taken: $X * (100/109) * 0.03
+        # - Net winnings: $X * (100/109) * 0.97
+        # - Total payout: $X + $X * (100/109) * 0.97
+        # 
+        # Set equal to target: $X + $X * (100/109) * 0.97 = target_total_payout
+        # Factor out $X: $X * (1 + (100/109) * 0.97) = target_total_payout
+        # Solve for $X: $X = target_total_payout / (1 + (100/109) * 0.97)
         
-        print(f"   Minus bet: ${minus_bet:.2f} at {eff_minus_odds:+.2f} → Total return ${total_return_target:.2f}")
+        # Calculate the multiplier more precisely
+        win_rate_on_minus = 100 / abs(minus_odds)  # 100/109 = 0.917431...
+        net_win_rate = win_rate_on_minus * (1 - self.commission_rate)  # * 0.97
+        total_payout_multiplier = 1 + net_win_rate  # 1 + (win rate after commission)
         
-        # Step 4: Calculate profit
+        minus_bet = target_total_payout / total_payout_multiplier
+        
+        print(f"   Minus bet calculation:")
+        print(f"     Target total payout: ${target_total_payout:.2f}")
+        print(f"     Win rate on {minus_odds:+d}: {win_rate_on_minus:.6f}")
+        print(f"     Net win rate (after commission): {net_win_rate:.6f}")  
+        print(f"     Total payout multiplier: {total_payout_multiplier:.6f}")
+        print(f"     Required minus bet: ${minus_bet:.2f}")
+        
+        # Step 4: Verify the calculation by computing minus side payout
+        gross_winnings_minus = minus_bet * win_rate_on_minus
+        commission_amount_minus = gross_winnings_minus * self.commission_rate
+        net_winnings_minus = gross_winnings_minus - commission_amount_minus
+        actual_minus_payout = minus_bet + net_winnings_minus
+        
+        print(f"   Verification:")
+        print(f"     Plus side total payout: ${target_total_payout:.2f}")
+        print(f"     Minus side total payout: ${actual_minus_payout:.2f}")
+        print(f"     Difference: ${abs(target_total_payout - actual_minus_payout):.6f}")
+        
+        # Step 5: Calculate profit metrics
         total_investment = plus_bet + minus_bet
-        guaranteed_profit = total_return_target - total_investment
+        guaranteed_profit = target_total_payout - total_investment  # Same regardless of winner
         profit_margin = (guaranteed_profit / total_investment) * 100 if total_investment > 0 else 0
         
-        print(f"   Total investment: ${total_investment:.2f}")
-        print(f"   Guaranteed profit: ${guaranteed_profit:.2f} ({profit_margin:.2f}%)")
+        print(f"   Arbitrage result:")
+        print(f"     Total investment: ${total_investment:.2f}")
+        print(f"     Guaranteed profit: ${guaranteed_profit:.2f} ({profit_margin:.2f}%)")
         
         return ArbitrageCalculation(
             plus_side_bet=plus_bet,
