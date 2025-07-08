@@ -744,3 +744,174 @@ async def test_matching_system():
         
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error testing matching system: {str(e)}")
+    
+@router.get("/confidence-config", response_model=Dict[str, Any])
+async def get_confidence_configuration():
+    """
+    Get current confidence threshold configuration
+    
+    Returns the current settings for event matching confidence thresholds.
+    """
+    try:
+        return {
+            "success": True,
+            "message": "Current confidence configuration",
+            "data": {
+                "min_confidence_threshold": event_matching_service.min_confidence_threshold,
+                "display_threshold": event_matching_service.display_threshold,
+                "time_tolerance_minutes": event_matching_service.time_tolerance_minutes,
+                "description": {
+                    "min_confidence_threshold": "Minimum confidence required for successful match",
+                    "display_threshold": "Minimum confidence to show in prophetx_matches list",
+                    "time_tolerance_minutes": "Maximum time difference allowed between events"
+                },
+                "confidence_calculation": {
+                    "time_score_weight": "40%",
+                    "team_name_weight": "60%",
+                    "perfect_time_match": "≤ 5 minutes = 1.0 score",
+                    "good_time_match": "≤ 10 minutes = 0.9 score", 
+                    "acceptable_time_match": "≤ 15 minutes = 0.7 score"
+                }
+            }
+        }
+        
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error getting confidence config: {str(e)}")
+
+@router.post("/update-confidence-threshold", response_model=Dict[str, Any])
+async def update_confidence_threshold(
+    threshold: float = Query(..., description="New confidence threshold (0.0 - 1.0)", ge=0.0, le=1.0)
+):
+    """
+    Update the confidence threshold for event matching
+    
+    Changes the minimum confidence score required for events to be considered a match.
+    Higher values (0.8-0.9) = stricter matching, fewer but higher quality matches
+    Lower values (0.5-0.6) = looser matching, more matches but potentially lower quality
+    
+    - **threshold**: New minimum confidence threshold between 0.0 and 1.0
+    
+    **Note**: This clears existing matches and requires re-running event matching.
+    """
+    try:
+        result = event_matching_service.update_confidence_threshold(threshold)
+        
+        if result["success"]:
+            return {
+                "success": True,
+                "message": f"Confidence threshold updated to {threshold}",
+                "data": result,
+                "next_steps": [
+                    "Run /matching/refresh to re-match events with new threshold",
+                    "Check /matching/matches-summary to see results"
+                ]
+            }
+        else:
+            return {
+                "success": False,
+                "message": result["message"]
+            }
+            
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error updating confidence threshold: {str(e)}")
+
+@router.get("/confidence-breakdown/{odds_api_event_id}", response_model=Dict[str, Any])
+async def get_confidence_breakdown(odds_api_event_id: str):
+    """
+    Get detailed confidence breakdown for a specific event
+    
+    Shows exactly how the confidence score is calculated for debugging purposes.
+    
+    - **odds_api_event_id**: Event ID from The Odds API
+    """
+    try:
+        # Get the specific event from Odds API
+        odds_events = await odds_api_service.get_events()
+        target_event = None
+        
+        for event in odds_events:
+            if event.event_id == odds_api_event_id:
+                target_event = event
+                break
+        
+        if not target_event:
+            raise HTTPException(status_code=404, detail=f"Event {odds_api_event_id} not found")
+        
+        # Get ProphetX events
+        prophetx_events = await prophetx_events_service.get_all_upcoming_events()
+        
+        # Calculate confidence for each ProphetX event
+        confidence_details = []
+        
+        for px_event in prophetx_events:
+            confidence, reasons = event_matching_service._calculate_match_confidence(target_event, px_event)
+            
+            # Get detailed breakdown
+            time_diff_minutes = abs((target_event.commence_time - px_event.commence_time).total_seconds() / 60)
+            team_score = event_matching_service._calculate_team_name_score(target_event, px_event)
+            
+            # Calculate time score
+            if time_diff_minutes <= 5:
+                time_score = 1.0
+            elif time_diff_minutes <= 10:
+                time_score = 0.9
+            elif time_diff_minutes <= 15:
+                time_score = 0.7
+            else:
+                time_score = 0.0
+            
+            confidence_details.append({
+                "prophetx_event": {
+                    "event_id": px_event.event_id,
+                    "display_name": px_event.display_name,
+                    "commence_time": px_event.commence_time.isoformat()
+                },
+                "overall_confidence": confidence,
+                "breakdown": {
+                    "time_component": {
+                        "score": time_score,
+                        "weight": 0.4,
+                        "contribution": time_score * 0.4,
+                        "time_difference_minutes": time_diff_minutes
+                    },
+                    "team_component": {
+                        "score": team_score,
+                        "weight": 0.6,
+                        "contribution": team_score * 0.6
+                    }
+                },
+                "meets_threshold": confidence >= event_matching_service.min_confidence_threshold,
+                "shown_in_matches": confidence >= event_matching_service.display_threshold,
+                "reasons": reasons
+            })
+        
+        # Sort by confidence
+        confidence_details.sort(key=lambda x: x["overall_confidence"], reverse=True)
+        
+        return {
+            "success": True,
+            "message": f"Confidence breakdown for {target_event.display_name}",
+            "data": {
+                "odds_api_event": {
+                    "event_id": target_event.event_id,
+                    "display_name": target_event.display_name,
+                    "commence_time": target_event.commence_time.isoformat(),
+                    "home_team": target_event.home_team,
+                    "away_team": target_event.away_team
+                },
+                "thresholds": {
+                    "min_confidence_threshold": event_matching_service.min_confidence_threshold,
+                    "display_threshold": event_matching_service.display_threshold,
+                    "time_tolerance_minutes": event_matching_service.time_tolerance_minutes
+                },
+                "prophetx_matches_analyzed": len(confidence_details),
+                "matches_above_threshold": sum(1 for m in confidence_details if m["meets_threshold"]),
+                "matches_shown": sum(1 for m in confidence_details if m["shown_in_matches"]),
+                "detailed_analysis": confidence_details[:10]  # Top 10 matches
+            }
+        }
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error getting confidence breakdown: {str(e)}")

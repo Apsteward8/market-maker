@@ -1,12 +1,13 @@
 #!/usr/bin/env python3
 """
-Markets Router
-FastAPI endpoints for market making operations
+Markets Router - UPDATED
+FastAPI endpoints for market making operations with incremental betting support
 """
 
 from fastapi import APIRouter, HTTPException, Query, BackgroundTasks
 from typing import List, Optional, Dict, Any
 from datetime import datetime
+import time
 
 from app.models.odds_models import ProcessedEvent, SportKey, MarketType
 from app.models.market_models import ManagedEvent, ProphetXMarket, PortfolioSummary
@@ -18,15 +19,16 @@ router = APIRouter()
 @router.post("/start", response_model=Dict[str, Any])
 async def start_market_making():
     """
-    Start the automated market making system
+    Start the automated market making system with exact Pinnacle replication
     
     This begins the core market making loop that will:
-    1. Poll Pinnacle odds via The Odds API
-    2. Create markets on ProphetX copying those odds
-    3. Manage position risk and exposure
-    4. Update markets when odds change
+    1. Poll Pinnacle odds via The Odds API  
+    2. Create markets on ProphetX copying those odds EXACTLY (no improvement)
+    3. Use incremental betting with arbitrage position sizing
+    4. Manage position risk and exposure with 5-minute fill wait periods
+    5. Update markets when odds change
     
-    **Note**: System respects dry_run_mode setting for safety
+    **New Strategy**: Exact Pinnacle replication with incremental liquidity
     """
     try:
         result = await market_maker_service.start_market_making()
@@ -44,7 +46,7 @@ async def stop_market_making():
     - Stop the odds polling loop
     - Cancel all active bets (if possible)
     - Close all markets
-    - Generate final statistics
+    - Generate final statistics including incremental betting performance
     """
     try:
         result = await market_maker_service.stop_market_making()
@@ -63,6 +65,7 @@ async def get_market_making_status():
     - Number of events being managed
     - Total exposure and risk metrics
     - Performance statistics
+    - Incremental betting status (lines in wait periods, position counts)
     - API usage information
     """
     try:
@@ -77,16 +80,188 @@ async def get_market_making_status():
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error getting status: {str(e)}")
 
+# NEW INCREMENTAL BETTING ENDPOINTS
+
+@router.get("/positions", response_model=Dict[str, Any])
+async def get_current_positions():
+    """
+    Get current positions across all lines with incremental betting details
+    
+    Shows:
+    - Total stake per line
+    - Number of bets per line
+    - Lines currently in wait periods
+    - Position limits and utilization
+    """
+    try:
+        positions_data = {
+            "total_lines": len(market_maker_service.position_tracker.line_positions),
+            "total_stake_across_all_lines": 0.0,
+            "lines_detail": {},
+            "wait_periods": {},
+            "summary": {
+                "lines_with_positions": 0,
+                "lines_in_wait_period": 0,
+                "total_bets_placed": 0
+            }
+        }
+        
+        # Get position details
+        for line_id, position_info in market_maker_service.position_tracker.line_positions.items():
+            total_stake = position_info['total_stake']
+            positions_data["total_stake_across_all_lines"] += total_stake
+            positions_data["summary"]["lines_with_positions"] += 1
+            positions_data["summary"]["total_bets_placed"] += len(position_info['bets'])
+            
+            # Check if in wait period
+            from app.services.market_making_strategy import market_making_strategy
+            can_add_liquidity = market_making_strategy.betting_manager.can_add_liquidity(line_id)
+            if not can_add_liquidity:
+                positions_data["summary"]["lines_in_wait_period"] += 1
+                wait_remaining = (market_making_strategy.betting_manager.fill_wait_period - 
+                                (time.time() - market_making_strategy.betting_manager.last_fill_time.get(line_id, 0)))
+                positions_data["wait_periods"][line_id] = {
+                    "wait_remaining_seconds": max(0, wait_remaining),
+                    "can_add_liquidity": False
+                }
+            
+            positions_data["lines_detail"][line_id] = {
+                "total_stake": total_stake,
+                "number_of_bets": len(position_info['bets']),
+                "last_updated": datetime.fromtimestamp(position_info['last_updated']).isoformat(),
+                "can_add_liquidity": can_add_liquidity,
+                "bets": position_info['bets']
+            }
+        
+        return {
+            "success": True,
+            "message": f"Current positions across {positions_data['total_lines']} lines",
+            "data": positions_data,
+            "timestamp": datetime.now().isoformat()
+        }
+        
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error getting positions: {str(e)}")
+
+@router.post("/simulate-fill", response_model=Dict[str, Any])
+async def simulate_bet_fill(
+    bet_id: str = Query(..., description="External bet ID to simulate fill for"),
+    fill_amount: float = Query(..., description="Amount that got filled/matched")
+):
+    """
+    Simulate a bet getting filled/matched - for testing incremental betting
+    
+    This endpoint simulates what happens when one of our bets gets matched on ProphetX:
+    - Records the fill in position tracking
+    - Starts the 5-minute wait period for that line
+    - Updates bet status to matched
+    
+    **Use for testing**: In production, this would be triggered by ProphetX API callbacks
+    """
+    try:
+        success = await market_maker_service.simulate_bet_fill(bet_id, fill_amount)
+        
+        if success:
+            return {
+                "success": True,
+                "message": f"Simulated fill: {bet_id} for ${fill_amount:.2f}",
+                "data": {
+                    "bet_id": bet_id,
+                    "fill_amount": fill_amount,
+                    "note": "5-minute wait period started for this line",
+                    "next_action": "System will wait 5 minutes before adding more liquidity to this line"
+                }
+            }
+        else:
+            return {
+                "success": False,
+                "message": f"Bet {bet_id} not found or already filled"
+            }
+            
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error simulating fill: {str(e)}")
+
+@router.post("/clear-wait-period", response_model=Dict[str, Any])
+async def clear_wait_period(
+    line_id: str = Query(..., description="Line ID to clear wait period for")
+):
+    """
+    Manually clear wait period for a specific line
+    
+    Allows immediate addition of more liquidity to a line that's currently
+    in a wait period. Useful when odds change significantly or for manual management.
+    """
+    try:
+        from app.services.market_making_strategy import market_making_strategy
+        market_making_strategy.betting_manager.clear_wait_period(line_id)
+        
+        return {
+            "success": True,
+            "message": f"Wait period cleared for line {line_id}",
+            "data": {
+                "line_id": line_id,
+                "note": "Can now add liquidity immediately to this line"
+            }
+        }
+        
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error clearing wait period: {str(e)}")
+
+@router.get("/strategy-info", response_model=Dict[str, Any])
+async def get_strategy_info():
+    """
+    Get current strategy configuration and settings
+    
+    Shows the key parameters for the exact Pinnacle replication strategy:
+    - Commission rate (3%)
+    - Position sizing limits 
+    - Incremental betting amounts
+    - Wait period duration
+    """
+    try:
+        from app.services.market_making_strategy import market_making_strategy
+        
+        strategy_info = {
+            "strategy_type": "Exact Pinnacle Replication with Arbitrage Position Sizing",
+            "commission_rate": market_making_strategy.commission_rate,
+            "position_limits": {
+                "max_plus_bet": market_making_strategy.max_plus_bet,
+                "base_plus_bet": market_making_strategy.base_plus_bet,
+                "position_multiplier": market_making_strategy.position_multiplier
+            },
+            "incremental_betting": {
+                "fill_wait_period_seconds": market_making_strategy.betting_manager.fill_wait_period,
+                "increment_plus": market_making_strategy.base_plus_bet,
+                "increment_minus": "Calculated based on arbitrage (varies per market)"
+            },
+            "odds_improvement": "NONE - Copy Pinnacle exactly",
+            "risk_management": {
+                "max_exposure_per_event": market_maker_service.settings.max_exposure_per_event,
+                "max_exposure_total": market_maker_service.settings.max_exposure_total,
+                "unbalanced_positions": "Allowed - considered +EV bets"
+            }
+        }
+        
+        return {
+            "success": True,
+            "message": "Current strategy configuration",
+            "data": strategy_info
+        }
+        
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error getting strategy info: {str(e)}")
+
 @router.get("/events", response_model=List[ManagedEvent])
 async def get_managed_events():
     """
-    Get all events currently being managed
+    Get all events currently being managed with incremental betting details
     
     Returns detailed information about each event including:
     - Event details (teams, start time)
     - Markets being made
     - Current positions and exposure
     - Market status
+    - Incremental betting activity
     """
     try:
         return list(market_maker_service.managed_events.values())
@@ -120,7 +295,7 @@ async def pause_event_markets(event_id: str):
     Pause market making for a specific event
     
     This will stop creating new bets and updating odds for this event,
-    but existing bets will remain active.
+    but existing bets will remain active. Wait periods continue normally.
     """
     try:
         if event_id not in market_maker_service.managed_events:
@@ -132,7 +307,8 @@ async def pause_event_markets(event_id: str):
         return {
             "success": True,
             "message": f"Market making paused for {managed_event.display_name}",
-            "event_id": event_id
+            "event_id": event_id,
+            "note": "Existing positions and wait periods remain active"
         }
         
     except HTTPException:
@@ -215,66 +391,20 @@ async def refresh_odds_cache():
 @router.get("/portfolio", response_model=PortfolioSummary)
 async def get_portfolio_summary():
     """
-    Get comprehensive portfolio summary
+    Get comprehensive portfolio summary with incremental betting metrics
     
     Returns detailed financial and risk metrics across all markets including:
     - Total exposure and liquidity
     - Number of active positions
     - Performance statistics
     - Risk utilization metrics
+    - Incremental betting performance
     """
     try:
         return await market_maker_service.get_portfolio_summary()
         
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error getting portfolio summary: {str(e)}")
-
-@router.post("/test/create-market", response_model=Dict[str, Any])
-async def test_create_market(
-    event_id: str = Query(..., description="Event ID to create test market for")
-):
-    """
-    Test market creation for a specific event
-    
-    Creates a test market without starting the full market making system.
-    Useful for debugging and testing market creation logic.
-    
-    **Note**: Respects dry_run_mode setting
-    """
-    try:
-        # Get latest odds for this event
-        events = await odds_api_service.get_events()
-        target_event = None
-        
-        for event in events:
-            if event.event_id == event_id:
-                target_event = event
-                break
-        
-        if not target_event:
-            raise HTTPException(status_code=404, detail=f"Event {event_id} not found in current odds")
-        
-        # Simulate market creation process
-        if target_event.moneyline:
-            print(f"🧪 TEST: Would create moneyline market for {target_event.display_name}")
-            print(f"   Outcomes: {[f'{o.name} {o.american_odds:+d}' for o in target_event.moneyline.outcomes]}")
-        
-        return {
-            "success": True,
-            "message": f"Test market creation for {target_event.display_name}",
-            "event": {
-                "event_id": target_event.event_id,
-                "display_name": target_event.display_name,
-                "commence_time": target_event.commence_time.isoformat(),
-                "available_markets": target_event.get_available_markets()
-            },
-            "dry_run_mode": market_maker_service.settings.dry_run_mode
-        }
-        
-    except HTTPException:
-        raise
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Error testing market creation: {str(e)}")
 
 @router.get("/api-usage", response_model=Dict[str, Any])
 async def get_api_usage_stats():
@@ -312,8 +442,9 @@ async def get_api_usage_stats():
 @router.post("/config/update", response_model=Dict[str, Any])
 async def update_market_making_config(
     max_events: Optional[int] = Query(None, description="Maximum events to track"),
-    liquidity_amount: Optional[float] = Query(None, description="Liquidity amount per market side"),
-    poll_interval: Optional[int] = Query(None, description="Odds polling interval in seconds")
+    liquidity_amount: Optional[float] = Query(None, description="Base liquidity amount per increment"),
+    poll_interval: Optional[int] = Query(None, description="Odds polling interval in seconds"),
+    fill_wait_period: Optional[int] = Query(None, description="Wait period after fills in seconds")
 ):
     """
     Update market making configuration
@@ -333,8 +464,10 @@ async def update_market_making_config(
         if liquidity_amount is not None:
             if liquidity_amount <= 0:
                 raise HTTPException(status_code=400, detail="liquidity_amount must be positive")
-            market_maker_service.settings.default_liquidity_amount = liquidity_amount
-            updates["default_liquidity_amount"] = liquidity_amount
+            # Update base bet amount in strategy
+            from app.services.market_making_strategy import market_making_strategy
+            market_making_strategy.base_plus_bet = liquidity_amount
+            updates["base_plus_bet"] = liquidity_amount
         
         if poll_interval is not None:
             if poll_interval < 30:
@@ -342,11 +475,24 @@ async def update_market_making_config(
             market_maker_service.settings.odds_poll_interval_seconds = poll_interval
             updates["odds_poll_interval_seconds"] = poll_interval
         
+        if fill_wait_period is not None:
+            if fill_wait_period < 60:
+                raise HTTPException(status_code=400, detail="fill_wait_period must be at least 60 seconds")
+            # Update wait period in betting manager
+            from app.services.market_making_strategy import market_making_strategy
+            market_making_strategy.betting_manager.fill_wait_period = fill_wait_period
+            updates["fill_wait_period_seconds"] = fill_wait_period
+        
         if not updates:
             return {
                 "success": False,
                 "message": "No configuration updates provided",
-                "current_config": market_maker_service.settings.to_dict()
+                "current_config": {
+                    "max_events_tracked": market_maker_service.settings.max_events_tracked,
+                    "base_plus_bet": market_making_strategy.base_plus_bet,
+                    "odds_poll_interval_seconds": market_maker_service.settings.odds_poll_interval_seconds,
+                    "fill_wait_period_seconds": market_making_strategy.betting_manager.fill_wait_period
+                }
             }
         
         return {

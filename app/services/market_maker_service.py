@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
-Market Maker Service
-Core market making logic for ProphetX using Pinnacle odds
+Market Maker Service - UPDATED
+Core market making logic with incremental betting, exact Pinnacle replication, and fill management
 """
 
 import asyncio
@@ -17,9 +17,53 @@ from app.models.market_models import (
     MarketStatus, BetStatus, PortfolioSummary, RiskReport, RiskLimit
 )
 from app.services.odds_api_service import odds_api_service
+# Import BettingInstruction at the end to avoid circular imports
+
+class PositionTracker:
+    """Tracks current positions and fills for each line"""
+    
+    def __init__(self):
+        self.line_positions: Dict[str, Dict] = {}  # line_id -> position info
+        
+    def get_current_position(self, line_id: str) -> float:
+        """Get current total position size for a line"""
+        return self.line_positions.get(line_id, {}).get('total_stake', 0.0)
+        
+    def record_new_bet(self, line_id: str, stake: float, bet_id: str):
+        """Record a new bet placement"""
+        if line_id not in self.line_positions:
+            self.line_positions[line_id] = {
+                'total_stake': 0.0,
+                'bets': [],
+                'last_updated': time.time()
+            }
+        
+        self.line_positions[line_id]['total_stake'] += stake
+        self.line_positions[line_id]['bets'].append({
+            'bet_id': bet_id,
+            'stake': stake,
+            'placed_at': time.time(),
+            'status': 'placed'
+        })
+        self.line_positions[line_id]['last_updated'] = time.time()
+        
+    def record_fill(self, line_id: str, bet_id: str, filled_amount: float):
+        """Record when a bet gets filled/matched"""
+        if line_id in self.line_positions:
+            for bet in self.line_positions[line_id]['bets']:
+                if bet['bet_id'] == bet_id:
+                    bet['status'] = 'filled'
+                    bet['filled_amount'] = filled_amount
+                    bet['filled_at'] = time.time()
+                    
+                    # Notify the betting manager about the fill
+                    market_making_strategy.betting_manager.record_fill(
+                        line_id, filled_amount, self.get_current_position(line_id)
+                    )
+                    break
 
 class MarketMakerService:
-    """Core service for making markets on ProphetX"""
+    """Core service for making markets on ProphetX with incremental betting"""
     
     def __init__(self):
         self.settings = get_settings()
@@ -27,6 +71,9 @@ class MarketMakerService:
         # Portfolio tracking
         self.managed_events: Dict[str, ManagedEvent] = {}
         self.all_bets: Dict[str, ProphetXBet] = {}  # external_id -> bet
+        
+        # Position and fill tracking
+        self.position_tracker = PositionTracker()
         
         # System state
         self.is_running = False
@@ -39,15 +86,19 @@ class MarketMakerService:
         self.total_exposure = 0.0
         self.max_exposure_reached = 0.0
         
+        # Odds tracking for change detection
+        self.last_odds_cache: Dict[str, Dict] = {}  # event_id -> market data
+        
     async def start_market_making(self) -> Dict[str, Any]:
         """Start the market making system"""
         if self.is_running:
             return {"success": False, "message": "Market making is already running"}
         
-        print("🚀 Starting ProphetX Market Making System")
-        print(f"   Target: {self.settings.focus_sport} using {self.settings.target_bookmaker} odds")
-        print(f"   Liquidity: ${self.settings.default_liquidity_amount} per market side")
-        print(f"   Max events: {self.settings.max_events_tracked}")
+        print("🚀 Starting ProphetX Market Making System - EXACT PINNACLE REPLICATION")
+        print(f"   Strategy: Copy Pinnacle odds exactly (no improvement)")
+        print(f"   Increments: ${market_making_strategy.base_plus_bet} plus side, arbitrage amounts minus side")
+        print(f"   Max position: ${market_making_strategy.max_plus_bet} plus side")
+        print(f"   Fill wait period: {market_making_strategy.betting_manager.fill_wait_period}s")
         
         self.is_running = True
         self.start_time = datetime.now(timezone.utc)
@@ -58,7 +109,7 @@ class MarketMakerService:
         
         return {
             "success": True,
-            "message": "Market making system started",
+            "message": "Market making system started with exact Pinnacle replication",
             "settings": self.settings.to_dict()
         }
     
@@ -84,13 +135,15 @@ class MarketMakerService:
         }
     
     async def _market_making_loop(self):
-        """Main market making loop"""
+        """Main market making loop with continuous odds monitoring"""
         while self.is_running:
             try:
                 print(f"🔄 Market making cycle starting...")
                 
                 # 1. Get matched events (events that exist on both platforms)
                 from app.services.event_matching_service import event_matching_service
+                from app.services.market_matching_service import market_matching_service
+                
                 matched_events = await event_matching_service.get_matched_events()
                 
                 if not matched_events:
@@ -100,36 +153,35 @@ class MarketMakerService:
                 
                 print(f"📊 Found {len(matched_events)} matched events to manage")
                 
-                # 2. Update or create markets for matched events
-                for match in matched_events:
-                    await self._manage_matched_event(match)
+                # 2. Process each matched event
+                for event_match in matched_events:
+                    await self._manage_matched_event_with_incremental_betting(event_match)
                 
-                # 3. Clean up expired events
+                # 3. Check for and add incremental liquidity where appropriate
+                await self._add_incremental_liquidity()
+                
+                # 4. Clean up expired events
                 await self._cleanup_expired_events()
                 
-                # 4. Check risk limits
+                # 5. Check risk limits
                 await self._check_risk_limits()
                 
                 print(f"✅ Market making cycle complete. Managing {len(self.managed_events)} events.")
                 
-                # Wait before next cycle
+                # Wait before next cycle (60 seconds for odds updates)
                 await asyncio.sleep(self.settings.odds_poll_interval_seconds)
                 
             except Exception as e:
                 print(f"💥 Error in market making loop: {e}")
                 await asyncio.sleep(30)  # Wait before retrying
     
-    async def _manage_matched_event(self, event_match):
+    async def _manage_matched_event_with_incremental_betting(self, event_match):
         """
-        Manage markets for a matched event (exists on both Odds API and ProphetX)
-        
-        Args:
-            event_match: EventMatch object containing both Odds API and ProphetX event data
+        Manage markets for a matched event with incremental betting strategy
         """
-        odds_event = event_match.odds_api_event  # Has the pricing data from Pinnacle
-        prophetx_event = event_match.prophetx_event  # Has the ProphetX event ID for bet placement
+        odds_event = event_match.odds_api_event
+        prophetx_event = event_match.prophetx_event
         
-        # Use ProphetX event ID as the key for our managed events
         event_id = str(prophetx_event.event_id)
         
         # Get or create managed event
@@ -153,205 +205,195 @@ class MarketMakerService:
             managed_event.status = MarketStatus.CLOSED
             return
         
-        # Update markets based on latest Pinnacle odds, but use ProphetX event details
-        await self._update_matched_event_markets(managed_event, odds_event, prophetx_event)
+        # Check if Pinnacle odds have changed significantly
+        odds_changed = await self._check_odds_changes(event_id, odds_event)
+        
+        # Get market matching results
+        from app.services.market_matching_service import market_matching_service
+        market_match_result = await market_matching_service.match_event_markets(event_match)
+        
+        if not market_match_result.ready_for_trading:
+            print(f"⚠️  Event {managed_event.display_name} not ready for trading")
+            return
+        
+        # Create or update market making plan
+        plan = market_making_strategy.create_market_making_plan(event_match, market_match_result)
+        
+        if not plan or not plan.is_profitable:
+            print(f"❌ No profitable opportunities for {managed_event.display_name}")
+            return
+        
+        # Execute betting plan with incremental strategy
+        await self._execute_betting_plan(managed_event, plan, odds_changed)
+        
+        # Update tracking
+        managed_event.last_odds_update = datetime.now(timezone.utc)
+        managed_event.status = MarketStatus.ACTIVE
     
-    async def _update_matched_event_markets(self, managed_event: ManagedEvent, odds_event, prophetx_event):
+    async def _check_odds_changes(self, event_id: str, odds_event: ProcessedEvent) -> bool:
+        """Check if Pinnacle odds have changed significantly since last update"""
+        current_odds = self._extract_odds_signature(odds_event)
+        
+        if event_id not in self.last_odds_cache:
+            self.last_odds_cache[event_id] = current_odds
+            return True  # First time seeing this event
+        
+        last_odds = self.last_odds_cache[event_id]
+        
+        # Compare odds for significant changes
+        odds_changed = False
+        for market_type, outcomes in current_odds.items():
+            if market_type not in last_odds:
+                odds_changed = True
+                break
+            
+            for outcome_name, odds in outcomes.items():
+                if outcome_name not in last_odds[market_type]:
+                    odds_changed = True
+                    break
+                
+                # Check for odds movement
+                if abs(odds - last_odds[market_type][outcome_name]) >= 5:  # 5 point movement
+                    print(f"📊 Odds change detected: {outcome_name} {last_odds[market_type][outcome_name]:+d} → {odds:+d}")
+                    odds_changed = True
+                    break
+        
+        if odds_changed:
+            self.last_odds_cache[event_id] = current_odds
+            
+            # Clear wait periods for lines with significant odds changes
+            # This allows immediate liquidity updates when market moves
+            print("⚡ Odds changed significantly - clearing wait periods for affected lines")
+        
+        return odds_changed
+    
+    def _extract_odds_signature(self, odds_event: ProcessedEvent) -> Dict[str, Dict[str, int]]:
+        """Extract odds signature for change detection"""
+        signature = {}
+        
+        if odds_event.moneyline:
+            signature['moneyline'] = {
+                outcome.name: outcome.american_odds 
+                for outcome in odds_event.moneyline.outcomes
+            }
+        
+        if odds_event.spreads:
+            signature['spreads'] = {
+                f"{outcome.name}_{outcome.point}": outcome.american_odds 
+                for outcome in odds_event.spreads.outcomes
+            }
+        
+        if odds_event.totals:
+            signature['totals'] = {
+                f"{outcome.name}_{outcome.point}": outcome.american_odds 
+                for outcome in odds_event.totals.outcomes
+            }
+        
+        return signature
+    
+    async def _execute_betting_plan(self, managed_event: ManagedEvent, plan, odds_changed: bool):
         """
-        Update markets for a matched event using Pinnacle odds and ProphetX event details
+        Execute betting plan with incremental strategy
         
         Args:
-            managed_event: Our internal event tracking
-            odds_event: ProcessedEvent from Odds API with Pinnacle pricing
-            prophetx_event: ProphetXEvent with ProphetX-specific details
+            managed_event: Event being managed
+            plan: MarketMakingPlan with betting instructions
+            odds_changed: Whether Pinnacle odds changed significantly
         """
-        try:
-            # Handle moneyline market using Pinnacle odds
-            if odds_event.moneyline:
-                await self._update_or_create_moneyline_market(managed_event, odds_event.moneyline, prophetx_event)
+        for instruction in plan.betting_instructions:
+            line_id = instruction.line_id
+            current_position = self.position_tracker.get_current_position(line_id)
             
-            # Handle spreads market using Pinnacle odds
-            if odds_event.spreads:
-                await self._update_or_create_spreads_market(managed_event, odds_event.spreads, prophetx_event)
-            
-            # Handle totals market using Pinnacle odds
-            if odds_event.totals:
-                await self._update_or_create_totals_market(managed_event, odds_event.totals, prophetx_event)
-            
-            managed_event.last_odds_update = datetime.now(timezone.utc)
-            managed_event.status = MarketStatus.ACTIVE
-            
-        except Exception as e:
-            print(f"❌ Error updating markets for {managed_event.display_name}: {e}")
-            managed_event.status = MarketStatus.ERROR
-    
-    async def _update_or_create_moneyline_market(self, managed_event: ManagedEvent, moneyline: ProcessedMarket, prophetx_event=None):
-        """Update or create moneyline market"""
-        market_type = "moneyline"
-        existing_market = managed_event.get_market_by_type(market_type)
-        
-        if not existing_market:
-            # Create new market
-            market = await self._create_moneyline_market(managed_event, moneyline, prophetx_event)
-            if market:
-                managed_event.markets.append(market)
-                self.total_markets_created += 1
-        else:
-            # Update existing market
-            await self._update_moneyline_market(existing_market, moneyline, prophetx_event)
-    
-    async def _create_moneyline_market(self, managed_event: ManagedEvent, moneyline: ProcessedMarket, prophetx_event=None) -> Optional[ProphetXMarket]:
-        """Create a new moneyline market"""
-        try:
-            print(f"🎾 Creating moneyline market for {managed_event.display_name}")
-            
-            # Get outcomes (should be 2 for baseball: player 1 and player 2)
-            if len(moneyline.outcomes) != 2:
-                print(f"⚠️  Expected 2 outcomes for moneyline, got {len(moneyline.outcomes)}")
-                return None
-            
-            outcome1, outcome2 = moneyline.outcomes
-            
-            # Create market sides - we offer the OPPOSITE of what Pinnacle offers
-            # If Pinnacle has Player A at -110, we bet Player A at +110 to offer -110 to others
-            sides = [
-                MarketSide(
-                    selection_name=outcome1.name,
-                    target_odds=outcome1.american_odds,  # We copy Pinnacle exactly
-                    liquidity_amount=self.settings.default_liquidity_amount,
-                    max_exposure=self.settings.max_exposure_per_event / 4  # Split across market sides
-                ),
-                MarketSide(
-                    selection_name=outcome2.name,
-                    target_odds=outcome2.american_odds,
-                    liquidity_amount=self.settings.default_liquidity_amount,
-                    max_exposure=self.settings.max_exposure_per_event / 4
+            # Determine how much to bet
+            if current_position == 0:
+                # First bet on this line
+                bet_amount = instruction.stake
+                print(f"🎯 Initial bet: {instruction.selection_name} {instruction.odds:+d} for ${bet_amount:.2f}")
+                
+            elif odds_changed:
+                # Odds changed - cancel existing bets and place new ones at updated odds
+                await self._cancel_line_bets(line_id)
+                bet_amount = instruction.stake
+                print(f"🔄 Odds update bet: {instruction.selection_name} {instruction.odds:+d} for ${bet_amount:.2f}")
+                
+            else:
+                # Check if we can add incremental liquidity
+                from app.services.market_making_strategy import market_making_strategy
+                bet_amount = market_making_strategy.betting_manager.get_next_increment(
+                    line_id, current_position, instruction.max_position, instruction.increment_size
                 )
-            ]
+                
+                if bet_amount > 0:
+                    print(f"📈 Incremental bet: {instruction.selection_name} {instruction.odds:+d} for ${bet_amount:.2f} (total: ${current_position + bet_amount:.2f})")
+                else:
+                    continue  # No liquidity to add
             
-            market = ProphetXMarket(
-                market_id=f"{managed_event.event_id}_moneyline",
-                event_id=managed_event.event_id,
-                market_type=market_type,
-                event_name=managed_event.display_name,
-                commence_time=managed_event.commence_time,
-                sides=sides,
-                max_exposure=self.settings.max_exposure_per_event / 2,  # Half event exposure for this market
-                created_at=datetime.now(timezone.utc),
-                last_updated=datetime.now(timezone.utc)
-            )
+            # Place the bet
+            success = await self._place_line_bet(instruction, bet_amount, managed_event)
             
-            # Place initial bets for each side
-            for side in market.sides:
-                await self._place_market_side_bet(side, managed_event, prophetx_event)
-            
-            return market
-            
-        except Exception as e:
-            print(f"❌ Error creating moneyline market: {e}")
-            return None
+            if success:
+                self.total_updates_successful += 1
+            else:
+                self.total_updates_failed += 1
     
-    async def _place_market_side_bet(self, side: MarketSide, managed_event: ManagedEvent, prophetx_event=None) -> bool:
-        """Place a bet for one side of a market"""
+    async def _place_line_bet(self, instruction, bet_amount: float, managed_event: ManagedEvent) -> bool:
+        """Place a bet for a specific line with incremental tracking"""
         try:
             if not self.settings.dry_run_mode:
                 print(f"🚨 LIVE MODE: Would place real bet here!")
-                # In live mode, we'd actually place the bet on ProphetX using prophetx_event details
-                # For now, simulate the bet placement
+                # In live mode, we'd actually place the bet on ProphetX
             
-            # Calculate the bet we need to place
-            # If Pinnacle offers Player A at -110, we bet Player A at +110
-            # This means we're offering -110 to other users (copying Pinnacle)
-            bet_odds = side.target_odds
-            
-            # Create simulated bet
-            external_id = f"{managed_event.event_id}_{side.selection_name}_{int(time.time())}"
-            
-            # In a real implementation, we would use prophetx_event.event_id 
-            # to get the actual market data from ProphetX and find the correct line_id
-            simulated_line_id = f"prophetx_line_{prophetx_event.event_id if prophetx_event else 'unknown'}_{side.selection_name}"
+            # Create bet
+            external_id = f"{managed_event.event_id}_{instruction.line_id}_{int(time.time())}"
             
             bet = ProphetXBet(
                 external_id=external_id,
-                line_id=simulated_line_id,
-                selection_name=side.selection_name,
-                odds=bet_odds,
-                stake=side.liquidity_amount,
+                line_id=instruction.line_id,
+                selection_name=instruction.selection_name,
+                odds=instruction.odds,
+                stake=bet_amount,
                 status=BetStatus.PLACED if not self.settings.dry_run_mode else BetStatus.PENDING,
-                unmatched_stake=side.liquidity_amount,
+                unmatched_stake=bet_amount,
                 placed_at=datetime.now(timezone.utc),
                 updated_at=datetime.now(timezone.utc)
             )
             
-            # Store bet
+            # Store bet and update tracking
             self.all_bets[external_id] = bet
-            side.current_bet = bet
+            self.position_tracker.record_new_bet(instruction.line_id, bet_amount, external_id)
             
             mode_indicator = '[DRY RUN] ' if self.settings.dry_run_mode else ''
-            prophetx_id = f"PX:{prophetx_event.event_id}" if prophetx_event else "PX:unknown"
-            
-            print(f"💰 {mode_indicator}Bet placed: {side.selection_name} {bet_odds:+d} for ${side.liquidity_amount} ({prophetx_id})")
+            print(f"💰 {mode_indicator}Bet placed: {instruction.selection_name} {instruction.odds:+d} for ${bet_amount:.2f} (offers {instruction.outcome_offered_to_users})")
             
             return True
             
         except Exception as e:
-            print(f"❌ Error placing bet for {side.selection_name}: {e}")
+            print(f"❌ Error placing bet for {instruction.selection_name}: {e}")
             return False
     
-    async def _update_moneyline_market(self, market: ProphetXMarket, updated_moneyline: ProcessedMarket, prophetx_event=None):
-        """Update existing moneyline market with new odds"""
-        try:
-            # Check if odds have changed significantly
-            needs_update = False
+    async def _cancel_line_bets(self, line_id: str):
+        """Cancel all active bets for a specific line (when odds change)"""
+        cancelled_count = 0
+        
+        for bet in self.all_bets.values():
+            if bet.line_id == line_id and bet.is_active:
+                bet.status = BetStatus.CANCELLED
+                bet.unmatched_stake = 0.0
+                cancelled_count += 1
+        
+        if cancelled_count > 0:
+            print(f"❌ Cancelled {cancelled_count} bets for line {line_id} due to odds change")
             
-            for side in market.sides:
-                # Find corresponding outcome in updated data
-                updated_outcome = None
-                for outcome in updated_moneyline.outcomes:
-                    if outcome.name.lower() == side.selection_name.lower():
-                        updated_outcome = outcome
-                        break
-                
-                if updated_outcome and updated_outcome.american_odds != side.target_odds:
-                    print(f"📊 Odds change detected: {side.selection_name} {side.target_odds:+d} → {updated_outcome.american_odds:+d}")
-                    side.target_odds = updated_outcome.american_odds
-                    needs_update = True
-            
-            if needs_update:
-                # Cancel existing bets and place new ones
-                for side in market.sides:
-                    if side.current_bet and side.current_bet.is_active:
-                        # Cancel existing bet
-                        side.current_bet.status = BetStatus.CANCELLED
-                        print(f"❌ Cancelled bet: {side.current_bet.external_id}")
-                    
-                    # Place new bet with updated odds
-                    managed_event = self.managed_events[market.event_id]
-                    await self._place_market_side_bet(side, managed_event, prophetx_event)
-                
-                market.last_updated = datetime.now(timezone.utc)
-                market.update_count += 1
-                self.total_updates_successful += 1
-                
-                print(f"✅ Updated moneyline market for {market.event_name}")
-            
-        except Exception as e:
-            print(f"❌ Error updating moneyline market: {e}")
-            self.total_updates_failed += 1
+            # Clear wait period for this line
+            from app.services.market_making_strategy import market_making_strategy
+            market_making_strategy.betting_manager.clear_wait_period(line_id)
     
-    async def _update_or_create_spreads_market(self, managed_event: ManagedEvent, spreads: ProcessedMarket, prophetx_event=None):
-        """Update or create spreads market (placeholder)"""
-        # Similar logic to moneyline but for spreads
-        # Implementation would be similar but handle point spreads
-        print(f"📊 Spreads market for {managed_event.display_name} - implementation pending")
-        pass
-    
-    async def _update_or_create_totals_market(self, managed_event: ManagedEvent, totals: ProcessedMarket, prophetx_event=None):
-        """Update or create totals market (placeholder)"""
-        # Similar logic to moneyline but for totals
-        # Implementation would be similar but handle over/under
-        print(f"📊 Totals market for {managed_event.display_name} - implementation pending")
-        pass
+    async def _add_incremental_liquidity(self):
+        """Check all lines and add incremental liquidity where appropriate"""
+        for line_id, position_info in self.position_tracker.line_positions.items():
+            # This is handled in the main loop for each event
+            # Could add additional logic here for standalone liquidity additions
+            pass
     
     async def _cleanup_expired_events(self):
         """Remove events that have started or are no longer relevant"""
@@ -364,6 +406,9 @@ class MarketMakerService:
         
         for event_id in to_remove:
             del self.managed_events[event_id]
+            # Clean up odds cache
+            if event_id in self.last_odds_cache:
+                del self.last_odds_cache[event_id]
     
     async def _check_risk_limits(self):
         """Check if we're approaching or exceeding risk limits"""
@@ -382,8 +427,25 @@ class MarketMakerService:
             print(f"🚨 RISK LIMIT EXCEEDED: Total exposure ${total_exposure:,.2f} exceeds ${self.settings.max_exposure_total:,.2f}")
             # In a real implementation, we'd stop creating new markets or reduce position sizes
     
+    # Simulation of bet fills (in real implementation, this would be triggered by ProphetX API)
+    async def simulate_bet_fill(self, bet_id: str, filled_amount: float):
+        """Simulate a bet getting filled - for testing purposes"""
+        if bet_id in self.all_bets:
+            bet = self.all_bets[bet_id]
+            bet.status = BetStatus.MATCHED
+            bet.matched_stake = filled_amount
+            bet.unmatched_stake = bet.stake - filled_amount
+            
+            # Record the fill in position tracker
+            self.position_tracker.record_fill(bet.line_id, bet_id, filled_amount)
+            
+            print(f"✅ Simulated fill: {bet.selection_name} ${filled_amount:.2f} matched")
+            
+            return True
+        return False
+    
     async def get_system_stats(self) -> Dict[str, Any]:
-        """Get comprehensive system statistics"""
+        """Get comprehensive system statistics with incremental betting info"""
         if not self.start_time:
             uptime_hours = 0
         else:
@@ -395,6 +457,11 @@ class MarketMakerService:
         
         # Calculate utilization
         utilization = (len(self.managed_events) / self.settings.max_events_tracked) * 100
+        
+        # Count lines with wait periods
+        from app.services.market_making_strategy import market_making_strategy
+        lines_in_wait = sum(1 for line_id in market_making_strategy.betting_manager.last_fill_time.keys()
+                           if not market_making_strategy.betting_manager.can_add_liquidity(line_id))
         
         return {
             "system_status": "running" if self.is_running else "stopped",
@@ -409,20 +476,22 @@ class MarketMakerService:
             "updates_failed": self.total_updates_failed,
             "success_rate": self.total_updates_successful / max(self.total_updates_successful + self.total_updates_failed, 1),
             "capacity_utilization": utilization,
+            "incremental_betting": {
+                "lines_with_positions": len(self.position_tracker.line_positions),
+                "lines_in_wait_period": lines_in_wait,
+                "fill_wait_period_seconds": market_making_strategy.betting_manager.fill_wait_period
+            },
             "odds_api_stats": odds_api_service.get_usage_stats()
         }
     
     async def get_portfolio_summary(self) -> PortfolioSummary:
-        """Get current portfolio summary"""
+        """Get current portfolio summary with incremental betting details"""
         stats = await self.get_system_stats()
         
-        # Calculate financial metrics
-        total_liquidity = sum(
-            side.liquidity_amount 
-            for event in self.managed_events.values()
-            for market in event.markets
-            for side in market.sides
-        )
+        # Calculate financial metrics including incremental positions
+        total_liquidity = 0.0
+        for line_id, position_info in self.position_tracker.line_positions.items():
+            total_liquidity += position_info['total_stake']
         
         matched_stake = sum(bet.matched_stake for bet in self.all_bets.values())
         unmatched_stake = sum(bet.unmatched_stake for bet in self.all_bets.values())
@@ -450,3 +519,6 @@ class MarketMakerService:
 
 # Global market maker service instance
 market_maker_service = MarketMakerService()
+
+# Import after class definition to avoid circular imports
+from app.services.market_making_strategy import market_making_strategy
