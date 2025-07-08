@@ -184,41 +184,84 @@ class MarketMakingStrategy:
         """
         Calculate exact hedge odds to offer Pinnacle's odds to users
         
-        If Pinnacle shows Tigers +103, we bet Rays -103 to offer Tigers +103
-        If Pinnacle shows Rays -112, we bet Tigers +112 to offer Rays -112
+        CORRECTED LOGIC:
+        If Pinnacle shows Mets -121, we bet Orioles +121 to offer Mets -121
+        If Pinnacle shows Orioles +111, we bet Mets -111 to offer Orioles +111
+        
+        We bet the OPPOSITE team at the SAME ABSOLUTE VALUE but opposite sign
         """
+        # We bet the opposite absolute value with opposite sign
         return -pinnacle_odds
     
     def apply_commission_adjustment(self, odds: int) -> float:
-        """Apply 3% commission to calculate effective odds"""
+        """
+        Apply 3% commission to calculate effective odds for OUR bet sizing
+        
+        IMPORTANT: This only affects how much we need to bet, NOT the odds we offer users
+        
+        Commission is taken on winnings AFTER we win, so:
+        - If we bet +121 and win $121, we only get $121 * 0.97 = $117.37
+        - If we bet -111 to win $100, but only get $97 after commission, we need to bet more
+        """
         if odds > 0:
-            # Positive odds: reduce winnings by 3%
+            # Positive odds: we win less due to commission on winnings
+            # If we bet $100 at +121, we should win $121 but only get $117.37
             return odds * (1 - self.commission_rate)
         else:
-            # Negative odds: need to risk more to account for commission
+            # Negative odds: we need to risk more to account for commission on winnings
+            # If we want to effectively win $100 after commission, we need to win $103.09 before commission
+            # So we need to risk more than the face value suggests
             return odds / (1 - self.commission_rate)
     
-    def calculate_arbitrage_bets(self, plus_odds: float, minus_odds: float) -> ArbitrageCalculation:
+    def calculate_true_arbitrage_bets(self, plus_odds: int, minus_odds: int) -> ArbitrageCalculation:
         """
-        Calculate arbitrage bet amounts for guaranteed profit
+        Calculate true arbitrage bet amounts for guaranteed profit
+        
+        Strategy:
+        1. Always bet $100 on the higher odds side (after commission)
+        2. Calculate exact amount to bet on lower odds side for equal returns
+        3. Guaranteed profit = return - total investment
         
         Args:
-            plus_odds: Effective positive odds (after commission)
-            minus_odds: Effective negative odds (after commission)
+            plus_odds: Our positive bet odds (before commission)
+            minus_odds: Our negative bet odds (before commission)
             
         Returns:
-            ArbitrageCalculation with bet amounts and profit analysis
+            ArbitrageCalculation with true arbitrage amounts
         """
-        # Always bet base amount on plus side
-        plus_bet = self.base_plus_bet
+        # Apply commission to get effective odds
+        eff_plus_odds = plus_odds * (1 - self.commission_rate)  # Reduced winnings
+        eff_minus_odds = minus_odds / (1 - self.commission_rate)  # Need to bet more
         
-        # Calculate corresponding minus bet for arbitrage
-        plus_win = plus_bet * (plus_odds / 100)
-        minus_bet = plus_win / (abs(minus_odds) / 100)
+        print(f"   Commission adjustment: {plus_odds:+d} → {eff_plus_odds:+.2f}, {minus_odds:+d} → {eff_minus_odds:+.2f}")
         
+        # Step 1: Always bet $100 on the higher effective odds side
+        plus_bet = self.base_plus_bet  # $100
+        
+        # Step 2: Calculate total return if plus side wins
+        plus_win_amount = plus_bet * (eff_plus_odds / 100)
+        total_return_target = plus_bet + plus_win_amount
+        
+        print(f"   Plus bet: ${plus_bet} at {eff_plus_odds:+.2f} → Total return ${total_return_target:.2f}")
+        
+        # Step 3: Calculate minus bet amount to achieve same total return
+        # If we bet X at minus odds, total return = X + (X * win_rate)
+        # We want: X + (X * (100/abs(eff_minus_odds))) = total_return_target
+        # So: X * (1 + 100/abs(eff_minus_odds)) = total_return_target
+        # So: X = total_return_target / (1 + 100/abs(eff_minus_odds))
+        
+        minus_multiplier = 1 + (100 / abs(eff_minus_odds))
+        minus_bet = total_return_target / minus_multiplier
+        
+        print(f"   Minus bet: ${minus_bet:.2f} at {eff_minus_odds:+.2f} → Total return ${total_return_target:.2f}")
+        
+        # Step 4: Calculate profit
         total_investment = plus_bet + minus_bet
-        guaranteed_profit = plus_win - total_investment
+        guaranteed_profit = total_return_target - total_investment
         profit_margin = (guaranteed_profit / total_investment) * 100 if total_investment > 0 else 0
+        
+        print(f"   Total investment: ${total_investment:.2f}")
+        print(f"   Guaranteed profit: ${guaranteed_profit:.2f} ({profit_margin:.2f}%)")
         
         return ArbitrageCalculation(
             plus_side_bet=plus_bet,
@@ -228,23 +271,77 @@ class MarketMakingStrategy:
             profit_margin=profit_margin,
             is_profitable=guaranteed_profit > 0
         )
-    
-    def calculate_position_limits(self, plus_odds: float, minus_odds: float) -> PositionLimits:
         """
-        Calculate position limits based on arbitrage strategy
+        Calculate market making bet amounts for profitable spread
+        
+        For market making, we want to profit from the margin between plus and minus odds.
+        Example: +117 vs -114 gives us a 3-point margin for profit.
         
         Args:
             plus_odds: Effective positive odds (after commission)
             minus_odds: Effective negative odds (after commission)
             
         Returns:
-            PositionLimits with all sizing information
+            ArbitrageCalculation with bet amounts and profit analysis
         """
-        # Calculate base arbitrage amounts
-        arbitrage = self.calculate_arbitrage_bets(plus_odds, minus_odds)
+        # Always bet base amount on plus side
+        plus_bet = self.base_plus_bet  # $100
         
-        # Calculate maximum positions
-        max_plus_bet = min(self.max_plus_bet, self.base_plus_bet * self.position_multiplier)
+        # For market making, we want balanced risk on both sides
+        # If we risk $100 on plus side, we should risk similar amount on minus side
+        # But adjust for the odds difference to maintain roughly equal risk
+        
+        # Calculate what we win if plus side hits
+        plus_win_amount = plus_bet * (plus_odds / 100)  # $100 * (117/100) = $117
+        
+        # For minus side, bet amount that gives us similar win potential
+        # If minus odds are -114, we need to bet $114 to win $100
+        # But we want to scale this to match our plus side risk
+        minus_bet = plus_bet * (abs(minus_odds) / 100)  # $100 * (114/100) = $114
+        
+        # Calculate profit scenarios
+        # Scenario 1: Plus side wins
+        scenario1_profit = plus_win_amount - minus_bet  # Win $117, lose $114 = +$3
+        
+        # Scenario 2: Minus side wins  
+        minus_win_amount = minus_bet / (abs(minus_odds) / 100)  # $114 / (114/100) = $100
+        scenario2_profit = minus_win_amount - plus_bet  # Win $100, lose $100 = $0
+        
+        # Average expected profit (assuming 50/50 probability)
+        expected_profit = (scenario1_profit + scenario2_profit) / 2
+        
+        total_investment = plus_bet + minus_bet
+        profit_margin = (expected_profit / total_investment) * 100 if total_investment > 0 else 0
+        
+        # Market making is profitable if we have positive margin
+        # This happens when |plus_odds| > |minus_odds|
+        is_profitable = abs(plus_odds) > abs(minus_odds)
+        
+        return ArbitrageCalculation(
+            plus_side_bet=plus_bet,
+            minus_side_bet=minus_bet,
+            total_investment=total_investment,
+            guaranteed_profit=expected_profit,  # Expected profit, not guaranteed
+            profit_margin=profit_margin,
+            is_profitable=is_profitable
+        )
+    
+    def calculate_position_limits_simple(self, plus_odds: int, minus_odds: int) -> PositionLimits:
+        """
+        Calculate position limits using true arbitrage strategy
+        
+        Args:
+            plus_odds: Our positive bet odds
+            minus_odds: Our negative bet odds
+            
+        Returns:
+            PositionLimits with true arbitrage sizing
+        """
+        # Calculate true arbitrage amounts
+        arbitrage = self.calculate_true_arbitrage_bets(plus_odds, minus_odds)
+        
+        # Calculate max positions (5x base amounts)
+        max_plus_bet = min(self.max_plus_bet, arbitrage.plus_side_bet * self.position_multiplier)
         max_minus_bet = arbitrage.minus_side_bet * self.position_multiplier
         
         return PositionLimits(
@@ -252,10 +349,15 @@ class MarketMakingStrategy:
             base_minus_bet=arbitrage.minus_side_bet,
             max_plus_bet=max_plus_bet,
             max_minus_bet=max_minus_bet,
-            increment_plus=self.base_plus_bet,
-            increment_minus=arbitrage.minus_side_bet,
+            increment_plus=arbitrage.plus_side_bet,  # Always $100 increments
+            increment_minus=arbitrage.minus_side_bet,  # Proportional arbitrage amount
             arbitrage_calc=arbitrage
         )
+    def calculate_position_limits(self, plus_odds: float, minus_odds: float) -> PositionLimits:
+        """
+        Calculate position limits based on market making strategy (LEGACY - use simple version)
+        """
+        return self.calculate_position_limits_simple(int(plus_odds), int(minus_odds))
     
     def create_betting_instruction(
         self, 
@@ -267,53 +369,56 @@ class MarketMakingStrategy:
         is_plus_side: bool
     ) -> Optional[BettingInstruction]:
         """
-        Create a betting instruction for exact Pinnacle replication
+        Create a betting instruction using true arbitrage sizing
         
         Args:
             line_id: ProphetX line ID to bet on
-            selection_name: Name of selection (e.g., "Detroit Tigers") 
-            pinnacle_odds: Pinnacle odds for this outcome
-            outcome_name: What we're offering to users (e.g., "Tigers +103")
-            position_limits: Position sizing limits
-            is_plus_side: Whether this is the positive odds side
+            selection_name: Name of selection WE ARE BETTING ON
+            pinnacle_odds: Pinnacle odds for the OUTCOME WE'RE OFFERING TO USERS
+            outcome_name: What we're offering to users (e.g., "Mets -118")
+            position_limits: Position sizing with true arbitrage amounts
+            is_plus_side: Whether OUR BET is the positive odds side
         """
-        # Step 1: Calculate what odds we need to bet at (opposite of Pinnacle)
-        hedge_odds = self.calculate_exact_hedge_odds(pinnacle_odds)
+        # Step 1: Our bet odds are exact opposite of Pinnacle
+        our_bet_odds = self.calculate_exact_hedge_odds(pinnacle_odds)
         
-        # Step 2: Apply commission adjustment
-        effective_odds = self.apply_commission_adjustment(hedge_odds)
+        # Step 2: Round to allowed ProphetX odds (should be very close)
+        prophetx_odds = self.round_to_prophetx_odds(our_bet_odds)
         
-        # Step 3: Round to allowed ProphetX odds
-        prophetx_odds = self.round_to_prophetx_odds(int(effective_odds))
-        
-        # Step 4: Determine bet amount and limits
+        # Step 3: Use true arbitrage stake amounts (commission already factored in)
         if is_plus_side:
-            stake = position_limits.base_plus_bet
+            stake = position_limits.base_plus_bet  # Always $100
             max_position = position_limits.max_plus_bet
             increment_size = position_limits.increment_plus
         else:
-            stake = position_limits.base_minus_bet
+            stake = position_limits.base_minus_bet  # Arbitrage calculated amount
             max_position = position_limits.max_minus_bet
             increment_size = position_limits.increment_minus
         
-        # Step 5: Calculate expected return
+        # Step 4: Calculate returns
         if prophetx_odds > 0:
-            expected_return = stake * (prophetx_odds / 100)
-            liquidity_offered = expected_return
+            # Positive odds: gross winnings, then apply commission
+            gross_winnings = stake * (prophetx_odds / 100)
+            net_winnings = gross_winnings * (1 - self.commission_rate)
+            expected_return = net_winnings  # What we actually get
+            liquidity_offered = gross_winnings  # What users see as potential win
         else:
-            expected_return = stake / (abs(prophetx_odds) / 100)
-            liquidity_offered = expected_return
+            # Negative odds: gross winnings, then apply commission  
+            gross_winnings = stake / (abs(prophetx_odds) / 100)
+            net_winnings = gross_winnings * (1 - self.commission_rate)
+            expected_return = net_winnings  # What we actually get
+            liquidity_offered = gross_winnings  # What users see as potential win
         
-        # Step 6: Create instruction
+        # Step 5: Create instruction
         instruction = BettingInstruction(
             line_id=line_id,
-            selection_name=selection_name,
-            odds=prophetx_odds,
-            stake=stake,
-            expected_return=expected_return,
-            liquidity_offered=liquidity_offered,
-            outcome_offered_to_users=outcome_name,
-            odds_offered_to_users=pinnacle_odds,  # Exact Pinnacle odds
+            selection_name=selection_name,           # WHO we're betting on
+            odds=prophetx_odds,                      # OUR bet odds (exact opposite of Pinnacle)
+            stake=stake,                             # True arbitrage stake amount
+            expected_return=expected_return,         # What we get after commission
+            liquidity_offered=liquidity_offered,    # What users see
+            outcome_offered_to_users=outcome_name,  # What USERS see (exact Pinnacle)
+            odds_offered_to_users=pinnacle_odds,    # Exact Pinnacle odds
             is_plus_side=is_plus_side,
             max_position=max_position,
             increment_size=increment_size
@@ -372,12 +477,33 @@ class MarketMakingStrategy:
         instructions = []
         position_limits_by_market = {}
         
+        print(f"🎯 Creating market making plan for: {odds_event.display_name}")
+        
+        # DEBUG: Show all available Pinnacle markets
+        print(f"📊 Available Pinnacle markets:")
+        if odds_event.moneyline:
+            print(f"   Moneyline: {len(odds_event.moneyline.outcomes)} outcomes")
+            for outcome in odds_event.moneyline.outcomes:
+                print(f"     {outcome.name}: {outcome.american_odds:+d}")
+        if odds_event.spreads:
+            print(f"   Spreads: {len(odds_event.spreads.outcomes)} outcomes") 
+            for outcome in odds_event.spreads.outcomes:
+                print(f"     {outcome.name}: {outcome.american_odds:+d} @ {outcome.point}")
+        if odds_event.totals:
+            print(f"   Totals: {len(odds_event.totals.outcomes)} outcomes")
+            for outcome in odds_event.totals.outcomes:
+                print(f"     {outcome.name}: {outcome.american_odds:+d} @ {outcome.point}")
+        
+        print(f"📋 Processing {len(market_match.market_matches)} market matches...")
+        
         # Process each market type
         for market_result in market_match.market_matches:
             if not market_result.is_matched:
+                print(f"⚠️  Skipping {market_result.odds_api_market_type}: not matched")
                 continue
                 
             market_type = market_result.odds_api_market_type
+            print(f"📊 Processing {market_type} market...")
             
             # Get Pinnacle outcomes for this market
             if market_type == "h2h" and odds_event.moneyline:
@@ -387,6 +513,7 @@ class MarketMakingStrategy:
             elif market_type == "totals" and odds_event.totals:
                 pinnacle_outcomes = odds_event.totals.outcomes
             else:
+                print(f"⚠️  No Pinnacle data for {market_type}")
                 continue
             
             # Ensure we have exactly 2 outcomes for arbitrage
@@ -394,90 +521,136 @@ class MarketMakingStrategy:
                 print(f"⚠️  Skipping {market_type}: need exactly 2 outcomes, got {len(pinnacle_outcomes)}")
                 continue
             
-            # Calculate effective odds for both sides
+            # Calculate what we would bet (exact opposite of Pinnacle, no commission adjustment to odds)
             outcome1, outcome2 = pinnacle_outcomes
-            hedge_odds1 = self.calculate_exact_hedge_odds(outcome1.american_odds)
-            hedge_odds2 = self.calculate_exact_hedge_odds(outcome2.american_odds)
+            print(f"   Pinnacle odds: {outcome1.name} {outcome1.american_odds:+d}, {outcome2.name} {outcome2.american_odds:+d}")
             
-            eff_odds1 = self.apply_commission_adjustment(hedge_odds1)
-            eff_odds2 = self.apply_commission_adjustment(hedge_odds2)
+            # Calculate our exact hedge bets (exact opposite of Pinnacle)
+            our_bet_odds1 = self.calculate_exact_hedge_odds(outcome1.american_odds)  # To offer outcome1
+            our_bet_odds2 = self.calculate_exact_hedge_odds(outcome2.american_odds)  # To offer outcome2
             
-            # Determine which is plus/minus side
-            if eff_odds1 > 0 and eff_odds2 < 0:
-                plus_odds, minus_odds = eff_odds1, eff_odds2
-                plus_outcome, minus_outcome = outcome1, outcome2
-            elif eff_odds2 > 0 and eff_odds1 < 0:
-                plus_odds, minus_odds = eff_odds2, eff_odds1
-                plus_outcome, minus_outcome = outcome2, outcome1
+            print(f"   To offer {outcome1.name} {outcome1.american_odds:+d}: We bet {outcome2.name} at {our_bet_odds1:+d}")
+            print(f"   To offer {outcome2.name} {outcome2.american_odds:+d}: We bet {outcome1.name} at {our_bet_odds2:+d}")
+            
+            # Determine which of our bets is plus vs minus (based on our bet odds, not Pinnacle)
+            if our_bet_odds1 > 0 and our_bet_odds2 < 0:
+                # Bet 1 is positive, Bet 2 is negative
+                plus_bet_odds = our_bet_odds1
+                plus_bet_team = outcome2.name      # We bet on outcome2 team
+                plus_offer_outcome = outcome1      # We offer outcome1 to users
+                
+                minus_bet_odds = our_bet_odds2
+                minus_bet_team = outcome1.name     # We bet on outcome1 team  
+                minus_offer_outcome = outcome2     # We offer outcome2 to users
+                
+            elif our_bet_odds2 > 0 and our_bet_odds1 < 0:
+                # Bet 2 is positive, Bet 1 is negative
+                plus_bet_odds = our_bet_odds2
+                plus_bet_team = outcome1.name      # We bet on outcome1 team
+                plus_offer_outcome = outcome2      # We offer outcome2 to users
+                
+                minus_bet_odds = our_bet_odds1
+                minus_bet_team = outcome2.name     # We bet on outcome2 team
+                minus_offer_outcome = outcome1     # We offer outcome1 to users
             else:
-                print(f"⚠️  Skipping {market_type}: both sides same sign (odds1: {eff_odds1}, odds2: {eff_odds2})")
+                print(f"⚠️  Skipping {market_type}: both bet odds same sign ({our_bet_odds1:+d}, {our_bet_odds2:+d})")
                 continue
             
-            # Calculate position limits
-            limits = self.calculate_position_limits(plus_odds, minus_odds)
+            print(f"   Plus side bet: {plus_bet_team} at {plus_bet_odds:+d} → Offers users {plus_offer_outcome.name} {plus_offer_outcome.american_odds:+d}")
+            print(f"   Minus side bet: {minus_bet_team} at {minus_bet_odds:+d} → Offers users {minus_offer_outcome.name} {minus_offer_outcome.american_odds:+d}")
+            
+            # Check profitability based on margin between our bet odds
+            margin = abs(plus_bet_odds) - abs(minus_bet_odds)
+            is_profitable = margin > 0
+            print(f"   Margin: |{plus_bet_odds:+d}| - |{minus_bet_odds:+d}| = {margin}")
+            print(f"   Is profitable: {is_profitable}")
+            
+            if not is_profitable:
+                print(f"❌ Skipping unprofitable {market_type} market")
+                continue
+            
+            print(f"✅ {market_type} market is profitable!")
+            
+            # Calculate position limits (using our bet odds for commission calculations)
+            limits = self.calculate_position_limits_simple(plus_bet_odds, minus_bet_odds)
             position_limits_by_market[market_type] = limits
             
-            # Check profitability
-            if not limits.arbitrage_calc.is_profitable:
-                print(f"❌ Skipping unprofitable {market_type} market: profit = ${limits.arbitrage_calc.guaranteed_profit:.2f}")
-                continue
+            # Create betting instructions with corrected logic
+            print(f"   Creating betting instructions...")
             
-            print(f"✅ {market_type} market profitable: ${limits.arbitrage_calc.guaranteed_profit:.2f} profit on ${limits.arbitrage_calc.total_investment:.2f} investment")
+            # Instruction 1: Plus side bet
+            print(f"   \n   Creating plus side instruction:")
+            print(f"     Bet on: {plus_bet_team} at {plus_bet_odds:+d}")
+            print(f"     Offers users: {plus_offer_outcome.name} {plus_offer_outcome.american_odds:+d}")
             
-            # Create betting instructions for both sides
-            market_instructions = []
-            
-            # Find line mappings for both outcomes
-            plus_mapping = None
-            minus_mapping = None
-            
+            # Find the line for plus side bet
+            plus_line_mapping = None
             for outcome_mapping in market_result.outcome_mappings:
-                if outcome_mapping['odds_api_outcome_name'].lower() == plus_outcome.name.lower():
-                    plus_mapping = outcome_mapping
-                elif outcome_mapping['odds_api_outcome_name'].lower() == minus_outcome.name.lower():
-                    minus_mapping = outcome_mapping
+                if outcome_mapping['odds_api_outcome_name'].lower() == plus_bet_team.lower():
+                    plus_line_mapping = outcome_mapping
+                    break
             
-            if not plus_mapping or not minus_mapping:
-                print(f"⚠️  Could not find line mappings for {market_type}")
-                continue
+            if plus_line_mapping:
+                plus_instruction = self.create_betting_instruction(
+                    line_id=plus_line_mapping['prophetx_line_id'],
+                    selection_name=plus_line_mapping['prophetx_selection_name'],
+                    pinnacle_odds=plus_offer_outcome.american_odds,  # What we offer users
+                    outcome_name=f"{plus_offer_outcome.name} {plus_offer_outcome.american_odds:+d}",
+                    position_limits=limits,
+                    is_plus_side=True
+                )
+                if plus_instruction:
+                    instructions.append(plus_instruction)
+                    print(f"     ✅ Plus instruction: Bet {plus_instruction.selection_name} {plus_instruction.odds:+d}")
+                    print(f"        → Users see: {plus_instruction.outcome_offered_to_users}")
             
-            # Create instructions
-            plus_instruction = self.create_betting_instruction(
-                line_id=plus_mapping['prophetx_line_id'],
-                selection_name=plus_mapping['prophetx_selection_name'],
-                pinnacle_odds=plus_outcome.american_odds,
-                outcome_name=f"{plus_outcome.name} {plus_outcome.american_odds:+d}",
-                position_limits=limits,
-                is_plus_side=True
-            )
+            # Instruction 2: Minus side bet
+            print(f"   \n   Creating minus side instruction:")
+            print(f"     Bet on: {minus_bet_team} at {minus_bet_odds:+d}")
+            print(f"     Offers users: {minus_offer_outcome.name} {minus_offer_outcome.american_odds:+d}")
             
-            minus_instruction = self.create_betting_instruction(
-                line_id=minus_mapping['prophetx_line_id'],
-                selection_name=minus_mapping['prophetx_selection_name'],
-                pinnacle_odds=minus_outcome.american_odds,
-                outcome_name=f"{minus_outcome.name} {minus_outcome.american_odds:+d}",
-                position_limits=limits,
-                is_plus_side=False
-            )
+            # Find the line for minus side bet
+            minus_line_mapping = None
+            for outcome_mapping in market_result.outcome_mappings:
+                if outcome_mapping['odds_api_outcome_name'].lower() == minus_bet_team.lower():
+                    minus_line_mapping = outcome_mapping
+                    break
             
-            if plus_instruction and minus_instruction:
-                market_instructions.extend([plus_instruction, minus_instruction])
-                instructions.extend(market_instructions)
+            if minus_line_mapping:
+                minus_instruction = self.create_betting_instruction(
+                    line_id=minus_line_mapping['prophetx_line_id'],
+                    selection_name=minus_line_mapping['prophetx_selection_name'],
+                    pinnacle_odds=minus_offer_outcome.american_odds,  # What we offer users
+                    outcome_name=f"{minus_offer_outcome.name} {minus_offer_outcome.american_odds:+d}",
+                    position_limits=limits,
+                    is_plus_side=False
+                )
+                if minus_instruction:
+                    instructions.append(minus_instruction)
+                    print(f"     ✅ Minus instruction: Bet {minus_instruction.selection_name} {minus_instruction.odds:+d}")
+                    print(f"        → Users see: {minus_instruction.outcome_offered_to_users}")
+            
+            created_instructions = 2 if plus_line_mapping and minus_line_mapping else 0
+            print(f"   ✅ Created {created_instructions} betting instructions for {market_type}")
         
         if not instructions:
+            print("❌ No profitable opportunities found - no betting instructions created")
             return None
+        
+        print(f"🎉 Created {len(instructions)} total betting instructions")
         
         # Calculate overall metrics
         total_stake = sum(instr.stake for instr in instructions)
         max_exposure = max(instr.max_position for instr in instructions)
         
-        # Overall profitability analysis
+        # Overall profitability analysis using the corrected calculations
         overall_profitability = {"markets": {}}
         all_profitable = True
         
         for market_type, limits in position_limits_by_market.items():
+            # Use the new margin-based profitability
             market_profit = {
-                "guaranteed_profit": limits.arbitrage_calc.guaranteed_profit,
+                "expected_profit": limits.arbitrage_calc.guaranteed_profit,
                 "profit_margin": limits.arbitrage_calc.profit_margin,
                 "total_investment": limits.arbitrage_calc.total_investment,
                 "is_profitable": limits.arbitrage_calc.is_profitable

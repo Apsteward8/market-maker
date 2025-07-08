@@ -915,3 +915,118 @@ async def get_confidence_breakdown(odds_api_event_id: str):
         raise
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error getting confidence breakdown: {str(e)}")
+
+# Add this to the matching router to enhance the test-strategy response
+
+@router.post("/test-strategy-detailed/{odds_api_event_id}", response_model=Dict[str, Any])
+async def test_market_making_strategy_detailed(odds_api_event_id: str):
+    """
+    Test the market making strategy with detailed Pinnacle odds comparison
+    
+    Shows exactly what Pinnacle offers vs what we bet vs what users see.
+    """
+    try:
+        # Get the event match
+        confirmed_matches = await event_matching_service.get_matched_events()
+        target_match = None
+        
+        for match in confirmed_matches:
+            if match.odds_api_event.event_id == odds_api_event_id:
+                target_match = match
+                break
+        
+        if not target_match:
+            return {
+                "success": False,
+                "message": f"No matched event found for {odds_api_event_id}",
+                "suggestion": "Run /matching/find-matches first"
+            }
+        
+        # Get market matching results
+        market_match_result = await market_matching_service.match_event_markets(target_match)
+        
+        # Create market making plan
+        plan = market_making_strategy.create_market_making_plan(target_match, market_match_result)
+        
+        if not plan:
+            return {
+                "success": False,
+                "message": "No profitable market making opportunities found",
+                "event_name": target_match.odds_api_event.display_name
+            }
+        
+        # Enhanced response with Pinnacle comparison
+        odds_event = target_match.odds_api_event
+        
+        # Build detailed comparison
+        detailed_response = {
+            "event_name": plan.event_name,
+            "is_profitable": plan.is_profitable,
+            "total_stake_required": f"${plan.total_stake:.2f}",
+            
+            # NEW: Pinnacle odds for reference
+            "pinnacle_odds": {},
+            
+            # Enhanced betting instructions with clear logic
+            "betting_instructions": [],
+            
+            "profitability_analysis": plan.profitability_analysis,
+            "created_at": plan.created_at.isoformat()
+        }
+        
+        # Add Pinnacle odds to response
+        if odds_event.moneyline:
+            detailed_response["pinnacle_odds"]["moneyline"] = [
+                {"team": outcome.name, "odds": outcome.american_odds}
+                for outcome in odds_event.moneyline.outcomes
+            ]
+        if odds_event.spreads:
+            detailed_response["pinnacle_odds"]["spreads"] = [
+                {"team": outcome.name, "odds": outcome.american_odds, "point": outcome.point}
+                for outcome in odds_event.spreads.outcomes
+            ]
+        if odds_event.totals:
+            detailed_response["pinnacle_odds"]["totals"] = [
+                {"outcome": outcome.name, "odds": outcome.american_odds, "point": outcome.point}
+                for outcome in odds_event.totals.outcomes
+            ]
+        
+        # Enhanced betting instructions with clear explanations
+        for instruction in plan.betting_instructions:
+            enhanced_instruction = {
+                "line_id": instruction.line_id,
+                "selection_name": instruction.selection_name,
+                
+                # Our bet details
+                "our_bet": {
+                    "team_we_bet_on": instruction.selection_name,
+                    "odds": instruction.odds,
+                    "stake": f"${instruction.stake:.2f}",
+                    "expected_return": f"${instruction.expected_return:.2f}",
+                    "explanation": f"We bet on {instruction.selection_name} at {instruction.odds:+d}"
+                },
+                
+                # What users see
+                "offer_to_users": {
+                    "outcome": instruction.outcome_offered_to_users,
+                    "liquidity_available": f"${instruction.liquidity_offered:.2f}",
+                    "explanation": f"Users can bet: {instruction.outcome_offered_to_users}"
+                },
+                
+                # Position sizing info
+                "position_info": {
+                    "is_plus_side": instruction.is_plus_side,
+                    "max_position": f"${instruction.max_position:.2f}",
+                    "increment_size": f"${instruction.increment_size:.2f}"
+                }
+            }
+            detailed_response["betting_instructions"].append(enhanced_instruction)
+        
+        return {
+            "success": True,
+            "message": f"Market making strategy for {plan.event_name}",
+            "data": detailed_response
+        }
+        
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error testing strategy: {str(e)}")
