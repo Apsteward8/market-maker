@@ -918,12 +918,14 @@ async def get_confidence_breakdown(odds_api_event_id: str):
 
 # Add this to the matching router to enhance the test-strategy response
 
+# Add this method to app/routers/matching.py (replace existing test-strategy-detailed endpoint)
+
 @router.post("/test-strategy-detailed/{odds_api_event_id}", response_model=Dict[str, Any])
 async def test_market_making_strategy_detailed(odds_api_event_id: str):
     """
-    Test the market making strategy with detailed Pinnacle odds comparison
+    Test the market making strategy with detailed Pinnacle odds comparison and payout verification
     
-    Shows exactly what Pinnacle offers vs what we bet vs what users see.
+    Shows exactly what Pinnacle offers vs what we bet vs what users see, with total payout verification.
     """
     try:
         # Get the event match
@@ -955,7 +957,7 @@ async def test_market_making_strategy_detailed(odds_api_event_id: str):
                 "event_name": target_match.odds_api_event.display_name
             }
         
-        # Enhanced response with Pinnacle comparison
+        # Enhanced response with Pinnacle comparison and payout verification
         odds_event = target_match.odds_api_event
         
         # Build detailed comparison
@@ -967,8 +969,11 @@ async def test_market_making_strategy_detailed(odds_api_event_id: str):
             # NEW: Pinnacle odds for reference
             "pinnacle_odds": {},
             
-            # Enhanced betting instructions with clear logic
+            # Enhanced betting instructions with payout verification
             "betting_instructions": [],
+            
+            # NEW: Arbitrage verification
+            "arbitrage_verification": {},
             
             "profitability_analysis": plan.profitability_analysis,
             "created_at": plan.created_at.isoformat()
@@ -991,18 +996,21 @@ async def test_market_making_strategy_detailed(odds_api_event_id: str):
                 for outcome in odds_event.totals.outcomes
             ]
         
-        # Enhanced betting instructions with clear explanations
-        for instruction in plan.betting_instructions:
+        # Enhanced betting instructions with complete payout breakdown
+        for i, instruction in enumerate(plan.betting_instructions):
             enhanced_instruction = {
                 "line_id": instruction.line_id,
                 "selection_name": instruction.selection_name,
                 
-                # Our bet details
+                # Our bet details with complete breakdown
                 "our_bet": {
                     "team_we_bet_on": instruction.selection_name,
                     "odds": instruction.odds,
                     "stake": f"${instruction.stake:.2f}",
-                    "expected_return": f"${instruction.expected_return:.2f}",
+                    "gross_winnings": f"${instruction.gross_winnings:.2f}",
+                    "commission": f"${instruction.commission_paid:.2f}",
+                    "net_winnings": f"${instruction.expected_return:.2f}",
+                    "total_payout": f"${instruction.total_payout:.2f}",
                     "explanation": f"We bet on {instruction.selection_name} at {instruction.odds:+d}"
                 },
                 
@@ -1021,6 +1029,69 @@ async def test_market_making_strategy_detailed(odds_api_event_id: str):
                 }
             }
             detailed_response["betting_instructions"].append(enhanced_instruction)
+        
+        # NEW: Arbitrage verification - group instructions by market
+        markets_verification = {}
+        
+        # Group instructions by market (every 2 instructions should be one market)
+        for i in range(0, len(plan.betting_instructions), 2):
+            if i + 1 < len(plan.betting_instructions):
+                instr1 = plan.betting_instructions[i]
+                instr2 = plan.betting_instructions[i + 1]
+                
+                # Determine which is plus/minus side
+                if instr1.is_plus_side:
+                    plus_instr, minus_instr = instr1, instr2
+                else:
+                    plus_instr, minus_instr = instr2, instr1
+                
+                market_name = f"market_{i//2 + 1}"
+                
+                payout_difference = abs(plus_instr.total_payout - minus_instr.total_payout)
+                total_investment = plus_instr.stake + minus_instr.stake
+                guaranteed_profit = plus_instr.total_payout - total_investment
+                
+                markets_verification[market_name] = {
+                    "plus_side": {
+                        "selection": plus_instr.selection_name,
+                        "odds": plus_instr.odds,
+                        "stake": f"${plus_instr.stake:.2f}",
+                        "total_payout": f"${plus_instr.total_payout:.2f}"
+                    },
+                    "minus_side": {
+                        "selection": minus_instr.selection_name,
+                        "odds": minus_instr.odds,
+                        "stake": f"${minus_instr.stake:.2f}",
+                        "total_payout": f"${minus_instr.total_payout:.2f}"
+                    },
+                    "arbitrage_check": {
+                        "payouts_equal": payout_difference < 0.01,
+                        "payout_difference": f"${payout_difference:.4f}",
+                        "total_investment": f"${total_investment:.2f}",
+                        "guaranteed_profit": f"${guaranteed_profit:.2f}",
+                        "profit_margin": f"{(guaranteed_profit/total_investment)*100:.3f}%"
+                    }
+                }
+        
+        detailed_response["arbitrage_verification"] = markets_verification
+        
+        # Overall arbitrage summary
+        all_payouts_equal = all(
+            market["arbitrage_check"]["payouts_equal"] 
+            for market in markets_verification.values()
+        )
+        
+        total_profit = sum(
+            float(market["arbitrage_check"]["guaranteed_profit"].replace("$", "")) 
+            for market in markets_verification.values()
+        )
+        
+        detailed_response["arbitrage_summary"] = {
+            "all_payouts_perfectly_equal": all_payouts_equal,
+            "total_guaranteed_profit": f"${total_profit:.2f}",
+            "number_of_markets": len(markets_verification),
+            "calculation_status": "✅ PERFECT" if all_payouts_equal else "⚠️ NEEDS ADJUSTMENT"
+        }
         
         return {
             "success": True,

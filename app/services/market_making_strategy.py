@@ -60,18 +60,23 @@ PROPHETX_ALLOWED_ODDS_FULL = _generate_extended_odds()
 
 @dataclass
 class BettingInstruction:
-    """Instructions for placing a single bet on ProphetX"""
+    """Instructions for placing a single bet on ProphetX with complete payout tracking"""
     line_id: str
     selection_name: str
     odds: int  # ProphetX odds to bet at
     stake: float  # Amount to wager
-    expected_return: float  # Expected return if bet wins
+    expected_return: float  # Expected return if bet wins (net winnings after commission)
     liquidity_offered: float  # Liquidity we're providing to users
     outcome_offered_to_users: str  # What outcome we're offering (e.g., "Tigers +103")
     odds_offered_to_users: int  # What odds we're offering to users
     is_plus_side: bool  # True if this is the positive odds side
     max_position: float  # Maximum total position size for this line
     increment_size: float  # Size of each increment to add
+    
+    # NEW: Additional fields for payout verification and debugging
+    total_payout: float = 0.0  # Total payout (stake + net winnings) - for arbitrage verification
+    gross_winnings: float = 0.0  # Gross winnings before commission
+    commission_paid: float = 0.0  # Commission amount paid on winnings
     
 @dataclass
 class ArbitrageCalculation:
@@ -215,87 +220,78 @@ class MarketMakingStrategy:
     
     def calculate_true_arbitrage_bets(self, plus_odds: int, minus_odds: int) -> ArbitrageCalculation:
         """
-        Calculate true arbitrage bet amounts for guaranteed profit - FIXED VERSION
+        Calculate true arbitrage bet amounts for guaranteed profit with EXACT equal payouts
         
         Strategy:
-        1. Always bet $100 on the higher odds side 
-        2. Calculate exact total payout after commission for that bet
-        3. Calculate exact amount to bet on lower odds side for identical total payout
+        1. Always bet $100 on the higher odds side (positive odds)
+        2. Calculate the EXACT total payout for that bet (stake + net winnings after commission)
+        3. Calculate the EXACT amount to bet on lower odds side to achieve identical total payout
         4. Guaranteed profit = total payout - total investment
         
         Args:
-            plus_odds: Our positive bet odds 
-            minus_odds: Our negative bet odds 
+            plus_odds: Our positive bet odds (e.g., +118)
+            minus_odds: Our negative bet odds (e.g., -109)
             
         Returns:
-            ArbitrageCalculation with precise arbitrage amounts
+            ArbitrageCalculation with exact arbitrage amounts and equal payouts
         """
-        # Step 1: Always bet base amount on plus side
+        print(f"   📊 Calculating true arbitrage for {plus_odds:+d} vs {minus_odds:+d}")
+        
+        # Step 1: Always bet $100 on the positive odds side
         plus_bet = self.base_plus_bet  # $100
         
-        # Step 2: Calculate EXACT total payout for plus bet (including commission effects)
-        # If we bet $100 at +118 and win:
-        # - Gross winnings: $100 * (118/100) = $118
-        # - Commission taken: $118 * 0.03 = $3.54  
-        # - Net winnings: $118 - $3.54 = $114.46
-        # - Total payout: $100 + $114.46 = $214.46
+        # Step 2: Calculate EXACT total payout for plus side
+        plus_gross_winnings = plus_bet * (plus_odds / 100)  # $100 * (118/100) = $118
+        plus_commission = plus_gross_winnings * self.commission_rate  # $118 * 0.03 = $3.54
+        plus_net_winnings = plus_gross_winnings - plus_commission  # $118 - $3.54 = $114.46
+        plus_total_payout = plus_bet + plus_net_winnings  # $100 + $114.46 = $214.46
         
-        gross_winnings_plus = plus_bet * (plus_odds / 100)
-        commission_amount_plus = gross_winnings_plus * self.commission_rate
-        net_winnings_plus = gross_winnings_plus - commission_amount_plus
-        target_total_payout = plus_bet + net_winnings_plus
+        print(f"   📈 Plus side ({plus_odds:+d}): Bet ${plus_bet:.2f}")
+        print(f"      Gross winnings: ${plus_gross_winnings:.2f}")
+        print(f"      Commission: ${plus_commission:.2f}")
+        print(f"      Net winnings: ${plus_net_winnings:.2f}")
+        print(f"      Total payout: ${plus_total_payout:.2f}")
         
-        print(f"   Plus bet calculation:")
-        print(f"     Bet $100 at {plus_odds:+d}")
-        print(f"     Gross winnings: ${gross_winnings_plus:.2f}")
-        print(f"     Commission (3%): ${commission_amount_plus:.2f}")
-        print(f"     Net winnings: ${net_winnings_plus:.2f}")
-        print(f"     Total payout target: ${target_total_payout:.2f}")
+        # Step 3: Calculate EXACT stake for minus side to achieve identical total payout
+        # For negative odds: if we bet X, we win X * (100 / abs(minus_odds))
+        # Gross winnings = X * (100 / abs(minus_odds))
+        # Commission = gross_winnings * commission_rate  
+        # Net winnings = gross_winnings * (1 - commission_rate)
+        # Total payout = X + net_winnings = X + (X * (100/abs(minus_odds)) * (1 - commission_rate))
+        # We want: total_payout = plus_total_payout
         
-        # Step 3: Calculate EXACT minus bet amount for identical total payout
-        # If we bet $X at -109 and win:
-        # - Gross winnings: $X * (100/109) 
-        # - Commission taken: $X * (100/109) * 0.03
-        # - Net winnings: $X * (100/109) * 0.97
-        # - Total payout: $X + $X * (100/109) * 0.97
-        # 
-        # Set equal to target: $X + $X * (100/109) * 0.97 = target_total_payout
-        # Factor out $X: $X * (1 + (100/109) * 0.97) = target_total_payout
-        # Solve for $X: $X = target_total_payout / (1 + (100/109) * 0.97)
+        win_rate = 100 / abs(minus_odds)  # For -109: 100/109 = 0.9174
+        net_win_rate = win_rate * (1 - self.commission_rate)  # 0.9174 * 0.97 = 0.8899
         
-        # Calculate the multiplier more precisely
-        win_rate_on_minus = 100 / abs(minus_odds)  # 100/109 = 0.917431...
-        net_win_rate = win_rate_on_minus * (1 - self.commission_rate)  # * 0.97
-        total_payout_multiplier = 1 + net_win_rate  # 1 + (win rate after commission)
+        # Solve: X * (1 + net_win_rate) = plus_total_payout
+        minus_bet = plus_total_payout / (1 + net_win_rate)
         
-        minus_bet = target_total_payout / total_payout_multiplier
+        # Verify the calculation by computing minus side payout
+        minus_gross_winnings = minus_bet * win_rate
+        minus_commission = minus_gross_winnings * self.commission_rate
+        minus_net_winnings = minus_gross_winnings - minus_commission
+        minus_total_payout = minus_bet + minus_net_winnings
         
-        print(f"   Minus bet calculation:")
-        print(f"     Target total payout: ${target_total_payout:.2f}")
-        print(f"     Win rate on {minus_odds:+d}: {win_rate_on_minus:.6f}")
-        print(f"     Net win rate (after commission): {net_win_rate:.6f}")  
-        print(f"     Total payout multiplier: {total_payout_multiplier:.6f}")
-        print(f"     Required minus bet: ${minus_bet:.2f}")
+        print(f"   📉 Minus side ({minus_odds:+d}): Bet ${minus_bet:.2f}")
+        print(f"      Gross winnings: ${minus_gross_winnings:.2f}")
+        print(f"      Commission: ${minus_commission:.2f}")
+        print(f"      Net winnings: ${minus_net_winnings:.2f}")
+        print(f"      Total payout: ${minus_total_payout:.2f}")
         
-        # Step 4: Verify the calculation by computing minus side payout
-        gross_winnings_minus = minus_bet * win_rate_on_minus
-        commission_amount_minus = gross_winnings_minus * self.commission_rate
-        net_winnings_minus = gross_winnings_minus - commission_amount_minus
-        actual_minus_payout = minus_bet + net_winnings_minus
+        # Verify payouts are equal (within rounding tolerance)
+        payout_difference = abs(plus_total_payout - minus_total_payout)
+        print(f"   🔍 Payout difference: ${payout_difference:.4f}")
         
-        print(f"   Verification:")
-        print(f"     Plus side total payout: ${target_total_payout:.2f}")
-        print(f"     Minus side total payout: ${actual_minus_payout:.2f}")
-        print(f"     Difference: ${abs(target_total_payout - actual_minus_payout):.6f}")
+        if payout_difference > 0.01:  # More than 1 cent difference
+            print(f"   ⚠️  WARNING: Payouts not equal! Difference: ${payout_difference:.4f}")
         
-        # Step 5: Calculate profit metrics
+        # Step 4: Calculate guaranteed profit
         total_investment = plus_bet + minus_bet
-        guaranteed_profit = target_total_payout - total_investment  # Same regardless of winner
+        guaranteed_profit = plus_total_payout - total_investment  # Same as minus_total_payout - total_investment
         profit_margin = (guaranteed_profit / total_investment) * 100 if total_investment > 0 else 0
         
-        print(f"   Arbitrage result:")
-        print(f"     Total investment: ${total_investment:.2f}")
-        print(f"     Guaranteed profit: ${guaranteed_profit:.2f} ({profit_margin:.2f}%)")
+        print(f"   💰 Total investment: ${total_investment:.2f}")
+        print(f"   💰 Guaranteed profit: ${guaranteed_profit:.2f} ({profit_margin:.2f}%)")
         
         return ArbitrageCalculation(
             plus_side_bet=plus_bet,
@@ -403,7 +399,7 @@ class MarketMakingStrategy:
         is_plus_side: bool
     ) -> Optional[BettingInstruction]:
         """
-        Create a betting instruction using true arbitrage sizing
+        Create a betting instruction using true arbitrage sizing with exact payout calculation
         
         Args:
             line_id: ProphetX line ID to bet on
@@ -419,7 +415,7 @@ class MarketMakingStrategy:
         # Step 2: Round to allowed ProphetX odds (should be very close)
         prophetx_odds = self.round_to_prophetx_odds(our_bet_odds)
         
-        # Step 3: Use true arbitrage stake amounts (commission already factored in)
+        # Step 3: Use true arbitrage stake amounts
         if is_plus_side:
             stake = position_limits.base_plus_bet  # Always $100
             max_position = position_limits.max_plus_bet
@@ -429,21 +425,25 @@ class MarketMakingStrategy:
             max_position = position_limits.max_minus_bet
             increment_size = position_limits.increment_minus
         
-        # Step 4: Calculate returns
+        # Step 4: Calculate returns with EXACT commission accounting
         if prophetx_odds > 0:
-            # Positive odds: gross winnings, then apply commission
+            # Positive odds: 
             gross_winnings = stake * (prophetx_odds / 100)
-            net_winnings = gross_winnings * (1 - self.commission_rate)
+            commission = gross_winnings * self.commission_rate
+            net_winnings = gross_winnings - commission
             expected_return = net_winnings  # What we actually get
+            total_payout = stake + net_winnings  # Stake + net winnings
             liquidity_offered = gross_winnings  # What users see as potential win
         else:
-            # Negative odds: gross winnings, then apply commission  
-            gross_winnings = stake / (abs(prophetx_odds) / 100)
-            net_winnings = gross_winnings * (1 - self.commission_rate)
+            # Negative odds:
+            gross_winnings = stake * (100 / abs(prophetx_odds))
+            commission = gross_winnings * self.commission_rate
+            net_winnings = gross_winnings - commission
             expected_return = net_winnings  # What we actually get
+            total_payout = stake + net_winnings  # Stake + net winnings
             liquidity_offered = gross_winnings  # What users see as potential win
         
-        # Step 5: Create instruction
+        # Step 5: Create instruction with payout information
         instruction = BettingInstruction(
             line_id=line_id,
             selection_name=selection_name,           # WHO we're betting on
@@ -455,7 +455,11 @@ class MarketMakingStrategy:
             odds_offered_to_users=pinnacle_odds,    # Exact Pinnacle odds
             is_plus_side=is_plus_side,
             max_position=max_position,
-            increment_size=increment_size
+            increment_size=increment_size,
+            # NEW: Add payout tracking fields
+            total_payout=total_payout,
+            gross_winnings=gross_winnings,
+            commission_paid=commission
         )
         
         return instruction
