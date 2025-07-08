@@ -589,7 +589,7 @@ class MarketMakingStrategy:
             
             # Determine which of our bets is plus vs minus (based on our bet odds, not Pinnacle)
             if our_bet_odds1 > 0 and our_bet_odds2 < 0:
-                # Bet 1 is positive, Bet 2 is negative
+                # Standard case: Bet 1 is positive, Bet 2 is negative
                 plus_bet_odds = our_bet_odds1
                 plus_bet_team = outcome2.name      # We bet on outcome2 team
                 plus_offer_outcome = outcome1      # We offer outcome1 to users
@@ -599,7 +599,7 @@ class MarketMakingStrategy:
                 minus_offer_outcome = outcome2     # We offer outcome2 to users
                 
             elif our_bet_odds2 > 0 and our_bet_odds1 < 0:
-                # Bet 2 is positive, Bet 1 is negative
+                # Standard case: Bet 2 is positive, Bet 1 is negative
                 plus_bet_odds = our_bet_odds2
                 plus_bet_team = outcome1.name      # We bet on outcome1 team
                 plus_offer_outcome = outcome2      # We offer outcome2 to users
@@ -607,8 +607,58 @@ class MarketMakingStrategy:
                 minus_bet_odds = our_bet_odds1
                 minus_bet_team = outcome2.name     # We bet on outcome2 team
                 minus_offer_outcome = outcome1     # We offer outcome1 to users
+
+            # NEW: Handle case where both bets are positive (like totals with both negative Pinnacle odds)
+            elif our_bet_odds1 > 0 and our_bet_odds2 > 0:
+                print(f"   📊 Both bets positive: {our_bet_odds1:+d}, {our_bet_odds2:+d}")
+                
+                # Use the higher odds as "plus side" and lower odds as "minus side"
+                if our_bet_odds1 >= our_bet_odds2:
+                    plus_bet_odds = our_bet_odds1
+                    plus_bet_team = outcome2.name
+                    plus_offer_outcome = outcome1
+                    
+                    minus_bet_odds = our_bet_odds2  # Still positive, but we'll treat as "minus side"
+                    minus_bet_team = outcome1.name
+                    minus_offer_outcome = outcome2
+                else:
+                    plus_bet_odds = our_bet_odds2
+                    plus_bet_team = outcome1.name
+                    plus_offer_outcome = outcome2
+                    
+                    minus_bet_odds = our_bet_odds1  # Still positive, but we'll treat as "minus side" 
+                    minus_bet_team = outcome2.name
+                    minus_offer_outcome = outcome1
+                
+                print(f"   Using {plus_bet_odds:+d} as plus side, {minus_bet_odds:+d} as minus side")
+
+            # NEW: Handle case where both bets are negative (rare but possible)
+            elif our_bet_odds1 < 0 and our_bet_odds2 < 0:
+                print(f"   📊 Both bets negative: {our_bet_odds1:+d}, {our_bet_odds2:+d}")
+                
+                # Use the less negative (closer to 0) as "plus side"
+                if our_bet_odds1 > our_bet_odds2:  # -105 > -110
+                    plus_bet_odds = our_bet_odds1    # Less negative = "plus side"
+                    plus_bet_team = outcome2.name
+                    plus_offer_outcome = outcome1
+                    
+                    minus_bet_odds = our_bet_odds2   # More negative = "minus side"
+                    minus_bet_team = outcome1.name
+                    minus_offer_outcome = outcome2
+                else:
+                    plus_bet_odds = our_bet_odds2
+                    plus_bet_team = outcome1.name
+                    plus_offer_outcome = outcome2
+                    
+                    minus_bet_odds = our_bet_odds1
+                    minus_bet_team = outcome2.name
+                    minus_offer_outcome = outcome1
+                
+                print(f"   Using {plus_bet_odds:+d} as plus side, {minus_bet_odds:+d} as minus side")
+
             else:
-                print(f"⚠️  Skipping {market_type}: both bet odds same sign ({our_bet_odds1:+d}, {our_bet_odds2:+d})")
+                # This should never happen, but just in case
+                print(f"⚠️  Unexpected odds combination: {our_bet_odds1:+d}, {our_bet_odds2:+d}")
                 continue
             
             print(f"   Plus side bet: {plus_bet_team} at {plus_bet_odds:+d} → Offers users {plus_offer_outcome.name} {plus_offer_outcome.american_odds:+d}")
