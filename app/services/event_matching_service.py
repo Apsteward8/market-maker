@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
-Event Matching Service - FIXED VERSION
-Matches events between The Odds API (Pinnacle) and ProphetX with improved tolerance
+Event Matching Service - UPDATED for 0.7 Confidence Threshold
+Matches events between The Odds API (Pinnacle) and ProphetX with improved filtering
 """
 
 import re
@@ -50,9 +50,10 @@ class EventMatchingService:
         # Name variations cache
         self.name_variations: Dict[str, List[str]] = {}
         
-        # **UPDATED**: More lenient matching thresholds
-        self.min_confidence_threshold = 0.6  # Lowered from 0.7
-        self.time_tolerance_minutes = 15.0    # NEW: 15 minutes tolerance instead of hours
+        # **UPDATED**: Changed back to 0.7 confidence threshold
+        self.min_confidence_threshold = 0.7    # Raised back to 0.7
+        self.display_threshold = 0.7           # NEW: Only show matches above this in prophetx_matches
+        self.time_tolerance_minutes = 15.0     # 15 minutes tolerance
         
     async def find_matches_for_events(self, odds_api_events: List[ProcessedEvent]) -> List[MatchingAttempt]:
         """
@@ -65,6 +66,7 @@ class EventMatchingService:
             List of matching attempts with results
         """
         print(f"🔗 Finding ProphetX matches for {len(odds_api_events)} Odds API events...")
+        print(f"   Confidence threshold: {self.min_confidence_threshold}")
         
         # Get all upcoming ProphetX events
         prophetx_events = await prophetx_events_service.get_all_upcoming_events()
@@ -81,7 +83,11 @@ class EventMatchingService:
                 self.confirmed_matches[odds_event.event_id] = attempt.best_match
                 print(f"✅ {attempt.best_match.display_summary}")
             else:
-                print(f"❌ No match found for: {odds_event.display_name} - {attempt.no_match_reason}")
+                print(f"❌ No match found for: {odds_event.display_name}")
+                print(f"   Reason: {attempt.no_match_reason}")
+                if attempt.prophetx_matches:
+                    best_confidence = attempt.prophetx_matches[0][1]
+                    print(f"   Best confidence: {best_confidence:.3f} (threshold: {self.min_confidence_threshold})")
         
         successful_matches = sum(1 for attempt in matching_attempts if attempt.best_match)
         print(f"🎯 Successfully matched {successful_matches}/{len(odds_api_events)} events")
@@ -128,13 +134,14 @@ class EventMatchingService:
         for px_event in prophetx_events:
             confidence, reasons = self._calculate_match_confidence(odds_event, px_event)
             
-            if confidence > 0:  # Any non-zero confidence is worth considering
+            # **UPDATED**: Only include matches above display threshold in prophetx_matches
+            if confidence >= self.display_threshold:
                 potential_matches.append((px_event, confidence))
         
         # Sort by confidence
         potential_matches.sort(key=lambda x: x[1], reverse=True)
         
-        # Check if we have a good enough match
+        # Check if we have a good enough match for actual matching
         best_match = None
         no_match_reason = None
         
@@ -152,14 +159,14 @@ class EventMatchingService:
         else:
             # Determine why no match was found
             if not potential_matches:
-                no_match_reason = "No potential matches found"
+                no_match_reason = f"No matches found above {self.display_threshold:.1f} confidence threshold"
             else:
                 best_confidence = potential_matches[0][1]
-                no_match_reason = f"Best confidence {best_confidence:.2f} below threshold {self.min_confidence_threshold}"
+                no_match_reason = f"Best confidence {best_confidence:.3f} below required {self.min_confidence_threshold:.1f}"
         
         return MatchingAttempt(
             odds_api_event=odds_event,
-            prophetx_matches=potential_matches[:5],  # Keep top 5 for analysis
+            prophetx_matches=potential_matches,  # Now only includes matches >= 0.7
             best_match=best_match,
             no_match_reason=no_match_reason
         )
@@ -182,12 +189,12 @@ class EventMatchingService:
         confidence = 0.0
         reasons = []
         
-        # **UPDATED**: Time proximity check with minutes tolerance
+        # **TIME PROXIMITY CHECK** - with minutes tolerance
         time_diff_minutes = abs((odds_event.commence_time - px_event.commence_time).total_seconds() / 60)
         if time_diff_minutes > self.time_tolerance_minutes:
             return 0.0, [f"Time difference {time_diff_minutes:.1f}min exceeds {self.time_tolerance_minutes}min tolerance"]
         
-        # **IMPROVED**: Time score (closer = better)
+        # **TIME SCORE** (closer = better) - 40% weight
         if time_diff_minutes <= 5:  # Perfect if within 5 minutes
             time_score = 1.0
         elif time_diff_minutes <= 10:  # Good if within 10 minutes  
@@ -198,7 +205,7 @@ class EventMatchingService:
         confidence += time_score * 0.4  # 40% weight for time
         reasons.append(f"Time match: {time_score:.2f} (diff: {time_diff_minutes:.1f}min)")
         
-        # **IMPROVED**: Team name matching
+        # **TEAM NAME MATCHING** - 60% weight
         team_score = self._calculate_team_name_score(odds_event, px_event)
         confidence += team_score * 0.6  # 60% weight for team names
         reasons.append(f"Team names: {team_score:.2f}")
@@ -208,19 +215,11 @@ class EventMatchingService:
     def _calculate_team_name_score(self, odds_event: ProcessedEvent, px_event: ProphetXEvent) -> float:
         """Calculate team name similarity score"""
         
-        # **DEBUG**: Log team names being compared
-        print(f"   🔍 Comparing teams:")
-        print(f"      Odds API: {odds_event.home_team} vs {odds_event.away_team}")
-        print(f"      ProphetX: {px_event.home_team} vs {px_event.away_team}")
-        
         # Normalize all team names
         odds_home = self._normalize_team_name(odds_event.home_team)
         odds_away = self._normalize_team_name(odds_event.away_team)
         px_home = self._normalize_team_name(px_event.home_team)
         px_away = self._normalize_team_name(px_event.away_team)
-        
-        print(f"      Normalized - Odds API: {odds_home} vs {odds_away}")
-        print(f"      Normalized - ProphetX: {px_home} vs {px_away}")
         
         # Try both orientations (home/away might be swapped)
         score1 = (self._team_similarity(odds_home, px_home) + 
@@ -230,7 +229,6 @@ class EventMatchingService:
                  self._team_similarity(odds_away, px_home)) / 2
         
         final_score = max(score1, score2)
-        print(f"      Team similarity score: {final_score:.3f} (orientation1: {score1:.3f}, orientation2: {score2:.3f})")
         
         return final_score
     
@@ -246,12 +244,6 @@ class EventMatchingService:
         normalized = re.sub(r'[^\w\s]', '', normalized)
         normalized = re.sub(r'\s+', ' ', normalized)
         
-        # **IMPROVED**: Handle common team name variations
-        # Extract city and team name parts
-        words = normalized.split()
-        
-        # For MLB teams, keep both city and team name
-        # e.g., "detroit tigers" stays as "detroit tigers"
         return normalized
     
     def _team_similarity(self, name1: str, name2: str) -> float:
@@ -351,6 +343,8 @@ class EventMatchingService:
             "successful_matches": matched_count,
             "match_rate": matched_count / total_odds_events if total_odds_events > 0 else 0,
             "manual_overrides": len(self.manual_overrides),
+            "confidence_threshold": self.min_confidence_threshold,
+            "display_threshold": self.display_threshold,
             "last_updated": datetime.now().isoformat()
         }
     
@@ -361,6 +355,7 @@ class EventMatchingService:
         Clears existing matches and re-runs matching for all current events
         """
         print("🔄 Refreshing all event matches...")
+        print(f"   Using confidence threshold: {self.min_confidence_threshold}")
         
         # Clear existing matches (except manual overrides)
         self.confirmed_matches.clear()
@@ -379,7 +374,41 @@ class EventMatchingService:
             "successful_matches": successful,
             "failed_matches": failed,
             "match_rate": successful / len(attempts) if attempts else 0,
+            "confidence_threshold": self.min_confidence_threshold,
             "refresh_timestamp": datetime.now().isoformat()
+        }
+    
+    def update_confidence_threshold(self, new_threshold: float) -> Dict[str, Any]:
+        """
+        Update the confidence threshold for matching
+        
+        Args:
+            new_threshold: New minimum confidence threshold (0.0 - 1.0)
+            
+        Returns:
+            Result of the update
+        """
+        if not 0.0 <= new_threshold <= 1.0:
+            return {
+                "success": False,
+                "message": "Threshold must be between 0.0 and 1.0"
+            }
+        
+        old_threshold = self.min_confidence_threshold
+        self.min_confidence_threshold = new_threshold
+        self.display_threshold = new_threshold  # Also update display threshold
+        
+        # Clear existing matches since criteria changed
+        cleared_matches = len(self.confirmed_matches)
+        self.confirmed_matches.clear()
+        
+        return {
+            "success": True,
+            "message": f"Confidence threshold updated from {old_threshold} to {new_threshold}",
+            "old_threshold": old_threshold,
+            "new_threshold": new_threshold,
+            "cleared_matches": cleared_matches,
+            "note": "Existing matches cleared - run refresh to re-match with new threshold"
         }
 
 # Global event matching service instance  
