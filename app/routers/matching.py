@@ -1101,3 +1101,180 @@ async def test_market_making_strategy_detailed(odds_api_event_id: str):
         
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error testing strategy: {str(e)}")
+    
+# Add this debug endpoint to app/routers/matching.py
+
+@router.get("/debug-totals-matching/{odds_api_event_id}", response_model=Dict[str, Any])
+async def debug_totals_market_matching(odds_api_event_id: str):
+    """
+    Debug why totals markets aren't being included in strategy
+    
+    Shows detailed breakdown of totals market matching between Pinnacle and ProphetX
+    """
+    try:
+        # Get the event match
+        confirmed_matches = await event_matching_service.get_matched_events()
+        target_match = None
+        
+        for match in confirmed_matches:
+            if match.odds_api_event.event_id == odds_api_event_id:
+                target_match = match
+                break
+        
+        if not target_match:
+            return {
+                "success": False,
+                "message": f"No matched event found for {odds_api_event_id}"
+            }
+        
+        odds_event = target_match.odds_api_event
+        prophetx_event = target_match.prophetx_event
+        
+        debug_info = {
+            "event_name": odds_event.display_name,
+            "pinnacle_totals": None,
+            "prophetx_totals": None,
+            "market_matching_result": None,
+            "strategy_creation_analysis": []
+        }
+        
+        # Get Pinnacle totals data
+        if odds_event.totals:
+            debug_info["pinnacle_totals"] = {
+                "available": True,
+                "outcomes": [
+                    {
+                        "name": outcome.name,
+                        "odds": outcome.american_odds,
+                        "point": outcome.point
+                    }
+                    for outcome in odds_event.totals.outcomes
+                ],
+                "outcome_count": len(odds_event.totals.outcomes)
+            }
+        else:
+            debug_info["pinnacle_totals"] = {"available": False}
+        
+        # Get ProphetX totals data
+        prophetx_markets = await market_matching_service.fetch_prophetx_markets(prophetx_event.event_id)
+        
+        if prophetx_markets:
+            totals_market = prophetx_markets.get_total_market()
+            if totals_market:
+                debug_info["prophetx_totals"] = {
+                    "available": True,
+                    "market_id": totals_market.market_id,
+                    "market_name": totals_market.name,
+                    "status": totals_market.status,
+                    "total_lines": len(totals_market.lines),
+                    "active_lines": len(totals_market.active_lines),
+                    "lines_detail": [
+                        {
+                            "line_id": line.line_id,
+                            "selection_name": line.selection_name,
+                            "odds": line.american_odds if line.is_active else "unavailable",
+                            "point": line.point,
+                            "status": line.status,
+                            "is_active": line.is_active
+                        }
+                        for line in totals_market.lines
+                    ]
+                }
+                
+                # Check if we have the right point value
+                pinnacle_point = odds_event.totals.outcomes[0].point if odds_event.totals else None
+                matching_point_lines = []
+                
+                if pinnacle_point:
+                    for line in totals_market.lines:
+                        if line.point == pinnacle_point:
+                            matching_point_lines.append({
+                                "line_id": line.line_id,
+                                "selection_name": line.selection_name,
+                                "odds": line.american_odds if line.is_active else "unavailable",
+                                "is_active": line.is_active
+                            })
+                
+                debug_info["prophetx_totals"]["matching_point_lines"] = matching_point_lines
+                debug_info["prophetx_totals"]["matching_point"] = pinnacle_point
+                
+            else:
+                debug_info["prophetx_totals"] = {"available": False, "reason": "No totals market found"}
+        else:
+            debug_info["prophetx_totals"] = {"available": False, "reason": "No ProphetX markets fetched"}
+        
+        # Run market matching specifically for totals
+        if odds_event.totals and prophetx_markets:
+            try:
+                # Simulate the totals market matching
+                totals_match_result = await market_matching_service._match_totals_market(
+                    odds_event.totals, prophetx_markets
+                )
+                
+                debug_info["market_matching_result"] = {
+                    "odds_api_market_type": totals_match_result.odds_api_market_type,
+                    "match_status": totals_match_result.match_status,
+                    "confidence_score": totals_match_result.confidence_score,
+                    "outcome_mappings_count": len(totals_match_result.outcome_mappings),
+                    "issues": totals_match_result.issues,
+                    "is_matched": totals_match_result.is_matched,
+                    "outcome_mappings": totals_match_result.outcome_mappings
+                }
+                
+            except Exception as e:
+                debug_info["market_matching_result"] = {
+                    "error": f"Market matching failed: {str(e)}"
+                }
+        
+
+        # Analyze why strategy creation might be skipping totals
+        analysis = []
+
+        if not odds_event.totals:
+            analysis.append("❌ No totals market in Pinnacle data")
+        elif len(odds_event.totals.outcomes) != 2:
+            analysis.append(f"❌ Pinnacle totals has {len(odds_event.totals.outcomes)} outcomes, need exactly 2")
+        else:
+            analysis.append("✅ Pinnacle totals market has 2 outcomes")
+
+        if not debug_info["prophetx_totals"]["available"]:
+            analysis.append("❌ No totals market found on ProphetX")
+        else:
+            # Check if we have valid line_ids (regardless of active status)
+            matching_lines = debug_info["prophetx_totals"]["matching_point_lines"]
+            valid_lines = [line for line in matching_lines if line["line_id"]]
+            active_lines = [line for line in matching_lines if line["is_active"]]
+            
+            if len(valid_lines) < 2:
+                analysis.append(f"❌ Only {len(valid_lines)} valid lines at point {pinnacle_point} (need 2)")
+            else:
+                analysis.append(f"✅ ProphetX has 2 valid lines at point {pinnacle_point}")
+                
+                if len(active_lines) == 2:
+                    analysis.append("✅ Both lines have existing liquidity")
+                elif len(active_lines) == 1:
+                    analysis.append("🟡 1 line has liquidity, 1 is market making opportunity")
+                else:
+                    analysis.append("🟡 Both lines are market making opportunities (no existing liquidity)")
+
+        debug_info["strategy_creation_analysis"] = analysis
+
+        # Enhanced diagnosis
+        if all("✅" in item for item in analysis):
+            debug_info["diagnosis"] = "✅ Totals market should be included - all requirements met"
+        elif any("❌" in item for item in analysis):
+            failed_checks = [item for item in analysis if "❌" in item]
+            debug_info["diagnosis"] = f"❌ Totals market excluded due to: {'; '.join(failed_checks)}"
+        else:
+            opportunities = [item for item in analysis if "🟡" in item]
+            debug_info["diagnosis"] = f"🟡 Totals market is a market making opportunity: {'; '.join(opportunities)}"
+            debug_info["recommendation"] = "✅ SHOULD BE INCLUDED - providing first liquidity is the essence of market making!"
+        
+        return {
+            "success": True,
+            "message": "Totals market matching debug completed",
+            "data": debug_info
+        }
+        
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error debugging totals matching: {str(e)}")

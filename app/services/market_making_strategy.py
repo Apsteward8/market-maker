@@ -559,6 +559,23 @@ class MarketMakingStrategy:
                 print(f"⚠️  Skipping {market_type}: need exactly 2 outcomes, got {len(pinnacle_outcomes)}")
                 continue
             
+            # ✅ UPDATED: Check that we have valid line_ids for both outcomes (regardless of active status)
+            valid_line_mappings = []
+            for outcome_mapping in market_result.outcome_mappings:
+                if outcome_mapping.get('prophetx_line_id'):  # Valid line_id means we can bet
+                    valid_line_mappings.append(outcome_mapping)
+                    
+                    # Log the line status
+                    is_active = outcome_mapping.get('prophetx_line_active', False)
+                    status = "🟢 ACTIVE" if is_active else "🟡 INACTIVE (OPPORTUNITY)"
+                    print(f"      {outcome_mapping['odds_api_outcome_name']}: {status}")
+            
+            if len(valid_line_mappings) < 2:
+                print(f"❌ Skipping {market_type}: only {len(valid_line_mappings)} valid lines found")
+                continue
+            
+            print(f"✅ {market_type} market: Found 2 valid lines for arbitrage")
+            
             # Calculate what we would bet (exact opposite of Pinnacle, no commission adjustment to odds)
             outcome1, outcome2 = pinnacle_outcomes
             print(f"   Pinnacle odds: {outcome1.name} {outcome1.american_odds:+d}, {outcome2.name} {outcome2.american_odds:+d}")
@@ -613,21 +630,22 @@ class MarketMakingStrategy:
             limits = self.calculate_position_limits_simple(plus_bet_odds, minus_bet_odds)
             position_limits_by_market[market_type] = limits
             
-            # Create betting instructions with corrected logic
+            # ✅ UPDATED: Create betting instructions with improved line finding
             print(f"   Creating betting instructions...")
             
-            # Instruction 1: Plus side bet
-            print(f"   \n   Creating plus side instruction:")
-            print(f"     Bet on: {plus_bet_team} at {plus_bet_odds:+d}")
-            print(f"     Offers users: {plus_offer_outcome.name} {plus_offer_outcome.american_odds:+d}")
-            
-            # Find the line for plus side bet
+            # Find line mappings by team name (regardless of active status)
             plus_line_mapping = None
-            for outcome_mapping in market_result.outcome_mappings:
-                if outcome_mapping['odds_api_outcome_name'].lower() == plus_bet_team.lower():
-                    plus_line_mapping = outcome_mapping
-                    break
+            minus_line_mapping = None
             
+            for outcome_mapping in valid_line_mappings:
+                odds_api_name = outcome_mapping['odds_api_outcome_name'].lower()
+                
+                if plus_bet_team.lower() in odds_api_name or odds_api_name in plus_bet_team.lower():
+                    plus_line_mapping = outcome_mapping
+                if minus_bet_team.lower() in odds_api_name or odds_api_name in minus_bet_team.lower():
+                    minus_line_mapping = outcome_mapping
+            
+            # Create betting instructions
             if plus_line_mapping:
                 plus_instruction = self.create_betting_instruction(
                     line_id=plus_line_mapping['prophetx_line_id'],
@@ -639,20 +657,12 @@ class MarketMakingStrategy:
                 )
                 if plus_instruction:
                     instructions.append(plus_instruction)
-                    print(f"     ✅ Plus instruction: Bet {plus_instruction.selection_name} {plus_instruction.odds:+d}")
+                    
+                    # ✅ Log if this is a market making opportunity
+                    is_active = plus_line_mapping.get('prophetx_line_active', False)
+                    status = "existing liquidity" if is_active else "🟡 PROVIDING FIRST LIQUIDITY"
+                    print(f"     ✅ Plus instruction: Bet {plus_instruction.selection_name} {plus_instruction.odds:+d} ({status})")
                     print(f"        → Users see: {plus_instruction.outcome_offered_to_users}")
-            
-            # Instruction 2: Minus side bet
-            print(f"   \n   Creating minus side instruction:")
-            print(f"     Bet on: {minus_bet_team} at {minus_bet_odds:+d}")
-            print(f"     Offers users: {minus_offer_outcome.name} {minus_offer_outcome.american_odds:+d}")
-            
-            # Find the line for minus side bet
-            minus_line_mapping = None
-            for outcome_mapping in market_result.outcome_mappings:
-                if outcome_mapping['odds_api_outcome_name'].lower() == minus_bet_team.lower():
-                    minus_line_mapping = outcome_mapping
-                    break
             
             if minus_line_mapping:
                 minus_instruction = self.create_betting_instruction(
@@ -665,7 +675,11 @@ class MarketMakingStrategy:
                 )
                 if minus_instruction:
                     instructions.append(minus_instruction)
-                    print(f"     ✅ Minus instruction: Bet {minus_instruction.selection_name} {minus_instruction.odds:+d}")
+                    
+                    # ✅ Log if this is a market making opportunity
+                    is_active = minus_line_mapping.get('prophetx_line_active', False)
+                    status = "existing liquidity" if is_active else "🟡 PROVIDING FIRST LIQUIDITY"
+                    print(f"     ✅ Minus instruction: Bet {minus_instruction.selection_name} {minus_instruction.odds:+d} ({status})")
                     print(f"        → Users see: {minus_instruction.outcome_offered_to_users}")
             
             created_instructions = 2 if plus_line_mapping and minus_line_mapping else 0

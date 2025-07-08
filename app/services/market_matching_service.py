@@ -348,12 +348,6 @@ class MarketMatchingService:
     async def match_event_markets(self, event_match: EventMatch) -> EventMarketsMatch:
         """
         Match all markets for a specific event between Odds API and ProphetX
-        
-        Args:
-            event_match: Matched event from event matching service
-            
-        Returns:
-            Complete market matching result
         """
         odds_event = event_match.odds_api_event
         prophetx_event = event_match.prophetx_event
@@ -411,17 +405,43 @@ class MarketMatchingService:
         successful_matches = [m for m in market_matches if m.is_matched]
         overall_confidence = sum(m.confidence_score for m in market_matches) / len(market_matches) if market_matches else 0
         
-        # Determine if ready for trading
+        # ✅ FIXED: Distinguish between blocking issues and market making opportunities
+        blocking_issues = []
+        market_making_opportunities = []
+        
+        for match in market_matches:
+            for issue in match.issues:
+                if "market making opportunities" in issue.lower() or "✅" in issue:
+                    market_making_opportunities.append(issue)
+                else:
+                    blocking_issues.append(issue)
+        
+        # ✅ UPDATED: Only blocking issues prevent trading
         ready_for_trading = (
             len(successful_matches) > 0 and  # At least one market matched
             overall_confidence >= 0.7 and   # High confidence
-            not any(m.has_issues for m in market_matches)  # No critical issues
+            len(blocking_issues) == 0        # No BLOCKING issues (market making opportunities are OK!)
         )
         
-        # Collect issues
-        all_issues = []
-        for match in market_matches:
-            all_issues.extend(match.issues)
+        # ✅ ENHANCED: Separate reporting of blocking vs opportunity issues
+        all_issues = blocking_issues + market_making_opportunities
+        
+        print(f"📊 Market matching summary:")
+        print(f"   Successful matches: {len(successful_matches)}/{len(market_matches)}")
+        print(f"   Overall confidence: {overall_confidence:.3f}")
+        print(f"   Blocking issues: {len(blocking_issues)}")
+        print(f"   Market making opportunities: {len(market_making_opportunities)}")
+        print(f"   Ready for trading: {ready_for_trading}")
+        
+        if market_making_opportunities:
+            print(f"🟡 Market making opportunities found:")
+            for opp in market_making_opportunities:
+                print(f"     {opp}")
+        
+        if blocking_issues:
+            print(f"❌ Blocking issues:")
+            for issue in blocking_issues:
+                print(f"     {issue}")
         
         return EventMarketsMatch(
             odds_api_event_id=odds_event.event_id,
@@ -441,7 +461,7 @@ class MarketMatchingService:
         home_team: str,
         away_team: str
     ) -> MarketMatchResult:
-        """Match moneyline market between platforms"""
+        """Match moneyline market between platforms - INCLUDE INACTIVE LINES"""
         
         # Find ProphetX moneyline market
         px_market = prophetx_markets.get_moneyline_market()
@@ -483,6 +503,9 @@ class MarketMatchingService:
                 mapping_dict['prophetx_line_status'] = px_line.status
                 if not px_line.is_active:
                     mapping_dict['note'] = 'Line available for betting but no current liquidity'
+                    mapping_dict['market_making_opportunity'] = True
+                else:
+                    mapping_dict['market_making_opportunity'] = False
                 
                 outcome_mappings.append(mapping_dict)
         
@@ -490,9 +513,10 @@ class MarketMatchingService:
         match_status = "matched" if len(outcome_mappings) == len(odds_api_market.outcomes) else "partial"
         confidence = sum(m["confidence_score"] for m in outcome_mappings) / len(outcome_mappings) if outcome_mappings else 0
         
-        issues = []
+        # ✅ FIXED: Separate blocking issues from market making opportunities
+        blocking_issues = []
         if len(outcome_mappings) < len(odds_api_market.outcomes):
-            issues.append(f"Only matched {len(outcome_mappings)}/{len(odds_api_market.outcomes)} outcomes")
+            blocking_issues.append(f"Only matched {len(outcome_mappings)}/{len(odds_api_market.outcomes)} outcomes")
         
         return MarketMatchResult(
             odds_api_market_type="h2h",
@@ -501,9 +525,9 @@ class MarketMatchingService:
             outcome_mappings=outcome_mappings,
             confidence_score=confidence,
             match_status=match_status,
-            issues=issues
+            issues=blocking_issues  # No market making opportunities added to issues
         )
-    
+
     async def _match_spreads_market(
         self,
         odds_api_market: ProcessedMarket,
@@ -511,7 +535,7 @@ class MarketMatchingService:
         home_team: str,
         away_team: str
     ) -> MarketMatchResult:
-        """Match spreads market between platforms"""
+        """Match spreads market between platforms - INCLUDE INACTIVE LINES"""
         
         px_market = prophetx_markets.get_spread_market()
         
@@ -555,15 +579,19 @@ class MarketMatchingService:
                 mapping_dict['prophetx_line_status'] = px_line.status
                 if not px_line.is_active:
                     mapping_dict['note'] = 'Line available for betting but no current liquidity'
+                    mapping_dict['market_making_opportunity'] = True
+                else:
+                    mapping_dict['market_making_opportunity'] = False
                 
                 outcome_mappings.append(mapping_dict)
         
         match_status = "matched" if len(outcome_mappings) == len(odds_api_market.outcomes) else "partial"
         confidence = sum(m["confidence_score"] for m in outcome_mappings) / len(outcome_mappings) if outcome_mappings else 0
         
-        issues = []
+        # ✅ FIXED: Separate blocking issues from market making opportunities
+        blocking_issues = []
         if len(outcome_mappings) < len(odds_api_market.outcomes):
-            issues.append(f"Only matched {len(outcome_mappings)}/{len(odds_api_market.outcomes)} spread outcomes")
+            blocking_issues.append(f"Only matched {len(outcome_mappings)}/{len(odds_api_market.outcomes)} spread outcomes")
         
         return MarketMatchResult(
             odds_api_market_type="spreads",
@@ -572,7 +600,7 @@ class MarketMatchingService:
             outcome_mappings=outcome_mappings,
             confidence_score=confidence,
             match_status=match_status,
-            issues=issues
+            issues=blocking_issues  # No market making opportunities added to issues
         )
     
     async def _match_totals_market(
@@ -580,7 +608,7 @@ class MarketMatchingService:
         odds_api_market: ProcessedMarket,
         prophetx_markets: ProphetXEventMarkets
     ) -> MarketMatchResult:
-        """Match totals (over/under) market between platforms"""
+        """Match totals (over/under) market between platforms - INCLUDE INACTIVE LINES"""
         
         px_market = prophetx_markets.get_total_market()
         
@@ -622,15 +650,21 @@ class MarketMatchingService:
                 mapping_dict['prophetx_line_status'] = px_line.status
                 if not px_line.is_active:
                     mapping_dict['note'] = 'Line available for betting but no current liquidity'
+                    mapping_dict['market_making_opportunity'] = True
+                else:
+                    mapping_dict['market_making_opportunity'] = False
                 
                 outcome_mappings.append(mapping_dict)
         
+        # ✅ UPDATED: Consider it a successful match even if lines are inactive
+        # The presence of valid line_ids means we can place bets
         match_status = "matched" if len(outcome_mappings) == len(odds_api_market.outcomes) else "partial"
         confidence = sum(m["confidence_score"] for m in outcome_mappings) / len(outcome_mappings) if outcome_mappings else 0
         
-        issues = []
+        # ✅ FIXED: Separate blocking issues from market making opportunities
+        blocking_issues = []        
         if len(outcome_mappings) < len(odds_api_market.outcomes):
-            issues.append(f"Only matched {len(outcome_mappings)}/{len(odds_api_market.outcomes)} total outcomes")
+            blocking_issues.append(f"Only matched {len(outcome_mappings)}/{len(odds_api_market.outcomes)} total outcomes")
         
         return MarketMatchResult(
             odds_api_market_type="totals",
@@ -639,7 +673,7 @@ class MarketMatchingService:
             outcome_mappings=outcome_mappings,
             confidence_score=confidence,
             match_status=match_status,
-            issues=issues
+            issues=blocking_issues  # This will be filtered in match_event_markets
         )
     
     def _find_matching_line(
@@ -649,7 +683,7 @@ class MarketMatchingService:
         home_team: str,
         away_team: str
     ) -> Optional[ProphetXLine]:
-        """Find matching ProphetX line for an outcome name"""
+        """Find matching ProphetX line for an outcome name - INCLUDE INACTIVE LINES"""
         
         normalized_name = self._normalize_selection_name(outcome_name)
         
@@ -657,8 +691,8 @@ class MarketMatchingService:
         best_similarity = 0.0
         
         for line in prophetx_lines:
-            # **CHANGED**: Don't filter by is_active - include ALL lines
-            # The line_id is valid regardless of current liquidity status
+            # ✅ FIXED: Don't filter by is_active - we WANT inactive lines for market making!
+            # The line_id being present means it's available for betting
             
             line_name = self._normalize_selection_name(line.selection_name)
             similarity = self._calculate_name_similarity(normalized_name, line_name)
@@ -668,38 +702,14 @@ class MarketMatchingService:
                 best_match = line
         
         return best_match
-    
-    def _find_matching_spread_line(
-        self,
-        outcome_name: str,
-        point: Optional[float],
-        prophetx_lines: List[ProphetXLine],
-        home_team: str,
-        away_team: str
-    ) -> Optional[ProphetXLine]:
-        """Find matching ProphetX spread line"""
-        
-        if point is None:
-            return None
-        
-        # First filter by point value (include both active and inactive)
-        point_matches = [line for line in prophetx_lines 
-                        if line.point is not None 
-                        and abs(line.point - point) <= 0.1]
-        
-        if not point_matches:
-            return None
-        
-        # Then find best name match among point matches
-        return self._find_matching_line(outcome_name, point_matches, home_team, away_team)
-    
+
     def _find_matching_total_line(
         self,
         outcome_name: str,
         point: Optional[float],
         prophetx_lines: List[ProphetXLine]
     ) -> Optional[ProphetXLine]:
-        """Find matching ProphetX total line"""
+        """Find matching ProphetX total line - INCLUDE INACTIVE LINES"""
         
         if point is None:
             return None
@@ -707,7 +717,7 @@ class MarketMatchingService:
         normalized_name = outcome_name.lower().strip()
         
         for line in prophetx_lines:
-            # **CHANGED**: Don't filter by is_active - include ALL lines
+            # ✅ FIXED: Don't filter by is_active - inactive lines are OPPORTUNITIES!
             
             line_name = line.selection_name.lower().strip()
             
@@ -726,6 +736,30 @@ class MarketMatchingService:
                 return line
         
         return None
+
+    def _find_matching_spread_line(
+        self,
+        outcome_name: str,
+        point: Optional[float],
+        prophetx_lines: List[ProphetXLine],
+        home_team: str,
+        away_team: str
+    ) -> Optional[ProphetXLine]:
+        """Find matching ProphetX spread line - INCLUDE INACTIVE LINES"""
+        
+        if point is None:
+            return None
+        
+        # First filter by point value (include both active and inactive)
+        point_matches = [line for line in prophetx_lines 
+                        if line.point is not None 
+                        and abs(line.point - point) <= 0.1]
+        
+        if not point_matches:
+            return None
+        
+        # Then find best name match among point matches
+        return self._find_matching_line(outcome_name, point_matches, home_team, away_team)
     
     def _normalize_selection_name(self, name: str) -> str:
         """Normalize selection name for comparison"""
