@@ -506,3 +506,182 @@ async def update_market_making_config(
         raise
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error updating configuration: {str(e)}")
+    
+@router.get("/debug/line-summary/{line_id}", response_model=Dict[str, Any])
+async def debug_line_summary(line_id: str):
+    """
+    Debug endpoint to see betting summary for a specific line
+    
+    Useful for troubleshooting duplicate bet issues
+    """
+    try:
+        summary = market_maker_service._get_line_betting_summary(line_id)
+        
+        # Add some additional debug info
+        line_bets = [bet for bet in market_maker_service.all_bets.values() if bet.line_id == line_id]
+        bet_details = []
+        
+        for bet in line_bets:
+            bet_details.append({
+                "external_id": bet.external_id,
+                "odds": bet.odds,
+                "stake": bet.stake,
+                "status": bet.status.value,
+                "is_active": bet.is_active,
+                "placed_at": bet.placed_at.isoformat(),
+                "unmatched_stake": bet.unmatched_stake
+            })
+        
+        return {
+            "success": True,
+            "line_id": line_id,
+            "summary": summary,
+            "bet_details": bet_details,
+            "total_system_bets": len(market_maker_service.all_bets)
+        }
+        
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error getting line summary: {str(e)}")
+    
+# ADD this endpoint to your app/routers/markets.py
+
+@router.get("/debug/matched-bets", response_model=Dict[str, Any])
+async def debug_matched_bets():
+    """
+    Debug endpoint to see raw matched bets data from ProphetX
+    
+    Useful for troubleshooting matched bet detection issues
+    """
+    try:
+        from app.services.prophetx_service import prophetx_service
+        
+        # Get raw matched bets data
+        matched_bets = await prophetx_service.get_matched_bets()
+        
+        # Also get our active bets for comparison
+        active_bets_summary = []
+        for bet in market_maker_service.all_bets.values():
+            if bet.is_active:
+                active_bets_summary.append({
+                    "external_id": bet.external_id,
+                    "bet_id": bet.bet_id,
+                    "selection_name": bet.selection_name,
+                    "odds": bet.odds,
+                    "stake": bet.stake,
+                    "status": bet.status.value
+                })
+        
+        return {
+            "success": True,
+            "message": f"Retrieved {len(matched_bets)} matched bets from ProphetX",
+            "data": {
+                "matched_bets_from_prophetx": matched_bets,
+                "our_active_bets_count": len(active_bets_summary),
+                "our_active_bets_sample": active_bets_summary[:5],  # First 5 for reference
+                "analysis": {
+                    "prophetx_matched_count": len(matched_bets),
+                    "our_active_count": len(active_bets_summary),
+                    "expected_matches": "Look for external_id matches between the two lists"
+                }
+            }
+        }
+        
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error getting matched bets debug info: {str(e)}")
+
+@router.get("/debug/bet-status/{external_id}", response_model=Dict[str, Any])
+async def debug_specific_bet_status(external_id: str):
+    """
+    Debug endpoint to check status of a specific bet
+    
+    Shows all available information about a bet from both our records and ProphetX
+    """
+    try:
+        from app.services.prophetx_service import prophetx_service
+        
+        # Find our bet
+        our_bet = None
+        for bet in market_maker_service.all_bets.values():
+            if bet.external_id == external_id:
+                our_bet = bet
+                break
+        
+        if not our_bet:
+            return {
+                "success": False,
+                "message": f"Bet {external_id} not found in our records"
+            }
+        
+        # Get ProphetX data
+        prophetx_active_wagers = await prophetx_service.get_all_active_wagers()
+        prophetx_matched_bets = await prophetx_service.get_matched_bets()
+        
+        # Check if bet is in active wagers
+        found_in_active = None
+        for wager in prophetx_active_wagers:
+            if isinstance(wager, dict) and wager.get('external_id') == external_id:
+                found_in_active = wager
+                break
+        
+        # Check if bet is in matched bets
+        found_in_matched = None
+        for bet in prophetx_matched_bets:
+            if isinstance(bet, dict):
+                if bet.get('external_id') == external_id:
+                    found_in_matched = bet
+                    break
+                # Also check by ProphetX ID if available
+                elif our_bet.bet_id and (bet.get('id') == our_bet.bet_id or 
+                                       bet.get('wager_id') == our_bet.bet_id or
+                                       bet.get('bet_id') == our_bet.bet_id):
+                    found_in_matched = bet
+                    break
+        
+        # Try individual lookup if we have ProphetX bet ID
+        individual_lookup = None
+        if our_bet.bet_id:
+            individual_lookup = await prophetx_service.get_wager_by_id(our_bet.bet_id)
+        
+        return {
+            "success": True,
+            "message": f"Debug info for bet {external_id}",
+            "data": {
+                "our_bet": {
+                    "external_id": our_bet.external_id,
+                    "bet_id": our_bet.bet_id,
+                    "selection_name": our_bet.selection_name,
+                    "odds": our_bet.odds,
+                    "stake": our_bet.stake,
+                    "status": our_bet.status.value,
+                    "is_active": our_bet.is_active,
+                    "matched_stake": our_bet.matched_stake,
+                    "unmatched_stake": our_bet.unmatched_stake
+                },
+                "prophetx_status": {
+                    "found_in_active_wagers": found_in_active is not None,
+                    "found_in_matched_bets": found_in_matched is not None,
+                    "individual_lookup_success": individual_lookup is not None,
+                    "active_wager_data": found_in_active,
+                    "matched_bet_data": found_in_matched,
+                    "individual_lookup_data": individual_lookup
+                },
+                "diagnosis": {
+                    "likely_status": (
+                        "Still active" if found_in_active else
+                        "Matched/Filled" if found_in_matched or (individual_lookup and individual_lookup.get('matching_status') in ['fully_matched', 'partially_matched']) else
+                        "Completed/Settled" if individual_lookup is None else
+                        "Unknown"
+                    ),
+                    "recommendation": (
+                        "Bet is still active - no action needed" if found_in_active else
+                        "Bet is matched - should trigger wait period" if found_in_matched else
+                        "Bet likely settled - should be marked as matched" if individual_lookup is None else
+                        "Check bet status and matching_status fields"
+                    )
+                }
+            }
+        }
+        
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error debugging bet status: {str(e)}")
+        
