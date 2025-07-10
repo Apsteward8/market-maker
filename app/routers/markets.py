@@ -1229,16 +1229,24 @@ async def get_wager_histories_for_line(
     Get all wager histories for a specific line
     
     This shows the raw ProphetX wager data that drives position calculations.
-    
     **Parameters:**
     - **line_id**: ProphetX line ID
     - **days_back**: How many days back to search (default 7)
     - **include_all_statuses**: Whether to include cancelled/expired bets
     """
     try:
-        from app.services.enhanced_prophetx_wager_service import prophetx_wager_service
+        # Import the service class and ProphetX service
+        from app.services.enhanced_prophetx_wager_service import ProphetXWagerService, initialize_wager_service
+        from app.services.prophetx_service import prophetx_service
         
-        result = await prophetx_wager_service.get_all_wagers_for_line(
+        # Create a fresh instance of the wager service (don't rely on global)
+        wager_service = ProphetXWagerService(prophetx_service)
+        
+        # Also initialize the global for other parts of the system that might need it
+        initialize_wager_service(prophetx_service)
+        
+        # Now call the method on our fresh instance
+        result = await wager_service.get_all_wagers_for_line(
             line_id, 
             days_back=days_back,
             include_all_statuses=include_all_statuses
@@ -1247,11 +1255,25 @@ async def get_wager_histories_for_line(
         return {
             "success": True,
             "message": f"Wager histories for line {line_id}",
-            "data": result
+            "data": result,
+            "debug_info": {
+                "wager_service_created": wager_service is not None,
+                "service_type": str(type(wager_service)),
+                "line_id": line_id,
+                "days_back": days_back
+            }
         }
         
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Error getting wager histories: {str(e)}")
+        import traceback
+        return {
+            "success": False,
+            "error": f"Error getting wager histories: {str(e)}",
+            "traceback": traceback.format_exc(),
+            "line_id": line_id
+        }
+
+# Also fix the get_recent_fills endpoint the same way:
 
 @router.get("/wager-histories/recent-fills", response_model=Dict[str, Any])
 async def get_recent_fills(
@@ -1268,8 +1290,16 @@ async def get_recent_fills(
     - **line_ids**: Comma-separated line IDs to check (optional - checks all if not provided)
     """
     try:
-        from app.services.enhanced_prophetx_wager_service import prophetx_wager_service
+        # Create fresh service instances
+        from app.services.enhanced_prophetx_wager_service import ProphetXWagerService, initialize_wager_service
+        from app.services.prophetx_service import prophetx_service
         from app.services.line_monitoring_service import line_monitoring_service
+        
+        # Create a fresh wager service instance
+        wager_service = ProphetXWagerService(prophetx_service)
+        
+        # Initialize global service too
+        initialize_wager_service(prophetx_service)
         
         # Get line IDs to check
         if line_ids:
@@ -1284,7 +1314,8 @@ async def get_recent_fills(
                 "message": "No line IDs to check"
             }
         
-        recent_fills = await prophetx_wager_service.detect_recent_fills(
+        # Use our fresh instance
+        recent_fills = await wager_service.detect_recent_fills(
             check_line_ids, 
             minutes_back=minutes_back
         )
@@ -1300,7 +1331,12 @@ async def get_recent_fills(
         }
         
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Error getting recent fills: {str(e)}")
+        import traceback
+        return {
+            "success": False,
+            "error": f"Error getting recent fills: {str(e)}",
+            "traceback": traceback.format_exc()
+        }
 
 # =============================================================================
 # SINGLE EVENT TESTING ENDPOINTS

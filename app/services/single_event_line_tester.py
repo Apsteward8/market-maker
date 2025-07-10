@@ -33,6 +33,7 @@ class SingleEventLineTester:
         self.session: Optional[SingleEventSession] = None
         self.monitoring_active = False
         self.monitored_lines: Dict[str, Any] = {}  # line_id -> strategy info
+        self.initial_phase_complete = False
         
         # Services (will be injected)
         self.line_position_service = None
@@ -74,10 +75,10 @@ class SingleEventLineTester:
             from app.services.odds_api_service import odds_api_service
             
             print("📊 Fetching specific event from Odds API...")
-            odds_events = await odds_api_service.get_events()
+            odds_api_events = await odds_api_service.get_events()
             
             target_event = None
-            for event in odds_events:
+            for event in odds_api_events:
                 if event.event_id == odds_api_event_id:
                     target_event = event
                     break
@@ -85,53 +86,51 @@ class SingleEventLineTester:
             if not target_event:
                 return {
                     "success": False,
-                    "message": f"Event {odds_api_event_id} not found in current Odds API events"
+                    "message": f"Event {odds_api_event_id} not found in Odds API"
                 }
             
-            print(f"✅ Found event: {target_event.home_team} vs {target_event.away_team}")
+            print(f"✅ Found event: {target_event.away_team} vs {target_event.home_team}")
             
-            # Step 2: Test event matching
+            # Step 2: Match to ProphetX
             from app.services.event_matching_service import event_matching_service
             
-            print("🔗 Testing event matching...")
-            # Use find_matches_for_events with a list containing one event
+            print("🔗 Matching to ProphetX...")
             matching_attempts = await event_matching_service.find_matches_for_events([target_event])
             
             if not matching_attempts or not matching_attempts[0].best_match:
                 matching_attempt = matching_attempts[0] if matching_attempts else None
-                confidence = matching_attempt.best_match.confidence_score if matching_attempt and matching_attempt.best_match else "N/A"
                 no_match_reason = matching_attempt.no_match_reason if matching_attempt else "No matching attempt returned"
                 
                 return {
                     "success": False,
-                    "message": f"Could not match event to ProphetX (confidence: {confidence}, reason: {no_match_reason})"
+                    "message": f"Could not match event to ProphetX: {no_match_reason}"
                 }
             
             event_match = matching_attempts[0].best_match
             print(f"✅ Matched to ProphetX: {event_match.prophetx_event.display_name} (confidence: {event_match.confidence_score:.2f})")
             
-            # Step 3: Test market matching
+            # Step 3: Match markets
             from app.services.market_matching_service import market_matching_service
             
-            print("🎯 Testing market matching...")
+            print("📊 Matching markets...")
             market_matches = await market_matching_service.match_event_markets(event_match)
             
-            if not market_matches or not market_matches.ready_for_trading:
+            if not market_matches.ready_for_trading:
                 return {
                     "success": False,
-                    "message": f"No markets ready for trading (ready: {market_matches.ready_for_trading if market_matches else 'N/A'})"
+                    "message": f"Markets not ready: {market_matches.issues}"
                 }
             
             print(f"✅ Matched {len(market_matches.market_matches)} markets")
             
-            # Step 4: Test strategy creation
-            print("💰 Testing strategy creation...")
+            # Step 4: Create strategy
+            print("💰 Creating strategy...")
             strategy = self.market_making_strategy.create_market_making_plan(event_match, market_matches)
             
             if not strategy or not strategy.is_profitable:
                 return {
                     "success": False,
-                    "message": f"Strategy not profitable for this event (profitable: {strategy.is_profitable if strategy else 'N/A'})"
+                    "message": f"Strategy not profitable for this event"
                 }
             
             print(f"✅ Strategy created: {len(strategy.betting_instructions)} betting instructions")
@@ -150,6 +149,10 @@ class SingleEventLineTester:
                     "market_type": "h2h"
                 }
             
+            print(f"📋 Lines to monitor: {len(self.monitored_lines)}")
+            for line_id, info in self.monitored_lines.items():
+                print(f"   📊 {info['selection_name']}: {info['odds']:+d} - ${info['recommended_initial_stake']:.2f} initial, ${info['max_position']:.2f} max")
+            
             # Step 6: Create session
             self.session = SingleEventSession(
                 odds_api_event_id=odds_api_event_id,
@@ -163,17 +166,31 @@ class SingleEventLineTester:
                 last_cycle_time=None
             )
             
-            # Step 7: Start monitoring loop
+            print(f"✅ Created test session for: {self.session.event_name}")
+            
+            # Step 7: INITIAL PHASE - Place initial bets only
+            print("\\n🚀 PHASE 1: INITIAL BET PLACEMENT")
+            print("=" * 40)
+            initial_bets = await self._initial_bet_phase()
+            
+            # Step 8: MONITORING PHASE - Start monitoring loop  
+            print("\\n📊 PHASE 2: MONITORING AND INCREMENTAL BETTING")
+            print("=" * 40)
+            self.initial_phase_complete = True
             self.monitoring_active = True
-            asyncio.create_task(self._single_event_monitoring_loop())
+            
+            # Start monitoring loop
+            asyncio.create_task(self._monitoring_loop())
             
             return {
                 "success": True,
-                "message": f"Single event test started for {self.session.event_name}",
+                "message": f"Single event test started with {initial_bets} initial bets",
                 "data": {
                     "event_id": odds_api_event_id,
                     "event_name": self.session.event_name,
-                    "lines_to_monitor": len(self.monitored_lines),
+                    "lines_identified": len(self.monitored_lines),
+                    "initial_bets_placed": initial_bets,
+                    "monitoring_started": True,
                     "lines_detail": [
                         {
                             "line_id": line_info["line_id"],
@@ -190,9 +207,12 @@ class SingleEventLineTester:
             }
             
         except Exception as e:
+            print(f"❌ Error starting single event test: {e}")
+            import traceback
+            traceback.print_exc()
             return {
                 "success": False,
-                "message": f"Error starting single event test: {str(e)}"
+                "message": f"Error starting test: {str(e)}"
             }
     
     async def stop_single_event_test(self) -> Dict[str, Any]:
@@ -223,6 +243,306 @@ class SingleEventLineTester:
                 "success": True,
                 "message": "Single event test stopped"
             }
+        
+    async def _monitoring_loop(self):
+        """
+        PHASE 2: Monitoring loop for fills and incremental betting
+        
+        This runs every 60 seconds and ONLY places incremental bets after fills + wait periods.
+        """
+        cycle_count = 0
+        
+        while self.monitoring_active:
+            try:
+                cycle_count += 1
+                cycle_start = time.time()
+                
+                print(f"\\n🔄 MONITORING CYCLE #{cycle_count} ({datetime.now().strftime('%H:%M:%S')})")
+                print("=" * 50)
+                
+                # Step 1: Check current positions
+                await self._check_current_positions()
+                
+                # Step 2: Check for fills and place incremental bets if needed
+                new_bets = await self._check_fills_and_place_incremental_bets()
+                
+                # Step 3: Update session stats
+                if hasattr(self, 'session') and self.session:
+                    self.session.monitoring_cycles += 1
+                    if new_bets > 0:
+                        self.session.total_bets_placed += new_bets
+                
+                cycle_duration = time.time() - cycle_start
+                print(f"\\n📈 CYCLE #{cycle_count} COMPLETE")
+                print(f"   Duration: {cycle_duration:.1f}s")
+                print(f"   New incremental bets: {new_bets}")
+                print(f"   Next cycle in: {self.monitoring_interval_seconds}s")
+                
+                # Wait before next cycle
+                await asyncio.sleep(self.monitoring_interval_seconds)
+                
+            except Exception as e:
+                print(f"❌ Error in monitoring cycle {cycle_count}: {e}")
+                await asyncio.sleep(30)  # Wait 30s before retrying
+
+    async def _check_fills_and_place_incremental_bets(self) -> int:
+        """
+        Check for fills and place incremental bets only when appropriate
+        
+        Rules:
+        - Only place incremental bets if there are recent fills
+        - Must wait 5 minutes after fills before adding liquidity
+        - Never exceed 4x max position
+        """
+        print("\\n2️⃣ CHECKING FOR FILLS AND INCREMENTAL BETTING")
+        print("-" * 45)
+        
+        incremental_bets = 0
+        
+        for line_id, strategy_info in self.monitored_lines.items():
+            try:
+                # Get current position
+                position_result = await self.prophetx_wager_service.get_all_wagers_for_line(line_id)
+                
+                if not position_result["success"]:
+                    continue
+                
+                summary = position_result["position_summary"]
+                recent_fills = summary.get("recent_fills", [])
+                last_fill_time = summary.get("last_fill_time")
+                
+                print(f"   📊 {strategy_info['selection_name']}: {len(recent_fills)} recent fills")
+                
+                # Only proceed if we have fills
+                if not recent_fills and not last_fill_time:
+                    print(f"      ⏸️  No fills detected - no action needed")
+                    continue
+                
+                # Check wait period
+                if last_fill_time:
+                    try:
+                        last_fill = datetime.fromisoformat(last_fill_time.replace('Z', '+00:00'))
+                        wait_until = last_fill + timedelta(seconds=self.fill_wait_period_seconds)
+                        time_remaining = (wait_until - datetime.now(timezone.utc)).total_seconds()
+                        
+                        if time_remaining > 0:
+                            print(f"      ⏰ Wait period active - {time_remaining:.0f}s remaining")
+                            continue
+                    except:
+                        pass
+                
+                # Calculate incremental bet needed
+                current_stake = summary["total_stake"]
+                total_matched = summary["total_matched"]
+                
+                # If we've had fills, we need to restore liquidity
+                if total_matched > 0:
+                    target_unmatched = strategy_info["recommended_initial_stake"]
+                    current_unmatched = current_stake - total_matched
+                    
+                    if current_unmatched < target_unmatched:
+                        needed = target_unmatched - current_unmatched
+                        
+                        # Check position limits
+                        remaining_capacity = strategy_info["max_position"] - current_stake
+                        bet_amount = min(needed, remaining_capacity, strategy_info["increment_size"])
+                        
+                        if bet_amount > 0:
+                            print(f"      ✅ Adding ${bet_amount:.2f} to restore liquidity after fills")
+                            
+                            success = await self._place_single_bet(
+                                strategy_info,
+                                bet_amount,
+                                f"Incremental bet (restore after ${total_matched:.2f} filled)"
+                            )
+                            
+                            if success:
+                                incremental_bets += 1
+                        else:
+                            print(f"      🛑 At position limit - cannot add more")
+                    else:
+                        print(f"      ✅ Liquidity adequate - no incremental bet needed")
+                        
+            except Exception as e:
+                print(f"   ❌ Error checking line {line_id}: {e}")
+        
+        if incremental_bets == 0:
+            print("   📊 No incremental bets needed this cycle")
+        
+        return incremental_bets
+
+    async def _initial_bet_phase(self) -> int:
+        """
+        PHASE 1: Place initial bets only where no position exists
+        
+        This runs ONCE at the start and only places bets on lines with NO existing bets.
+        """
+        print("🎯 Running initial bet placement...")
+        print("Rule: Only place bet if line has NO existing bets AND is profitable")
+        print("-" * 50)
+        
+        initial_bets = 0
+        
+        for line_id, strategy_info in self.monitored_lines.items():
+            try:
+                # Check if ANY bets exist for this line
+                position_result = await self.prophetx_wager_service.get_all_wagers_for_line(line_id)
+                
+                if not position_result["success"]:
+                    print(f"❌ Could not check position for {strategy_info['selection_name']}")
+                    continue
+                
+                total_bets = position_result["position_summary"]["total_bets"]
+                total_stake = position_result["position_summary"]["total_stake"]
+                
+                if total_bets == 0:
+                    # No existing bets - place initial bet
+                    print(f"✅ {strategy_info['selection_name']}: No existing bets - placing initial ${strategy_info['recommended_initial_stake']:.2f}")
+                    
+                    success = await self._place_single_bet(
+                        strategy_info, 
+                        strategy_info["recommended_initial_stake"], 
+                        "Initial bet"
+                    )
+                    
+                    if success:
+                        initial_bets += 1
+                else:
+                    # Existing bets found - skip
+                    print(f"⏸️  {strategy_info['selection_name']}: {total_bets} existing bets (${total_stake:.2f}) - skipping")
+                    
+            except Exception as e:
+                print(f"❌ Error checking line {line_id}: {e}")
+        
+        print(f"\\n📊 Initial phase complete: {initial_bets} new bets placed")
+        return initial_bets
+    
+    async def _monitoring_loop(self):
+        """
+        PHASE 2: Monitoring loop for fills and incremental betting
+        
+        This runs every 60 seconds and ONLY places incremental bets after fills + wait periods.
+        """
+        cycle_count = 0
+        
+        while self.monitoring_active:
+            try:
+                cycle_count += 1
+                cycle_start = time.time()
+                
+                print(f"\\n🔄 MONITORING CYCLE #{cycle_count} ({datetime.now().strftime('%H:%M:%S')})")
+                print("=" * 50)
+                
+                # Step 1: Check current positions
+                await self._check_current_positions()
+                
+                # Step 2: Check for fills and place incremental bets if needed
+                new_bets = await self._check_fills_and_place_incremental_bets()
+                
+                # Step 3: Update session stats
+                if hasattr(self, 'session') and self.session:
+                    self.session.monitoring_cycles += 1
+                    if new_bets > 0:
+                        self.session.total_bets_placed += new_bets
+                
+                cycle_duration = time.time() - cycle_start
+                print(f"\\n📈 CYCLE #{cycle_count} COMPLETE")
+                print(f"   Duration: {cycle_duration:.1f}s")
+                print(f"   New incremental bets: {new_bets}")
+                print(f"   Next cycle in: {self.monitoring_interval_seconds}s")
+                
+                # Wait before next cycle
+                await asyncio.sleep(self.monitoring_interval_seconds)
+                
+            except Exception as e:
+                print(f"❌ Error in monitoring cycle {cycle_count}: {e}")
+                await asyncio.sleep(30)  # Wait 30s before retrying
+
+    async def _check_fills_and_place_incremental_bets(self) -> int:
+        """
+        Check for fills and place incremental bets only when appropriate
+        
+        Rules:
+        - Only place incremental bets if there are recent fills
+        - Must wait 5 minutes after fills before adding liquidity
+        - Never exceed 4x max position
+        """
+        print("\\n2️⃣ CHECKING FOR FILLS AND INCREMENTAL BETTING")
+        print("-" * 45)
+        
+        incremental_bets = 0
+        
+        for line_id, strategy_info in self.monitored_lines.items():
+            try:
+                # Get current position
+                position_result = await self.prophetx_wager_service.get_all_wagers_for_line(line_id)
+                
+                if not position_result["success"]:
+                    continue
+                
+                summary = position_result["position_summary"]
+                recent_fills = summary.get("recent_fills", [])
+                last_fill_time = summary.get("last_fill_time")
+                
+                print(f"   📊 {strategy_info['selection_name']}: {len(recent_fills)} recent fills")
+                
+                # Only proceed if we have fills
+                if not recent_fills and not last_fill_time:
+                    print(f"      ⏸️  No fills detected - no action needed")
+                    continue
+                
+                # Check wait period
+                if last_fill_time:
+                    try:
+                        last_fill = datetime.fromisoformat(last_fill_time.replace('Z', '+00:00'))
+                        wait_until = last_fill + timedelta(seconds=self.fill_wait_period_seconds)
+                        time_remaining = (wait_until - datetime.now(timezone.utc)).total_seconds()
+                        
+                        if time_remaining > 0:
+                            print(f"      ⏰ Wait period active - {time_remaining:.0f}s remaining")
+                            continue
+                    except:
+                        pass
+                
+                # Calculate incremental bet needed
+                current_stake = summary["total_stake"]
+                total_matched = summary["total_matched"]
+                
+                # If we've had fills, we need to restore liquidity
+                if total_matched > 0:
+                    target_unmatched = strategy_info["recommended_initial_stake"]
+                    current_unmatched = current_stake - total_matched
+                    
+                    if current_unmatched < target_unmatched:
+                        needed = target_unmatched - current_unmatched
+                        
+                        # Check position limits
+                        remaining_capacity = strategy_info["max_position"] - current_stake
+                        bet_amount = min(needed, remaining_capacity, strategy_info["increment_size"])
+                        
+                        if bet_amount > 0:
+                            print(f"      ✅ Adding ${bet_amount:.2f} to restore liquidity after fills")
+                            
+                            success = await self._place_single_bet(
+                                strategy_info,
+                                bet_amount,
+                                f"Incremental bet (restore after ${total_matched:.2f} filled)"
+                            )
+                            
+                            if success:
+                                incremental_bets += 1
+                        else:
+                            print(f"      🛑 At position limit - cannot add more")
+                    else:
+                        print(f"      ✅ Liquidity adequate - no incremental bet needed")
+                        
+            except Exception as e:
+                print(f"   ❌ Error checking line {line_id}: {e}")
+        
+        if incremental_bets == 0:
+            print("   📊 No incremental bets needed this cycle")
+        
+        return incremental_bets
     
     async def _single_event_monitoring_loop(self):
         """Main monitoring loop for single event"""
@@ -306,62 +626,25 @@ class SingleEventLineTester:
                 print(f"   ❌ Error checking line {line_id}: {e}")
     
     async def _place_new_bets(self) -> int:
-        """Place new bets where appropriate"""
-        print("\\n2️⃣ PLACING NEW BETS")
-        print("-" * 30)
+        """
+        DEPRECATED: This method is replaced by the new phase-based approach
         
-        bets_placed = 0
+        The new workflow uses:
+        1. _initial_bet_phase() - runs once at startup
+        2. _check_fills_and_place_incremental_bets() - runs in monitoring loop
         
-        for line_id, strategy_info in self.monitored_lines.items():
-            try:
-                # Get current position
-                position_result = await self.prophetx_wager_service.get_all_wagers_for_line(line_id)
-                
-                bet_amount = 0
-                bet_reason = ""
-                
-                if not position_result["success"] or position_result["position_summary"]["total_bets"] == 0:
-                    # No position - place initial bet
-                    bet_amount = strategy_info["recommended_initial_stake"]
-                    bet_reason = "Initial bet"
-                    
-                else:
-                    # Check if we can place incremental bet
-                    summary = position_result["position_summary"]
-                    current_stake = summary["total_stake"]
-                    
-                    # Check position limit
-                    if current_stake >= strategy_info["max_position"]:
-                        continue  # At max position
-                    
-                    # Check wait period (simplified for testing)
-                    if summary["last_fill_time"]:
-                        try:
-                            last_fill = datetime.fromisoformat(summary["last_fill_time"].replace('Z', '+00:00'))
-                            wait_until = last_fill + timedelta(seconds=self.fill_wait_period_seconds)
-                            
-                            if datetime.now(timezone.utc) < wait_until:
-                                continue  # Still in wait period
-                        except:
-                            pass
-                    
-                    # Calculate incremental bet
-                    remaining_capacity = strategy_info["max_position"] - current_stake
-                    bet_amount = min(strategy_info["increment_size"], remaining_capacity)
-                    bet_reason = f"Incremental bet (position: ${current_stake:.2f})"
-                
-                if bet_amount > 0:
-                    success = await self._place_single_bet(strategy_info, bet_amount, bet_reason)
-                    if success:
-                        bets_placed += 1
-                        
-            except Exception as e:
-                print(f"   ❌ Error analyzing line {line_id}: {e}")
+        This method should no longer be called in the new workflow.
+        """
+        print("⚠️  WARNING: _place_new_bets called but deprecated")
+        print("   Using new phase-based approach instead")
         
-        if bets_placed == 0:
-            print("   📊 No new bets to place this cycle")
+        # If we're in initial phase, don't place any bets here
+        if not hasattr(self, 'initial_phase_complete') or not self.initial_phase_complete:
+            print("   ⏸️  In initial phase - skipping")
+            return 0
         
-        return bets_placed
+        # If we're in monitoring phase, delegate to the new method
+        return await self._check_fills_and_place_incremental_bets()
     
     async def _place_single_bet(self, strategy_info: Dict[str, Any], amount: float, reason: str) -> bool:
         """Place a single bet"""

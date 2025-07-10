@@ -35,7 +35,7 @@ class ProphetXWagerService:
         event_id: Optional[str] = None,
         market_id: Optional[str] = None,
         next_cursor: Optional[str] = None,
-        line_id: Optional[str] = None  # NEW: Filter by line_id
+        line_id: Optional[str] = None
     ) -> Dict[str, Any]:
         """
         Get wager histories with optional line_id filtering
@@ -68,19 +68,28 @@ class ProphetXWagerService:
             if next_cursor:
                 params["next_cursor"] = next_cursor
             
-            # Make the API call
+            # Make the API call - FIXED URL with /partner prefix
             headers = await self.prophetx_service.get_auth_headers()
-            url = f"{self.base_url}/v2/mm/get_wager_histories"
+            url = f"{self.base_url}/partner/v2/mm/get_wager_histories"  # <-- FIXED: Added /partner
+            
+            print(f"🔍 Calling ProphetX API: {url}")
+            print(f"📊 Query params: {params}")
             
             async with aiohttp.ClientSession() as session:
                 async with session.get(url, headers=headers, params=params) as response:
+                    print(f"📡 API Response: HTTP {response.status}")
+                    
                     if response.status == 200:
                         data = await response.json()
                         wagers = data.get("data", {}).get("wagers", [])
                         
+                        print(f"📊 Retrieved {len(wagers)} total wagers from ProphetX")
+                        
                         # Filter by line_id if specified (client-side filtering)
                         if line_id:
+                            original_count = len(wagers)
                             wagers = [w for w in wagers if w.get("line_id") == line_id]
+                            print(f"🔍 Filtered from {original_count} to {len(wagers)} wagers for line_id: {line_id}")
                         
                         return {
                             "success": True,
@@ -92,6 +101,7 @@ class ProphetXWagerService:
                         }
                     else:
                         error_text = await response.text()
+                        print(f"❌ API Error: HTTP {response.status} - {error_text}")
                         return {
                             "success": False,
                             "error": f"HTTP {response.status}: {error_text}",
@@ -99,6 +109,7 @@ class ProphetXWagerService:
                         }
                         
         except Exception as e:
+            print(f"❌ Exception in get_wager_histories: {str(e)}")
             return {
                 "success": False,
                 "error": f"Exception: {str(e)}"
