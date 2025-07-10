@@ -11,6 +11,8 @@ from .market_making_strategy import market_making_strategy
 # NEW: Add these imports
 from .bet_monitoring_service import bet_monitoring_service
 from .odds_change_handler import odds_change_handler
+from .prophetx_wager_api import ProphetXWagerAPI
+
 
 __all__ = [
     "odds_api_service",
@@ -21,4 +23,5 @@ __all__ = [
     # NEW: Add these
     "bet_monitoring_service",
     "odds_change_handler"
+    "ProphetXWagerAPI"
 ]

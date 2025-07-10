@@ -13,6 +13,8 @@ from app.models.odds_models import ProcessedEvent, SportKey, MarketType
 from app.models.market_models import ManagedEvent, ProphetXMarket, PortfolioSummary
 from app.services.odds_api_service import odds_api_service
 from app.services.market_maker_service import market_maker_service
+from app.services.single_event_tester import single_event_tester
+
 
 router = APIRouter()
 
@@ -685,3 +687,296 @@ async def debug_specific_bet_status(external_id: str):
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error debugging bet status: {str(e)}")
         
+@router.post("/test-single-event/start/{odds_api_event_id}", response_model=Dict[str, Any])
+async def start_single_event_test(odds_api_event_id: str):
+    """
+    Start testing market making for a single event
+    
+    This is perfect for debugging the monitoring/updating/refilling logic
+    without the complexity of managing multiple events.
+    
+    - **odds_api_event_id**: Event ID from The Odds API
+    
+    **Test Flow:**
+    1. Places initial bets using your existing strategy
+    2. Monitors those bets for fills
+    3. Handles 5-minute wait periods after fills
+    4. Adds incremental liquidity when wait period ends
+    5. Monitors Pinnacle for odds changes every 60 seconds
+    6. Updates bets when odds change significantly
+    """
+    try:
+        # Import the single event tester
+        from app.services.single_event_tester import single_event_tester
+        
+        result = await single_event_tester.start_single_event_test(odds_api_event_id)
+        
+        return result
+        
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error starting single event test: {str(e)}")
+
+@router.get("/test-single-event/status", response_model=Dict[str, Any])
+async def get_single_event_test_status():
+    """
+    Get current status of the single event test
+    
+    Shows:
+    - Session information
+    - Number of bets placed
+    - Fill status
+    - Wait periods
+    - Detailed bet information
+    """
+    try:
+        from app.services.single_event_tester import single_event_tester
+        
+        status = single_event_tester.get_test_status()
+        
+        return {
+            "success": True,
+            "message": "Single event test status",
+            "data": status,
+            "timestamp": datetime.now().isoformat()
+        }
+        
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error getting test status: {str(e)}")
+
+@router.post("/test-single-event/stop", response_model=Dict[str, Any])
+async def stop_single_event_test():
+    """
+    Stop the single event test
+    
+    Generates a final report showing:
+    - Session duration
+    - Total bets placed
+    - Number of fills detected
+    - Incremental bets added
+    - Odds updates performed
+    """
+    try:
+        from app.services.single_event_tester import single_event_tester
+        
+        result = await single_event_tester.stop_test()
+        
+        return result
+        
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error stopping single event test: {str(e)}")
+
+@router.get("/test-single-event/bet-details", response_model=Dict[str, Any])
+async def get_single_event_bet_details():
+    """
+    Get detailed information about all bets placed in the single event test
+    
+    Shows for each bet:
+    - Selection name and odds
+    - Stake amount
+    - Current status
+    - Fill history
+    - Wait period status
+    - Position size information
+    """
+    try:
+        from app.services.single_event_tester import single_event_tester
+        
+        if not single_event_tester.session:
+            return {
+                "success": False,
+                "message": "No active test session"
+            }
+        
+        # Format bet details for easy reading
+        formatted_bets = []
+        
+        for external_id, bet_info in single_event_tester.placed_bets.items():
+            wait_remaining = None
+            if bet_info["in_wait_period"] and bet_info["wait_period_ends"]:
+                wait_remaining = (bet_info["wait_period_ends"] - datetime.now(timezone.utc)).total_seconds()
+                wait_remaining = max(0, wait_remaining)
+            
+            formatted_bet = {
+                "external_id": external_id,
+                "selection_name": bet_info["selection_name"],
+                "odds": bet_info["odds"],
+                "stake": bet_info["stake"],
+                "status": bet_info["status"],
+                "placed_at": bet_info["placed_at"].isoformat(),
+                "matched_amount": bet_info["matched_amount"],
+                "unmatched_amount": bet_info["unmatched_amount"],
+                "fill_count": len(bet_info["fills"]),
+                "in_wait_period": bet_info["in_wait_period"],
+                "wait_remaining_seconds": wait_remaining,
+                "total_position": bet_info["total_position"],
+                "max_position": bet_info["max_position"],
+                "can_add_incremental": single_event_tester._can_add_incremental_liquidity(bet_info),
+                "is_incremental": bet_info.get("is_incremental", False),
+                "fill_history": bet_info["fills"]
+            }
+            
+            formatted_bets.append(formatted_bet)
+        
+        # Sort by placement time
+        formatted_bets.sort(key=lambda x: x["placed_at"])
+        
+        return {
+            "success": True,
+            "message": f"Bet details for {single_event_tester.session.event_name}",
+            "data": {
+                "event_name": single_event_tester.session.event_name,
+                "session_active": single_event_tester.session.is_active,
+                "total_bets": len(formatted_bets),
+                "bets": formatted_bets,
+                "summary": {
+                    "active_bets": sum(1 for bet in formatted_bets if bet["status"] == "placed"),
+                    "filled_bets": sum(1 for bet in formatted_bets if bet["matched_amount"] > 0),
+                    "in_wait_period": sum(1 for bet in formatted_bets if bet["in_wait_period"]),
+                    "can_add_incremental": sum(1 for bet in formatted_bets if bet["can_add_incremental"]),
+                    "total_stake": sum(bet["stake"] for bet in formatted_bets),
+                    "total_matched": sum(bet["matched_amount"] for bet in formatted_bets)
+                }
+            }
+        }
+        
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error getting bet details: {str(e)}")
+
+@router.post("/test-single-event/simulate-fill/{external_id}", response_model=Dict[str, Any])
+async def simulate_single_event_fill(
+    external_id: str,
+    fill_amount: float = Query(..., description="Amount to simulate as filled")
+):
+    """
+    Simulate a bet getting filled in the single event test
+    
+    This is useful for testing the fill detection and wait period logic
+    without waiting for actual fills on ProphetX.
+    
+    - **external_id**: External ID of the bet to simulate fill for
+    - **fill_amount**: Amount to simulate as filled/matched
+    """
+    try:
+        from app.services.single_event_tester import single_event_tester
+        
+        if not single_event_tester.session:
+            return {
+                "success": False,
+                "message": "No active test session"
+            }
+        
+        if external_id not in single_event_tester.placed_bets:
+            return {
+                "success": False,
+                "message": f"Bet {external_id} not found in test session"
+            }
+        
+        bet_info = single_event_tester.placed_bets[external_id]
+        
+        # Simulate the fill
+        previous_matched = bet_info["matched_amount"]
+        new_matched = min(previous_matched + fill_amount, bet_info["stake"])
+        actual_fill = new_matched - previous_matched
+        
+        if actual_fill <= 0:
+            return {
+                "success": False,
+                "message": f"No fill possible - bet already matched {previous_matched:.2f}/{bet_info['stake']:.2f}"
+            }
+        
+        # Update bet info
+        bet_info["matched_amount"] = new_matched
+        bet_info["unmatched_amount"] = bet_info["stake"] - new_matched
+        bet_info["status"] = "matched" if new_matched >= bet_info["stake"] else "partially_matched"
+        
+        # Record fill
+        bet_info["fills"].append({
+            "amount": actual_fill,
+            "timestamp": datetime.now(timezone.utc),
+            "total_matched": new_matched,
+            "simulated": True
+        })
+        
+        # Start wait period
+        await single_event_tester._start_wait_period(bet_info)
+        
+        single_event_tester.session.total_fills += 1
+        
+        return {
+            "success": True,
+            "message": f"Simulated fill of ${actual_fill:.2f} for {bet_info['selection_name']}",
+            "data": {
+                "external_id": external_id,
+                "selection_name": bet_info["selection_name"],
+                "fill_amount": actual_fill,
+                "total_matched": new_matched,
+                "remaining_unmatched": bet_info["unmatched_amount"],
+                "wait_period_started": True,
+                "wait_period_ends": bet_info["wait_period_ends"].isoformat()
+            }
+        }
+        
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error simulating fill: {str(e)}")
+
+@router.post("/test-single-event/force-odds-check", response_model=Dict[str, Any])
+async def force_single_event_odds_check():
+    """
+    Force an immediate odds check for the single event test
+    
+    Useful for testing the odds change detection logic without waiting
+    for the 60-second interval.
+    """
+    try:
+        from app.services.single_event_tester import single_event_tester
+        
+        if not single_event_tester.session:
+            return {
+                "success": False,
+                "message": "No active test session"
+            }
+        
+        # Get current odds
+        current_odds = await single_event_tester._get_current_odds()
+        
+        if not current_odds:
+            return {
+                "success": False,
+                "message": "Could not retrieve current odds"
+            }
+        
+        # Check for changes
+        changes = single_event_tester._detect_odds_changes(current_odds)
+        
+        if changes:
+            print(f"📊 Manual odds check detected {len(changes)} changes")
+            await single_event_tester._handle_odds_changes(changes)
+            single_event_tester.session.odds_updates += 1
+            
+            # Update stored odds
+            single_event_tester.last_odds_check = current_odds
+            
+            return {
+                "success": True,
+                "message": f"Detected and processed {len(changes)} odds changes",
+                "data": {
+                    "changes_detected": len(changes),
+                    "changes": changes,
+                    "odds_updates_total": single_event_tester.session.odds_updates
+                }
+            }
+        else:
+            # Store current odds for future comparison
+            single_event_tester.last_odds_check = current_odds
+            
+            return {
+                "success": True,
+                "message": "No significant odds changes detected",
+                "data": {
+                    "changes_detected": 0,
+                    "current_odds": current_odds
+                }
+            }
+        
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error forcing odds check: {str(e)}")

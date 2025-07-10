@@ -3,6 +3,6 @@
 API Routers Package
 """
 
-from . import auth, markets, positions, events, matching
+from . import auth, markets, positions, events, matching, prophetx
 
-__all__ = ["auth", "markets", "positions", "events", "matching"]
+__all__ = ["auth", "markets", "positions", "events", "matching", "prophetx"]

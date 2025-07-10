@@ -10,7 +10,7 @@ from contextlib import asynccontextmanager
 import uvicorn
 
 from app.core.config import get_settings
-from app.routers import markets, positions, events, auth, matching
+from app.routers import markets, positions, events, auth, matching, prophetx
 
 # Global settings
 settings = get_settings()
@@ -87,6 +87,7 @@ app.include_router(matching.router, prefix="/matching", tags=["Event Matching"])
 app.include_router(markets.router, prefix="/markets", tags=["Market Making"])
 app.include_router(positions.router, prefix="/positions", tags=["Position Management"])
 app.include_router(events.router, prefix="/events", tags=["Event Management"])
+app.include_router(prophetx.router, prefix="/prophetx", tags=["ProphetX"])
 
 @app.get("/", tags=["Health"])
 async def root():
