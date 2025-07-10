@@ -54,7 +54,8 @@ class SingleEventTester:
         
         try:
             # Step 1: Get the event and its match
-            event_match = await self._get_event_match(odds_api_event_id)
+            matching_attempts = await event_matching_service.find_matches_for_events([odds_event])
+            event_match = matching_attempts[0].best_match if matching_attempts and matching_attempts[0].best_match else None
             if not event_match:
                 return {
                     "success": False,
@@ -246,12 +247,12 @@ class SingleEventTester:
                 in_wait = sum(1 for bet in self.placed_bets.values() if bet["in_wait_period"])
                 
                 print(f"📊 Bet Status: {active_bets} active, {filled_bets} filled, {in_wait} in wait period")
-                
-                await asyncio.sleep(30)  # Check every 30 seconds
-                
+
+                await asyncio.sleep(60)  # Check every 60 seconds
+
             except Exception as e:
                 print(f"❌ Error in bet monitoring: {e}")
-                await asyncio.sleep(30)
+                await asyncio.sleep(60)
     
     async def _check_single_bet_fill(self, bet_info) -> Optional[float]:
         """Check if a single bet has been filled"""

@@ -103,7 +103,7 @@ class Settings(BaseSettings):
     @field_validator('odds_poll_interval_seconds')
     @classmethod
     def validate_poll_interval(cls, v):
-        if v < 30:
+        if v < 60:
             raise ValueError('Poll interval must be at least 30 seconds to avoid API rate limits')
         return v
     

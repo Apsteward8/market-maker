@@ -15,7 +15,7 @@ class BetMonitoringService:
     def __init__(self):
         self.monitoring_active = False
         self.last_status_check = 0
-        self.status_check_interval = 30  # Check every 30 seconds
+        self.status_check_interval = 60  # Check every 30 seconds
         
     async def start_monitoring(self):
         """Start continuous bet monitoring"""

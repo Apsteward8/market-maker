@@ -21,7 +21,7 @@ async def lifespan(app: FastAPI):
     # Startup
     print("🏗️  ProphetX Market Maker starting up...")
     print(f"📝 Environment: {'SANDBOX' if settings.prophetx_sandbox else 'PRODUCTION'}")
-    print(f"🎾 Focus: Tennis market making using Pinnacle odds")
+    print(f"🎾 Focus: MLB market making using Pinnacle odds")
     print(f"💰 Liquidity per market: ${settings.default_liquidity_amount}")
     
     # Initialize core services
@@ -55,7 +55,7 @@ app = FastAPI(
     
     ## Markets Covered
     
-    * **Tennis** - Moneyline, spread, and totals for professional tournaments
+    * **MLB** - Moneyline, spread, and totals for professional tournaments
     * **Focus** - Pre-game markets only (no live betting)
     * **Liquidity** - Provides consistent liquidity up to event start
     
@@ -87,7 +87,7 @@ app.include_router(matching.router, prefix="/matching", tags=["Event Matching"])
 app.include_router(markets.router, prefix="/markets", tags=["Market Making"])
 app.include_router(positions.router, prefix="/positions", tags=["Position Management"])
 app.include_router(events.router, prefix="/events", tags=["Event Management"])
-app.include_router(prophetx.router, prefix="/prophetx", tags=["ProphetX"])
+# app.include_router(prophetx.router, prefix="/prophetx", tags=["ProphetX"])
 
 @app.get("/", tags=["Health"])
 async def root():

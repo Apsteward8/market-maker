@@ -14,6 +14,10 @@ from app.models.market_models import ManagedEvent, ProphetXMarket, PortfolioSumm
 from app.services.odds_api_service import odds_api_service
 from app.services.market_maker_service import market_maker_service
 from app.services.single_event_tester import single_event_tester
+from app.services.line_monitoring_service import line_monitoring_service
+from app.services.line_position_service import line_position_service
+from app.services.enhanced_prophetx_wager_service import prophetx_wager_service
+from app.services.single_event_line_tester import single_event_line_tester
 
 
 router = APIRouter()
@@ -472,7 +476,7 @@ async def update_market_making_config(
             updates["base_plus_bet"] = liquidity_amount
         
         if poll_interval is not None:
-            if poll_interval < 30:
+            if poll_interval < 60:
                 raise HTTPException(status_code=400, detail="poll_interval must be at least 30 seconds")
             market_maker_service.settings.odds_poll_interval_seconds = poll_interval
             updates["odds_poll_interval_seconds"] = poll_interval
@@ -980,3 +984,775 @@ async def force_single_event_odds_check():
         
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error forcing odds check: {str(e)}")
+
+@router.post("/line-monitoring/start", response_model=Dict[str, Any])
+async def start_line_monitoring():
+    """
+    Start the complete line monitoring and betting workflow
+    
+    This starts the main service that:
+    1. Runs strategy every cycle to identify profitable lines
+    2. Monitors positions via ProphetX wager histories
+    3. Places initial bets on new profitable lines
+    4. Detects fills and manages 5-minute wait periods  
+    5. Places incremental bets up to 4x position limits
+    6. Repeats every 60 seconds
+    
+    **This is the main endpoint to start your complete workflow.**
+    """
+    try:
+        # Initialize services if needed
+        from app.services.line_monitoring_service import line_monitoring_service
+        from app.services.line_position_service import line_position_service
+        from app.services.enhanced_prophetx_wager_service import prophetx_wager_service, initialize_wager_service
+        from app.services.market_making_strategy import market_making_strategy
+        from app.services.prophetx_service import prophetx_service
+        
+        # Initialize wager service
+        initialize_wager_service(prophetx_service)
+        
+        # Initialize monitoring service
+        line_monitoring_service.initialize_services(
+            line_position_service,
+            prophetx_wager_service,
+            market_making_strategy
+        )
+        
+        # Start monitoring
+        result = await line_monitoring_service.start_monitoring()
+        
+        return {
+            "success": True,
+            "message": "Line monitoring workflow started",
+            "data": result,
+            "workflow_description": {
+                "step_1": "Run strategy to identify profitable lines",
+                "step_2": "Check positions via ProphetX wager histories",
+                "step_3": "Place initial bets on new lines",
+                "step_4": "Monitor for fills every 60 seconds",
+                "step_5": "Manage 5-minute wait periods after fills",
+                "step_6": "Place incremental bets up to 4x limits"
+            }
+        }
+        
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error starting line monitoring: {str(e)}")
+
+@router.post("/line-monitoring/stop", response_model=Dict[str, Any])
+async def stop_line_monitoring():
+    """
+    Stop the line monitoring workflow
+    
+    This stops the monitoring loop but does not cancel existing bets.
+    """
+    try:
+        from app.services.line_monitoring_service import line_monitoring_service
+        
+        result = await line_monitoring_service.stop_monitoring()
+        
+        return {
+            "success": True,
+            "message": "Line monitoring stopped",
+            "data": result,
+            "note": "Existing bets remain active - use cancel endpoints if needed"
+        }
+        
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error stopping line monitoring: {str(e)}")
+
+@router.get("/line-monitoring/status", response_model=Dict[str, Any])
+async def get_line_monitoring_status():
+    """
+    Get current status of the line monitoring workflow
+    
+    Shows:
+    - Whether monitoring is active
+    - Number of lines being tracked
+    - Last strategy run time
+    - Last monitoring cycle time
+    - Configuration settings
+    """
+    try:
+        from app.services.line_monitoring_service import line_monitoring_service
+        
+        status = line_monitoring_service.get_status()
+        
+        return {
+            "success": True,
+            "message": "Line monitoring status",
+            "data": status,
+            "current_time": datetime.now(timezone.utc).isoformat()
+        }
+        
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error getting status: {str(e)}")
+
+# =============================================================================
+# LINE POSITION ENDPOINTS
+# =============================================================================
+
+@router.get("/line-positions/summary", response_model=Dict[str, Any])
+async def get_line_positions_summary():
+    """
+    Get summary of all line positions
+    
+    Shows total stake, matched amounts, and position utilization across all lines.
+    This uses real ProphetX data from wager histories.
+    """
+    try:
+        from app.services.line_position_service import line_position_service
+        
+        summary = line_position_service.get_summary()
+        
+        return {
+            "success": True,
+            "message": "Line positions summary",
+            "data": summary
+        }
+        
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error getting positions summary: {str(e)}")
+
+@router.get("/line-positions/{line_id}", response_model=Dict[str, Any])
+async def get_line_position_detail(line_id: str):
+    """
+    Get detailed position information for a specific line
+    
+    Shows:
+    - All bets placed on this line
+    - Total stake and matched amounts
+    - Recent fills and wait period status
+    - Whether more liquidity can be added
+    - Next bet amount if applicable
+    
+    **line_id**: ProphetX line ID to get details for
+    """
+    try:
+        from app.services.line_position_service import line_position_service
+        
+        position = await line_position_service.get_line_position(line_id)
+        
+        if not position:
+            # Try to refresh from ProphetX
+            position = await line_position_service.refresh_line_position(line_id)
+        
+        if not position:
+            return {
+                "success": False,
+                "message": f"No position data found for line {line_id}"
+            }
+        
+        return {
+            "success": True,
+            "message": f"Position details for line {line_id}",
+            "data": {
+                "line_id": position.line_id,
+                "selection_name": position.selection_name,
+                "position_summary": {
+                    "total_bets": position.total_bets,
+                    "total_stake": position.total_stake,
+                    "total_matched": position.total_matched,
+                    "total_unmatched": position.total_unmatched,
+                    "utilization_percent": (position.total_stake / position.max_position) * 100
+                },
+                "limits": {
+                    "max_position": position.max_position,
+                    "increment_size": position.increment_size,
+                    "recommended_initial": position.recommended_initial
+                },
+                "status": {
+                    "has_active_bets": position.has_active_bets,
+                    "in_wait_period": position.in_wait_period,
+                    "wait_period_ends": position.wait_period_ends.isoformat() if position.wait_period_ends else None,
+                    "can_add_liquidity": position.can_add_liquidity,
+                    "next_bet_amount": position.next_bet_amount
+                },
+                "activity": {
+                    "last_bet_time": position.last_bet_time.isoformat() if position.last_bet_time else None,
+                    "last_fill_time": position.last_fill_time.isoformat() if position.last_fill_time else None,
+                    "recent_fills": position.recent_fills
+                }
+            }
+        }
+        
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error getting line position: {str(e)}")
+
+@router.post("/line-positions/{line_id}/refresh", response_model=Dict[str, Any])
+async def refresh_line_position(line_id: str):
+    """
+    Manually refresh position data for a specific line
+    
+    Forces a fresh fetch from ProphetX wager histories API.
+    Useful for debugging or getting real-time updates.
+    
+    **line_id**: ProphetX line ID to refresh
+    """
+    try:
+        from app.services.line_position_service import line_position_service
+        
+        position = await line_position_service.refresh_line_position(line_id)
+        
+        if not position:
+            return {
+                "success": False,
+                "message": f"Failed to refresh position for line {line_id}"
+            }
+        
+        return {
+            "success": True,
+            "message": f"Position refreshed for line {line_id}",
+            "data": {
+                "line_id": line_id,
+                "total_stake": position.total_stake,
+                "total_matched": position.total_matched,
+                "can_add_liquidity": position.can_add_liquidity,
+                "next_bet_amount": position.next_bet_amount,
+                "refreshed_at": datetime.now(timezone.utc).isoformat()
+            }
+        }
+        
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error refreshing line position: {str(e)}")
+
+# =============================================================================
+# WAGER HISTORY ENDPOINTS
+# =============================================================================
+
+@router.get("/wager-histories/line/{line_id}", response_model=Dict[str, Any])
+async def get_wager_histories_for_line(
+    line_id: str,
+    days_back: int = Query(7, description="How many days back to search"),
+    include_all_statuses: bool = Query(True, description="Include cancelled/expired bets")
+):
+    """
+    Get all wager histories for a specific line
+    
+    This shows the raw ProphetX wager data that drives position calculations.
+    
+    **Parameters:**
+    - **line_id**: ProphetX line ID
+    - **days_back**: How many days back to search (default 7)
+    - **include_all_statuses**: Whether to include cancelled/expired bets
+    """
+    try:
+        from app.services.enhanced_prophetx_wager_service import prophetx_wager_service
+        
+        result = await prophetx_wager_service.get_all_wagers_for_line(
+            line_id, 
+            days_back=days_back,
+            include_all_statuses=include_all_statuses
+        )
+        
+        return {
+            "success": True,
+            "message": f"Wager histories for line {line_id}",
+            "data": result
+        }
+        
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error getting wager histories: {str(e)}")
+
+@router.get("/wager-histories/recent-fills", response_model=Dict[str, Any])
+async def get_recent_fills(
+    minutes_back: int = Query(60, description="How many minutes back to check for fills"),
+    line_ids: Optional[str] = Query(None, description="Comma-separated line IDs to check")
+):
+    """
+    Get recent fills across lines
+    
+    Useful for monitoring fill activity in real-time.
+    
+    **Parameters:**
+    - **minutes_back**: How many minutes back to check (default 60)
+    - **line_ids**: Comma-separated line IDs to check (optional - checks all if not provided)
+    """
+    try:
+        from app.services.enhanced_prophetx_wager_service import prophetx_wager_service
+        from app.services.line_monitoring_service import line_monitoring_service
+        
+        # Get line IDs to check
+        if line_ids:
+            check_line_ids = [lid.strip() for lid in line_ids.split(",")]
+        else:
+            # Use all monitored lines
+            check_line_ids = list(line_monitoring_service.monitored_lines.keys())
+        
+        if not check_line_ids:
+            return {
+                "success": False,
+                "message": "No line IDs to check"
+            }
+        
+        recent_fills = await prophetx_wager_service.detect_recent_fills(
+            check_line_ids, 
+            minutes_back=minutes_back
+        )
+        
+        return {
+            "success": True,
+            "message": f"Recent fills in last {minutes_back} minutes",
+            "data": {
+                "fills_detected": len(recent_fills),
+                "lines_checked": len(check_line_ids),
+                "fills": recent_fills
+            }
+        }
+        
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error getting recent fills: {str(e)}")
+
+# =============================================================================
+# SINGLE EVENT TESTING ENDPOINTS
+# =============================================================================
+
+@router.post("/line-monitoring/test-single-event/{odds_api_event_id}/start", response_model=Dict[str, Any])
+async def start_single_event_line_test(odds_api_event_id: str):
+    try:
+        from app.services.single_event_line_tester import single_event_line_tester
+        from app.services.line_position_service import line_position_service
+        from app.services.market_making_strategy import market_making_strategy
+        from app.services.prophetx_service import prophetx_service
+        
+        # IMPORTANT: Import and initialize properly
+        from app.services.enhanced_prophetx_wager_service import ProphetXWagerService, initialize_wager_service
+        
+        # Create the wager service instance directly
+        actual_wager_service = ProphetXWagerService(prophetx_service)
+        
+        # Initialize the global service
+        initialize_wager_service(prophetx_service)
+        
+        # Pass the actual instance to the single event tester
+        single_event_line_tester.initialize_services(
+            line_position_service,
+            actual_wager_service,  # Use the actual instance, not the global
+            market_making_strategy
+        )
+        
+        # Start single event test
+        result = await single_event_line_tester.start_single_event_test(odds_api_event_id)
+        
+        return {
+            "success": result["success"],
+            "message": result["message"],
+            "data": result.get("data"),
+            "debug_info": {
+                "wager_service_initialized": actual_wager_service is not None,
+                "service_type": str(type(actual_wager_service))
+            }
+        }
+        
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error starting single event test: {str(e)}")
+
+@router.post("/line-monitoring/test-single-event/stop", response_model=Dict[str, Any])
+async def stop_single_event_line_test():
+    """
+    Stop the single event line monitoring test
+    
+    Stops the monitoring loop but leaves any placed bets active.
+    """
+    try:
+        from app.services.single_event_line_tester import single_event_line_tester
+        
+        result = await single_event_line_tester.stop_single_event_test()
+        
+        return {
+            "success": result["success"],
+            "message": result["message"],
+            "data": result.get("data")
+        }
+        
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error stopping single event test: {str(e)}")
+
+@router.get("/line-monitoring/test-single-event/status", response_model=Dict[str, Any])
+async def get_single_event_test_status():
+    """
+    Get status of the single event line monitoring test
+    
+    Shows current session info, monitoring cycles, bets placed, etc.
+    """
+    try:
+        from app.services.single_event_line_tester import single_event_line_tester
+        
+        status = single_event_line_tester.get_session_status()
+        
+        return {
+            "success": True,
+            "message": "Single event test status",
+            "data": status
+        }
+        
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error getting single event test status: {str(e)}")
+
+@router.get("/odds/events", response_model=Dict[str, Any])
+async def get_current_odds_events():
+    """
+    Get current events from The Odds API
+    
+    Use this to find event IDs for single event testing.
+    Shows event_id, teams, and start times.
+    """
+    try:
+        from app.services.odds_api_service import odds_api_service
+        
+        events = await odds_api_service.get_events()
+        
+        events_list = []
+        for event in events:
+            events_list.append({
+                "event_id": event.event_id,
+                "sport": event.sport,
+                "home_team": event.home_team,
+                "away_team": event.away_team,
+                "commence_time": event.commence_time.isoformat(),
+                "display_name": f"{event.away_team} vs {event.home_team}"
+            })
+        
+        return {
+            "success": True,
+            "message": f"Found {len(events_list)} current events",
+            "data": {
+                "events": events_list,
+                "note": "Use event_id for single event testing"
+            }
+        }
+        
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error getting odds events: {str(e)}")
+
+# =============================================================================
+# MANUAL CONTROL ENDPOINTS
+# =============================================================================
+
+@router.post("/line-positions/{line_id}/clear-wait-period", response_model=Dict[str, Any])
+async def clear_line_wait_period(line_id: str):
+    """
+    Manually clear the 5-minute wait period for a specific line
+    
+    Useful when odds change significantly or for manual intervention.
+    After clearing, the line will be eligible for immediate liquidity addition.
+    
+    **line_id**: ProphetX line ID to clear wait period for
+    """
+    try:
+        from app.services.line_position_service import line_position_service
+        
+        # Get current position
+        position = await line_position_service.get_line_position(line_id)
+        
+        if not position:
+            return {
+                "success": False,
+                "message": f"No position found for line {line_id}"
+            }
+        
+        if not position.in_wait_period:
+            return {
+                "success": False,
+                "message": f"Line {line_id} is not in wait period"
+            }
+        
+        # Clear the wait period (simplified - you'd implement this in line_position_service)
+        # For now, just refresh the position which will recalculate status
+        await line_position_service.refresh_line_position(line_id)
+        
+        return {
+            "success": True,
+            "message": f"Wait period cleared for line {line_id}",
+            "data": {
+                "line_id": line_id,
+                "note": "Line is now eligible for immediate liquidity addition"
+            }
+        }
+        
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error clearing wait period: {str(e)}")
+
+@router.post("/line-monitoring/force-strategy-run", response_model=Dict[str, Any])
+async def force_strategy_run():
+    """
+    Force an immediate strategy run outside of the normal cycle
+    
+    Useful for testing or when you want to check for new profitable lines immediately.
+    """
+    try:
+        from app.services.line_monitoring_service import line_monitoring_service
+        
+        if not line_monitoring_service.monitoring_active:
+            return {
+                "success": False,
+                "message": "Line monitoring is not active - start it first"
+            }
+        
+        # Trigger strategy run
+        await line_monitoring_service._run_main_strategy()
+        
+        return {
+            "success": True,
+            "message": "Strategy run completed",
+            "data": {
+                "lines_identified": len(line_monitoring_service.monitored_lines),
+                "triggered_at": datetime.now(timezone.utc).isoformat()
+            }
+        }
+        
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error forcing strategy run: {str(e)}")
+
+@router.get("/line-monitoring/monitored-lines", response_model=Dict[str, Any])
+async def get_monitored_lines():
+    """
+    Get list of currently monitored lines with their strategies
+    
+    Shows which lines the system identified as profitable and is actively monitoring.
+    """
+    try:
+        from app.services.line_monitoring_service import line_monitoring_service
+        
+        lines_data = {}
+        
+        for line_id, strategy in line_monitoring_service.monitored_lines.items():
+            lines_data[line_id] = {
+                "selection_name": strategy.selection_name,
+                "odds": strategy.odds,
+                "recommended_initial_stake": strategy.recommended_initial_stake,
+                "max_position": strategy.max_position,
+                "increment_size": strategy.increment_size,
+                "event_id": strategy.event_id,
+                "market_type": strategy.market_type
+            }
+        
+        return {
+            "success": True,
+            "message": f"Currently monitoring {len(lines_data)} lines",
+            "data": {
+                "total_lines": len(lines_data),
+                "lines": lines_data,
+                "last_strategy_run": line_monitoring_service.last_strategy_run.isoformat() if line_monitoring_service.last_strategy_run else None
+            }
+        }
+        
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error getting monitored lines: {str(e)}")
+    
+@router.post("/debug/test-single-event-matching/{event_id}", response_model=Dict[str, Any])
+async def test_single_event_matching(event_id: str):
+    """
+    Test event matching for a single event (minimal version)
+    
+    This tests just the event matching part to make sure the method calls work.
+    """
+    try:
+        # Get the specific event from Odds API
+        from app.services.odds_api_service import odds_api_service
+        from app.services.event_matching_service import event_matching_service
+        
+        print(f"🎯 Testing event matching for {event_id}")
+        
+        # Step 1: Get the event
+        odds_events = await odds_api_service.get_events()
+        target_event = None
+        
+        for event in odds_events:
+            if event.event_id == event_id:
+                target_event = event
+                break
+        
+        if not target_event:
+            return {
+                "success": False,
+                "message": f"Event {event_id} not found in current Odds API events",
+                "available_events": [
+                    {
+                        "event_id": e.event_id,
+                        "display_name": f"{e.away_team} vs {e.home_team}"
+                    } for e in odds_events[:5]
+                ]
+            }
+        
+        print(f"✅ Found event: {target_event.away_team} vs {target_event.home_team}")
+        
+        # Step 2: Test event matching with CORRECT method
+        print("🔗 Testing event matching...")
+        
+        # ✅ CORRECT: Use find_matches_for_events with a list
+        matching_attempts = await event_matching_service.find_matches_for_events([target_event])
+        
+        if not matching_attempts:
+            return {
+                "success": False,
+                "message": "No matching attempts returned"
+            }
+        
+        matching_attempt = matching_attempts[0]
+        
+        if not matching_attempt.best_match:
+            return {
+                "success": False,
+                "message": f"Could not match event to ProphetX",
+                "details": {
+                    "no_match_reason": matching_attempt.no_match_reason,
+                    "potential_matches_count": len(matching_attempt.prophetx_matches),
+                    "best_confidence": matching_attempt.prophetx_matches[0][1] if matching_attempt.prophetx_matches else "N/A"
+                }
+            }
+        
+        event_match = matching_attempt.best_match
+        
+        return {
+            "success": True,
+            "message": f"Successfully matched event!",
+            "data": {
+                "odds_api_event": {
+                    "event_id": target_event.event_id,
+                    "display_name": f"{target_event.away_team} vs {target_event.home_team}",
+                    "commence_time": target_event.commence_time.isoformat()
+                },
+                "prophetx_event": {
+                    "event_id": event_match.prophetx_event.event_id,
+                    "display_name": event_match.prophetx_event.display_name,
+                    "commence_time": event_match.prophetx_event.commence_time.isoformat()
+                },
+                "match_confidence": event_match.confidence_score,
+                "match_reasons": event_match.match_reasons
+            }
+        }
+        
+    except Exception as e:
+        return {
+            "success": False,
+            "message": f"Error testing event matching: {str(e)}",
+            "error_type": type(e).__name__
+        }
+
+# ALSO: Add this helper endpoint to get available events for testing
+
+@router.get("/debug/available-events", response_model=Dict[str, Any])
+async def get_available_events_for_testing():
+    """
+    Get list of available events for testing
+    
+    Returns current events from Odds API that you can use for testing.
+    """
+    try:
+        from app.services.odds_api_service import odds_api_service
+        
+        events = await odds_api_service.get_events()
+        
+        events_list = []
+        for event in events:
+            events_list.append({
+                "event_id": event.event_id,
+                "display_name": f"{event.away_team} vs {event.home_team}",
+                "commence_time": event.commence_time.isoformat(),
+                "sport": event.sport
+            })
+        
+        return {
+            "success": True,
+            "message": f"Found {len(events_list)} events available for testing",
+            "events": events_list,
+            "usage": "Use event_id with /debug/test-single-event-matching/{event_id}"
+        }
+        
+    except Exception as e:
+        return {
+            "success": False,
+            "message": f"Error getting events: {str(e)}"
+        }
+
+@router.get("/debug/test-market-object/{event_id}", response_model=Dict[str, Any])
+async def test_market_object_structure(event_id: str):
+    """
+    Test market object structure to debug the len() error
+    
+    This will show you exactly what type of object market_matches is 
+    and what properties it has.
+    """
+    try:
+        from app.services.odds_api_service import odds_api_service
+        from app.services.event_matching_service import event_matching_service
+        from app.services.market_matching_service import market_matching_service
+        
+        # Get the event
+        odds_events = await odds_api_service.get_events()
+        target_event = None
+        
+        for event in odds_events:
+            if event.event_id == event_id:
+                target_event = event
+                break
+        
+        if not target_event:
+            return {"success": False, "message": "Event not found"}
+        
+        # Match event
+        matching_attempts = await event_matching_service.find_matches_for_events([target_event])
+        if not matching_attempts or not matching_attempts[0].best_match:
+            return {"success": False, "message": "No event match"}
+        
+        event_match = matching_attempts[0].best_match
+        
+        # Get market matches
+        market_matches = await market_matching_service.match_event_markets(event_match)
+        
+        # Debug the object structure
+        return {
+            "success": True,
+            "debug_info": {
+                "object_type": str(type(market_matches)),
+                "has_len": hasattr(market_matches, '__len__'),
+                "properties": dir(market_matches),
+                "market_matches_type": str(type(market_matches.market_matches)),
+                "market_matches_length": len(market_matches.market_matches),
+                "ready_for_trading": market_matches.ready_for_trading,
+                "sample_structure": {
+                    "total_markets": len(market_matches.market_matches),
+                    "ready": market_matches.ready_for_trading,
+                    "issues": market_matches.issues
+                }
+            }
+        }
+        
+    except Exception as e:
+        return {
+            "success": False,
+            "error": str(e),
+            "error_type": type(e).__name__
+        }
+
+# Also add this debug endpoint to test service creation:
+@router.get("/debug/test-wager-service", response_model=Dict[str, Any])
+async def test_wager_service_creation():
+    """Test creating the wager service directly"""
+    try:
+        from app.services.prophetx_service import prophetx_service
+        from app.services.enhanced_prophetx_wager_service import ProphetXWagerService
+        
+        # Create service directly
+        wager_service = ProphetXWagerService(prophetx_service)
+        
+        # Test a simple method
+        result = await wager_service.get_wager_histories(limit=1)
+        
+        return {
+            "success": True,
+            "message": "Wager service created and tested successfully",
+            "data": {
+                "service_created": wager_service is not None,
+                "service_type": str(type(wager_service)),
+                "test_call_success": result.get("success", False),
+                "test_result": result
+            }
+        }
+        
+    except Exception as e:
+        return {
+            "success": False,
+            "error": str(e),
+            "error_type": type(e).__name__
+        }
