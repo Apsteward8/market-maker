@@ -6,11 +6,281 @@ Comprehensive ProphetX API methods for granular bet and line management
 
 import requests
 import time
-from datetime import datetime, timezone
+from datetime import datetime, timezone, timedelta
 from typing import Optional, Dict, Any, List
 from fastapi import HTTPException
+import asyncio
 
 from app.core.config import get_settings
+
+class ProphetXAuthManager:
+    """
+    Enhanced authentication manager with automatic token refresh
+    
+    Features:
+    - Automatic token refresh 2 minutes before expiry
+    - Background refresh task
+    - Shared authentication state across all services
+    - Retry logic for authentication failures
+    """
+    
+    def __init__(self, prophetx_service):
+        self.prophetx_service = prophetx_service
+        self.base_url = prophetx_service.base_url
+        self.access_key = prophetx_service.access_key
+        self.secret_key = prophetx_service.secret_key
+        self.sandbox = prophetx_service.sandbox
+        
+        # Authentication state
+        self.access_token: Optional[str] = None
+        self.refresh_token: Optional[str] = None
+        self.access_expire_time: Optional[int] = None
+        self.refresh_expire_time: Optional[int] = None
+        self.is_authenticated = False
+        
+        # Auto-refresh settings
+        self.refresh_buffer_seconds = 120  # Refresh 2 minutes before expiry
+        self.refresh_task: Optional[asyncio.Task] = None
+        self.refresh_running = False
+        
+        # Retry settings
+        self.max_auth_retries = 3
+        self.auth_retry_delay = 5  # seconds
+        
+    async def authenticate(self) -> Dict[str, Any]:
+        """Enhanced authentication with better error handling"""
+        print("🔐 Authenticating with ProphetX...")
+        
+        url = f"{self.base_url}/partner/auth/login"
+        payload = {
+            "access_key": self.access_key,
+            "secret_key": self.secret_key
+        }
+        
+        headers = {'Content-Type': 'application/json'}
+        
+        for attempt in range(self.max_auth_retries):
+            try:
+                response = requests.post(url, headers=headers, json=payload, timeout=30)
+                
+                if response.status_code == 200:
+                    data = response.json()
+                    token_data = data.get('data', {})
+                    
+                    self.access_token = token_data.get('access_token')
+                    self.refresh_token = token_data.get('refresh_token')
+                    self.access_expire_time = token_data.get('access_expire_time')
+                    self.refresh_expire_time = token_data.get('refresh_expire_time')
+                    
+                    if self.access_token and self.refresh_token:
+                        self.is_authenticated = True
+                        
+                        # Update the main service's auth state
+                        self._update_service_auth_state()
+                        
+                        access_expire_dt = datetime.fromtimestamp(self.access_expire_time, tz=timezone.utc)
+                        refresh_expire_dt = datetime.fromtimestamp(self.refresh_expire_time, tz=timezone.utc)
+                        
+                        print("✅ ProphetX authentication successful!")
+                        print(f"   Environment: {'SANDBOX' if self.sandbox else 'PRODUCTION'}")
+                        print(f"   Access token expires: {access_expire_dt}")
+                        print(f"   Refresh token expires: {refresh_expire_dt}")
+                        
+                        # Start auto-refresh task
+                        await self._start_refresh_task()
+                        
+                        return {
+                            "success": True,
+                            "message": "Authentication successful",
+                            "access_expires_at": access_expire_dt.isoformat(),
+                            "refresh_expires_at": refresh_expire_dt.isoformat(),
+                            "expires_in_minutes": (self.access_expire_time - time.time()) / 60
+                        }
+                    else:
+                        raise Exception("Missing tokens in response")
+                        
+                else:
+                    error_msg = f"HTTP {response.status_code}: {response.text}"
+                    print(f"❌ Authentication attempt {attempt + 1} failed: {error_msg}")
+                    
+                    if attempt < self.max_auth_retries - 1:
+                        print(f"   Retrying in {self.auth_retry_delay} seconds...")
+                        await asyncio.sleep(self.auth_retry_delay)
+                    else:
+                        raise Exception(error_msg)
+                        
+            except requests.exceptions.RequestException as e:
+                print(f"❌ Network error on attempt {attempt + 1}: {e}")
+                if attempt < self.max_auth_retries - 1:
+                    await asyncio.sleep(self.auth_retry_delay)
+                else:
+                    raise Exception(f"Network error: {str(e)}")
+        
+        raise Exception("Authentication failed after all retries")
+    
+    async def refresh_access_token(self) -> Dict[str, Any]:
+        """Refresh the access token using the refresh token"""
+        if not self.refresh_token:
+            print("❌ No refresh token available - need to re-authenticate")
+            return await self.authenticate()
+        
+        print("🔄 Refreshing ProphetX access token...")
+        
+        url = f"{self.base_url}/partner/auth/refresh"
+        headers = {
+            'Authorization': f'Bearer {self.refresh_token}',
+            'Content-Type': 'application/json'
+        }
+        
+        try:
+            response = requests.post(url, headers=headers, timeout=30)
+            
+            if response.status_code == 200:
+                data = response.json()
+                token_data = data.get('data', {})
+                
+                # Update tokens
+                old_access_token = self.access_token
+                self.access_token = token_data.get('access_token')
+                self.access_expire_time = token_data.get('access_expire_time')
+                
+                # Update service auth state
+                self._update_service_auth_state()
+                
+                access_expire_dt = datetime.fromtimestamp(self.access_expire_time, tz=timezone.utc)
+                
+                print("✅ Access token refreshed successfully!")
+                print(f"   New expiry: {access_expire_dt}")
+                print(f"   Valid for: {(self.access_expire_time - time.time()) / 60:.1f} minutes")
+                
+                return {
+                    "success": True,
+                    "message": "Token refreshed successfully",
+                    "access_expires_at": access_expire_dt.isoformat(),
+                    "expires_in_minutes": (self.access_expire_time - time.time()) / 60
+                }
+            else:
+                error_msg = f"HTTP {response.status_code}: {response.text}"
+                print(f"❌ Token refresh failed: {error_msg}")
+                print("🔄 Attempting full re-authentication...")
+                return await self.authenticate()
+                
+        except Exception as e:
+            print(f"❌ Error refreshing token: {e}")
+            print("🔄 Attempting full re-authentication...")
+            return await self.authenticate()
+    
+    def _update_service_auth_state(self):
+        """Update the main ProphetX service with current auth state"""
+        self.prophetx_service.access_token = self.access_token
+        self.prophetx_service.refresh_token = self.refresh_token
+        self.prophetx_service.access_expire_time = self.access_expire_time
+        self.prophetx_service.refresh_expire_time = self.refresh_expire_time
+        self.prophetx_service.is_authenticated = self.is_authenticated
+    
+    def is_token_expired(self, buffer_seconds: int = 0) -> bool:
+        """Check if access token is expired or will expire within buffer_seconds"""
+        if not self.access_expire_time:
+            return True
+        
+        current_time = time.time()
+        return current_time >= (self.access_expire_time - buffer_seconds)
+    
+    def time_until_expiry(self) -> float:
+        """Get seconds until token expires"""
+        if not self.access_expire_time:
+            return 0
+        return max(0, self.access_expire_time - time.time())
+    
+    async def get_valid_auth_headers(self) -> Dict[str, str]:
+        """Get auth headers, refreshing token if necessary"""
+        
+        # Check if we need to refresh
+        if self.is_token_expired(buffer_seconds=30):  # 30 second buffer for API calls
+            print("🔄 Token expired or expiring soon - refreshing...")
+            await self.refresh_access_token()
+        
+        if not self.access_token:
+            print("🔐 No access token - authenticating...")
+            await self.authenticate()
+        
+        return {
+            'Authorization': f'Bearer {self.access_token}',
+            'Content-Type': 'application/json'
+        }
+    
+    async def _start_refresh_task(self):
+        """Start the background token refresh task"""
+        if self.refresh_task and not self.refresh_task.done():
+            self.refresh_task.cancel()
+        
+        self.refresh_task = asyncio.create_task(self._refresh_loop())
+        print(f"🔄 Started auto-refresh task (will refresh {self.refresh_buffer_seconds}s before expiry)")
+    
+    async def _refresh_loop(self):
+        """Background task that refreshes tokens automatically"""
+        self.refresh_running = True
+        
+        try:
+            while self.refresh_running and self.is_authenticated:
+                # Calculate when to refresh (2 minutes before expiry)
+                time_until_refresh = self.time_until_expiry() - self.refresh_buffer_seconds
+                
+                if time_until_refresh <= 0:
+                    # Token is about to expire - refresh now
+                    print("⏰ Token approaching expiry - auto-refreshing...")
+                    await self.refresh_access_token()
+                    time_until_refresh = self.time_until_expiry() - self.refresh_buffer_seconds
+                
+                if time_until_refresh > 0:
+                    print(f"🔄 Next auto-refresh in {time_until_refresh / 60:.1f} minutes")
+                    await asyncio.sleep(min(time_until_refresh, 300))  # Check at least every 5 minutes
+                else:
+                    await asyncio.sleep(60)  # Check again in 1 minute
+                    
+        except asyncio.CancelledError:
+            print("🛑 Auto-refresh task cancelled")
+        except Exception as e:
+            print(f"❌ Error in refresh loop: {e}")
+            # Try to restart the loop after a delay
+            await asyncio.sleep(60)
+            if self.refresh_running:
+                await self._start_refresh_task()
+        finally:
+            self.refresh_running = False
+    
+    async def stop_refresh_task(self):
+        """Stop the background refresh task"""
+        self.refresh_running = False
+        if self.refresh_task and not self.refresh_task.done():
+            self.refresh_task.cancel()
+            try:
+                await self.refresh_task
+            except asyncio.CancelledError:
+                pass
+        print("🛑 Auto-refresh task stopped")
+    
+    def get_auth_status(self) -> Dict[str, Any]:
+        """Get current authentication status"""
+        if not self.is_authenticated:
+            return {
+                "authenticated": False,
+                "message": "Not authenticated"
+            }
+        
+        current_time = time.time()
+        time_until_expiry = max(0, self.access_expire_time - current_time)
+        time_until_refresh_expiry = max(0, self.refresh_expire_time - current_time)
+        
+        return {
+            "authenticated": True,
+            "access_token_valid": not self.is_token_expired(),
+            "expires_in_seconds": time_until_expiry,
+            "expires_in_minutes": time_until_expiry / 60,
+            "refresh_expires_in_hours": time_until_refresh_expiry / 3600,
+            "auto_refresh_active": self.refresh_running,
+            "environment": "sandbox" if self.sandbox else "production"
+        }
 
 class ProphetXService:
     """Service with complete ProphetX API coverage"""
@@ -31,67 +301,39 @@ class ProphetXService:
         self.secret_key = self.settings.prophetx_secret_key
         self.sandbox = self.settings.prophetx_sandbox
 
+        # Initialize authentication manager
+        self.auth_manager = ProphetXAuthManager(self)
+
+
     # ============================================================================
     # AUTHENTICATION METHODS (keep existing ones)
     # ============================================================================
     
     async def authenticate(self) -> Dict[str, Any]:
-        """Authenticate with ProphetX API"""
-        print("🔐 Authenticating with ProphetX...")
-        
-        url = f"{self.base_url}/partner/auth/login"
-        payload = {
-            "access_key": self.access_key,
-            "secret_key": self.secret_key
-        }
-        
-        headers = {'Content-Type': 'application/json'}
-        
-        try:
-            response = requests.post(url, headers=headers, json=payload)
-            
-            if response.status_code == 200:
-                data = response.json()
-                token_data = data.get('data', {})
-                
-                self.access_token = token_data.get('access_token')
-                self.refresh_token = token_data.get('refresh_token')
-                self.access_expire_time = token_data.get('access_expire_time')
-                self.refresh_expire_time = token_data.get('refresh_expire_time')
-                
-                if self.access_token and self.refresh_token:
-                    self.is_authenticated = True
-                    
-                    access_expire_dt = datetime.fromtimestamp(self.access_expire_time, tz=timezone.utc)
-                    print("✅ ProphetX authentication successful!")
-                    print(f"   Environment: {'SANDBOX' if self.sandbox else 'PRODUCTION'}")
-                    print(f"   Access token expires: {access_expire_dt}")
-                    
-                    return {
-                        "success": True,
-                        "message": "Authentication successful",
-                        "access_expires_at": access_expire_dt.isoformat(),
-                        "refresh_expires_at": datetime.fromtimestamp(self.refresh_expire_time, tz=timezone.utc).isoformat()
-                    }
-                else:
-                    raise HTTPException(status_code=400, detail="Missing tokens in response")
-                    
-            else:
-                error_msg = f"HTTP {response.status_code}: {response.text}"
-                raise HTTPException(status_code=response.status_code, detail=error_msg)
-                
-        except requests.exceptions.RequestException as e:
-            raise HTTPException(status_code=500, detail=f"Network error: {str(e)}")
+        """Authenticate with ProphetX API using the auth manager"""
+        return await self.auth_manager.authenticate()
+
+    async def refresh_token(self) -> Dict[str, Any]:
+        """Refresh the access token"""
+        return await self.auth_manager.refresh_access_token()
 
     async def get_auth_headers(self) -> Dict[str, str]:
-        """Get authentication headers for API requests"""
-        if not self.access_token:
-            await self.authenticate()
-        
-        return {
-            'Authorization': f'Bearer {self.access_token}',
-            'Content-Type': 'application/json'
-        }
+        """Get authentication headers with automatic refresh"""
+        return await self.auth_manager.get_valid_auth_headers()
+    
+    def get_auth_status(self) -> Dict[str, Any]:
+        """Get current authentication status"""
+        return self.auth_manager.get_auth_status()
+
+    async def start_auth_monitoring(self):
+        """Start automatic token refresh monitoring"""
+        print("🚀 Starting ProphetX authentication monitoring...")
+        await self.auth_manager.authenticate()
+
+    async def stop_auth_monitoring(self):
+        """Stop automatic token refresh monitoring"""
+        print("🛑 Stopping ProphetX authentication monitoring...")
+        await self.auth_manager.stop_refresh_task()
 
     # ============================================================================
     # LINE-SPECIFIC METHODS (NEW)

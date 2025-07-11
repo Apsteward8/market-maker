@@ -115,175 +115,101 @@ class ProphetXWagerService:
                 "error": f"Exception: {str(e)}"
             }
     
-    async def get_all_wagers_for_line(
-        self,
-        line_id: str,
-        days_back: int = 7,
-        include_all_statuses: bool = True
-    ) -> Dict[str, Any]:
+    def _calculate_position_summary(self, wagers: List[Dict[str, Any]]) -> Dict[str, Any]:
         """
-        Get ALL wagers for a specific line_id
+        Calculate position summary from wager list - HANDLES EMPTY WAGERS
         
-        This is the key method for line-based position tracking.
-        Gets all wagers (active, matched, cancelled, etc.) for a line.
-        
-        Args:
-            line_id: ProphetX line ID
-            days_back: How many days back to search
-            include_all_statuses: Whether to include cancelled/expired bets
-            
-        Returns:
-            All wagers for this line with position summary
+        Returns consistent summary structure even when no wagers exist.
         """
-        try:
-            # Calculate time range
-            now_timestamp = int(time.time())
-            from_timestamp = now_timestamp - (days_back * 24 * 60 * 60)
-            
-            all_wagers = []
-            next_cursor = None
-            
-            # DEBUG: Log what we're searching for
-            print(f"🔍 Searching for wagers on line_id: {line_id}")
-            
-            # Paginate through all results - get ALL our wagers, then filter by line_id
-            while True:
-                result = await self.get_wager_histories(
-                    from_timestamp=from_timestamp,
-                    to_timestamp=now_timestamp,
-                    limit=1000,
-                    next_cursor=next_cursor
-                    # NOTE: No line_id parameter here since API doesn't support it
-                )
-                
-                if not result["success"]:
-                    print(f"❌ Failed to get wager histories: {result.get('error')}")
-                    break
-                
-                wagers = result["wagers"]
-                print(f"📊 Retrieved {len(wagers)} total wagers from ProphetX")
-                
-                # CLIENT-SIDE FILTERING: Filter by line_id
-                line_wagers = []
-                for wager in wagers:
-                    wager_line_id = wager.get("line_id")
-                    if wager_line_id == line_id:
-                        line_wagers.append(wager)
-                        print(f"✅ Found wager for line {line_id}: {wager.get('external_id', 'unknown')} - ${wager.get('stake', 0)}")
-                
-                all_wagers.extend(line_wagers)
-                print(f"📊 Found {len(line_wagers)} wagers for line {line_id} in this batch")
-                
-                next_cursor = result.get("next_cursor")
-                if not next_cursor:
-                    break
-            
-            print(f"📊 TOTAL: Found {len(all_wagers)} wagers for line {line_id}")
-            
-            # Filter out cancelled/expired if requested
-            if not include_all_statuses:
-                before_filter = len(all_wagers)
-                all_wagers = [w for w in all_wagers if w.get("status") not in ["cancelled", "expired", "void"]]
-                print(f"📊 After status filter: {len(all_wagers)}/{before_filter} wagers")
-            
-            # Calculate position summary
-            summary = self._calculate_line_summary(all_wagers, line_id)
-            
-            # DEBUG: Log summary
-            print(f"💰 Line {line_id[-8:]} summary:")
-            print(f"   Total bets: {summary['total_bets']}")
-            print(f"   Total stake: ${summary['total_stake']:.2f}")
-            print(f"   Total matched: ${summary['total_matched']:.2f}")
-            print(f"   Has active: {summary['has_active_bets']}")
-            
-            return {
-                "success": True,
-                "line_id": line_id,
-                "total_wagers": len(all_wagers),
-                "wagers": all_wagers,
-                "position_summary": summary
-            }
-            
-        except Exception as e:
-            print(f"❌ Error getting wagers for line {line_id}: {str(e)}")
-            return {
-                "success": False,
-                "error": f"Error getting wagers for line {line_id}: {str(e)}"
-            }
-    
-    def _calculate_line_summary(self, wagers: List[Dict[str, Any]], line_id: str) -> Dict[str, Any]:
-        """Calculate position summary for a line from wagers list"""
+        # Handle empty wagers list (no bets ever placed on this line)
         if not wagers:
             return {
                 "total_bets": 0,
+                "active_bets": 0,  # This was missing and causing the error
                 "total_stake": 0.0,
                 "total_matched": 0.0,
                 "total_unmatched": 0.0,
                 "has_active_bets": False,
                 "last_bet_time": None,
                 "last_fill_time": None,
-                "recent_fills": []
+                "recent_fills": [],
+                "debug_info": {
+                    "all_bets_count": 0,
+                    "active_bets_count": 0,
+                    "cancelled_bets_count": 0,
+                    "fills_detected": 0,
+                    "status": "no_wagers_found"
+                }
             }
         
-        # Calculate totals
-        total_bets = len(wagers)
-        total_stake = sum(w.get("stake", 0) for w in wagers)
-        total_matched = sum(w.get("matched_stake", 0) for w in wagers)
+        # Process existing wagers
+        active_bets = []
+        all_bets = []
+        
+        for wager in wagers:
+            status = wager.get("status", "").lower()
+            stake = wager.get("stake", 0) or 0  # Handle None values
+            matched_stake = wager.get("matched_stake", 0) or 0
+            
+            all_bets.append(wager)
+            
+            # Only include bets that are NOT cancelled and have stake > 0
+            if status not in ["canceled", "cancelled", "void"] and stake > 0:
+                active_bets.append(wager)
+        
+        # Calculate totals from ACTIVE bets only (ignore cancelled)
+        total_stake = sum(bet.get("stake", 0) or 0 for bet in active_bets)
+        total_matched = sum(bet.get("matched_stake", 0) or 0 for bet in active_bets)
         total_unmatched = total_stake - total_matched
         
-        # Check for active bets
-        has_active_bets = any(
-            w.get("matching_status") == "unmatched" and 
-            w.get("status") in ["open", "active"] 
-            for w in wagers
-        )
-        
-        # Find most recent activity
+        # Find last bet time (from all bets)
         last_bet_time = None
-        last_fill_time = None
+        if all_bets:
+            try:
+                sorted_bets = sorted(all_bets, key=lambda x: x.get("created_at", ""), reverse=True)
+                if sorted_bets[0].get("created_at"):
+                    last_bet_time = sorted_bets[0]["created_at"]
+            except:
+                pass
+        
+        # Find fills and last fill time
         recent_fills = []
+        last_fill_time = None
         
-        # Sort by creation time
-        sorted_wagers = sorted(wagers, key=lambda w: w.get("created_at", ""), reverse=True)
-        
-        for wager in sorted_wagers:
-            created_at = wager.get("created_at")
-            updated_at = wager.get("updated_at")
-            matched_stake = wager.get("matched_stake", 0)
-            
-            # Track last bet time
-            if not last_bet_time and created_at:
-                last_bet_time = created_at
-            
-            # Track fills
+        for wager in active_bets:
+            matched_stake = wager.get("matched_stake", 0) or 0
             if matched_stake > 0:
-                if not last_fill_time and updated_at:
-                    last_fill_time = updated_at
+                fill_info = {
+                    "wager_id": wager.get("wager_id"),
+                    "external_id": wager.get("external_id", ""),
+                    "matched_stake": matched_stake,
+                    "fill_time": wager.get("updated_at"),
+                    "matching_status": wager.get("matching_status")
+                }
+                recent_fills.append(fill_info)
                 
-                # Recent fills (last hour)
-                if updated_at:
-                    try:
-                        update_time = datetime.fromisoformat(updated_at.replace('Z', '+00:00'))
-                        if update_time > datetime.now(timezone.utc) - timedelta(hours=1):
-                            recent_fills.append({
-                                "wager_id": wager.get("wager_id"),
-                                "external_id": wager.get("external_id"),
-                                "matched_stake": matched_stake,
-                                "fill_time": updated_at,
-                                "matching_status": wager.get("matching_status")
-                            })
-                    except:
-                        pass
+                # Track latest fill time
+                if wager.get("updated_at"):
+                    if not last_fill_time or wager.get("updated_at") > last_fill_time:
+                        last_fill_time = wager.get("updated_at")
         
         return {
-            "total_bets": total_bets,
+            "total_bets": len(all_bets),
+            "active_bets": len(active_bets),
             "total_stake": total_stake,
             "total_matched": total_matched,
             "total_unmatched": total_unmatched,
-            "has_active_bets": has_active_bets,
+            "has_active_bets": len(active_bets) > 0 and total_unmatched > 0,
             "last_bet_time": last_bet_time,
             "last_fill_time": last_fill_time,
-            "recent_fills": recent_fills
+            "recent_fills": recent_fills,
+            "debug_info": {
+                "all_bets_count": len(all_bets),
+                "active_bets_count": len(active_bets),
+                "cancelled_bets_count": len(all_bets) - len(active_bets),
+                "fills_detected": len(recent_fills),
+                "status": "processed_wagers"
+            }
         }
     
     async def get_position_summary_for_lines(
@@ -393,6 +319,130 @@ class ProphetXWagerService:
         except Exception as e:
             print(f"❌ Error detecting recent fills: {e}")
             return []
+            
+    async def get_all_wagers_for_line(
+        self,
+        line_id: str,
+        days_back: int = 7,
+        include_all_statuses: bool = True
+    ) -> Dict[str, Any]:
+        """
+        Get ALL wagers for a specific line_id - ENHANCED with better error handling
+        """
+        try:
+            # Calculate time range
+            now_timestamp = int(time.time())
+            from_timestamp = now_timestamp - (days_back * 24 * 60 * 60)
+            
+            all_wagers = []
+            next_cursor = None
+            
+            print(f"🔍 Searching for wagers on line_id: {line_id}")
+            
+            # Paginate through all results
+            while True:
+                result = await self.get_wager_histories(
+                    from_timestamp=from_timestamp,
+                    to_timestamp=now_timestamp,
+                    limit=1000,
+                    next_cursor=next_cursor
+                )
+                
+                if not result["success"]:
+                    print(f"❌ Failed to get wager histories: {result.get('error')}")
+                    break
+                
+                wagers = result["wagers"]
+                print(f"📊 Retrieved {len(wagers)} total wagers from ProphetX")
+                
+                # CLIENT-SIDE FILTERING: Filter by line_id
+                line_wagers = []
+                for wager in wagers:
+                    wager_line_id = wager.get("line_id")
+                    if wager_line_id == line_id:
+                        line_wagers.append(wager)
+                        stake = wager.get("stake", 0)
+                        status = wager.get("status", "")
+                        print(f"✅ Found wager for line {line_id}: {wager.get('external_id', 'unknown')} - ${stake} ({status})")
+                
+                all_wagers.extend(line_wagers)
+                print(f"📊 Found {len(line_wagers)} wagers for line {line_id} in this batch")
+                
+                next_cursor = result.get("next_cursor")
+                if not next_cursor:
+                    break
+            
+            print(f"📊 TOTAL: Found {len(all_wagers)} wagers for line {line_id}")
+            
+            # Calculate position summary (handles empty list correctly)
+            try:
+                position_summary = self._calculate_position_summary(all_wagers)
+            except Exception as summary_error:
+                print(f"❌ Error calculating position summary: {summary_error}")
+                # Return a safe default summary
+                position_summary = {
+                    "total_bets": len(all_wagers),
+                    "active_bets": 0,
+                    "total_stake": 0.0,
+                    "total_matched": 0.0,
+                    "total_unmatched": 0.0,
+                    "has_active_bets": False,
+                    "last_bet_time": None,
+                    "last_fill_time": None,
+                    "recent_fills": [],
+                    "debug_info": {
+                        "error": str(summary_error),
+                        "status": "summary_calculation_failed"
+                    }
+                }
+            
+            # Log summary for debugging
+            if len(all_wagers) == 0:
+                print(f"💰 No wagers found for line {line_id[-8:]} - ready for initial bet")
+            else:
+                print(f"💰 Line position summary:")
+                print(f"   Total bets: {position_summary['total_bets']} ({position_summary.get('active_bets', 0)} active)")
+                print(f"   Total stake: ${position_summary['total_stake']:.2f} (active bets only)")
+                print(f"   Total matched: ${position_summary['total_matched']:.2f}")
+                print(f"   Current unmatched: ${position_summary['total_unmatched']:.2f}")
+                print(f"   Has active liquidity: {position_summary['has_active_bets']}")
+            
+            return {
+                "success": True,
+                "line_id": line_id,
+                "total_wagers": len(all_wagers),
+                "wagers": all_wagers,
+                "position_summary": position_summary
+            }
+            
+        except Exception as e:
+            print(f"❌ Error getting wagers for line {line_id}: {e}")
+            import traceback
+            traceback.print_exc()
+            
+            # Return error but with safe structure
+            return {
+                "success": False,
+                "error": f"Exception: {str(e)}",
+                "line_id": line_id,
+                "total_wagers": 0,
+                "wagers": [],
+                "position_summary": {
+                    "total_bets": 0,
+                    "active_bets": 0,
+                    "total_stake": 0.0,
+                    "total_matched": 0.0,
+                    "total_unmatched": 0.0,
+                    "has_active_bets": False,
+                    "last_bet_time": None,
+                    "last_fill_time": None,
+                    "recent_fills": [],
+                    "debug_info": {
+                        "error": str(e),
+                        "status": "api_call_failed"
+                    }
+                }
+            }
 
 # This will be initialized with the main ProphetX service
 prophetx_wager_service = None

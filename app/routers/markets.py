@@ -1792,3 +1792,127 @@ async def test_wager_service_creation():
             "error": str(e),
             "error_type": type(e).__name__
         }
+    
+@router.get("/debug/liquidity-calculation/{line_id}", response_model=Dict[str, Any])
+async def debug_liquidity_calculation(
+    line_id: str,
+    recommended_initial: float = Query(100.0, description="Recommended initial stake"),
+    max_position_multiplier: float = Query(4.0, description="Max position multiplier (e.g., 4x)")
+):
+    """
+    Debug liquidity calculation for a specific line
+    
+    Shows exactly how the liquidity management logic works with current position data.
+    """
+    try:
+        from app.services.enhanced_prophetx_wager_service import ProphetXWagerService
+        from app.services.prophetx_service import prophetx_service
+        
+        # Create wager service
+        wager_service = ProphetXWagerService(prophetx_service)
+        
+        # Get current position
+        position_result = await wager_service.get_all_wagers_for_line(line_id)
+        
+        if not position_result["success"]:
+            return {
+                "success": False,
+                "message": f"Could not get position data for line {line_id}",
+                "error": position_result.get("error")
+            }
+        
+        summary = position_result["position_summary"]
+        
+        # Extract current state
+        total_stake = summary["total_stake"]
+        total_matched = summary["total_matched"]
+        current_unmatched = total_stake - total_matched
+        max_position = recommended_initial * max_position_multiplier
+        
+        # Calculate what we would do
+        liquidity_shortfall = max(0, recommended_initial - current_unmatched)
+        remaining_capacity = max_position - total_stake
+        potential_bet_amount = min(liquidity_shortfall, remaining_capacity) if remaining_capacity > 0 else 0
+        
+        # Determine action
+        if liquidity_shortfall == 0:
+            action = "✅ No action needed - adequate liquidity"
+            action_type = "none"
+        elif remaining_capacity <= 0:
+            action = "🛑 No action - at maximum position"
+            action_type = "blocked_by_limit"
+        elif potential_bet_amount > 0:
+            action = f"💰 Place ${potential_bet_amount:.2f} bet to restore liquidity"
+            action_type = "place_bet"
+        else:
+            action = "⏸️ No action needed"
+            action_type = "none"
+        
+        # Check wait period
+        wait_status = "none"
+        wait_message = "No recent fills - no wait period"
+        
+        if summary.get("last_fill_time"):
+            try:
+                from datetime import datetime, timezone, timedelta
+                last_fill = datetime.fromisoformat(summary["last_fill_time"].replace('Z', '+00:00'))
+                wait_until = last_fill + timedelta(seconds=300)  # 5 minutes
+                time_remaining = (wait_until - datetime.now(timezone.utc)).total_seconds()
+                
+                if time_remaining > 0:
+                    wait_status = "active"
+                    wait_message = f"⏰ Wait period active - {time_remaining:.0f}s remaining"
+                    if action_type == "place_bet":
+                        action = f"⏰ Would place ${potential_bet_amount:.2f} but waiting {time_remaining:.0f}s"
+                        action_type = "waiting"
+                else:
+                    wait_status = "completed"
+                    wait_message = "✅ Wait period completed"
+            except:
+                wait_message = "⚠️ Could not parse last fill time"
+        
+        return {
+            "success": True,
+            "line_id": line_id,
+            "liquidity_analysis": {
+                "current_state": {
+                    "total_stake": total_stake,
+                    "total_matched": total_matched,
+                    "current_unmatched": current_unmatched,
+                    "total_bets": summary["total_bets"],
+                    "has_active_bets": summary["has_active_bets"]
+                },
+                "targets": {
+                    "recommended_initial": recommended_initial,
+                    "max_position": max_position,
+                    "max_multiplier": max_position_multiplier
+                },
+                "calculations": {
+                    "liquidity_shortfall": liquidity_shortfall,
+                    "remaining_capacity": remaining_capacity,
+                    "potential_bet_amount": potential_bet_amount
+                },
+                "decision": {
+                    "action": action,
+                    "action_type": action_type,
+                    "wait_status": wait_status,
+                    "wait_message": wait_message
+                }
+            },
+            "examples_explanation": {
+                "your_case": f"total_stake=${total_stake}, total_matched=${total_matched}, current_unmatched=${current_unmatched}",
+                "example_1": "total_stake=25, total_matched=25, unmatched=0 → Need $25 to reach target",
+                "example_2": "total_stake=25, total_matched=0, unmatched=25 → Already at target",
+                "example_3": "total_stake=25, total_matched=10, unmatched=15 → Need $10 to reach target",
+                "example_4": "total_stake=100, total_matched=90, unmatched=10 → At max position, can't add more",
+                "example_5": "total_stake=90, total_matched=85, unmatched=5 → Need $20 but limited to $10 by max position"
+            }
+        }
+        
+    except Exception as e:
+        import traceback
+        return {
+            "success": False,
+            "error": f"Debug calculation failed: {str(e)}",
+            "traceback": traceback.format_exc()
+        }

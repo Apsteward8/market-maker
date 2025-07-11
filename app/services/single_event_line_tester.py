@@ -287,15 +287,12 @@ class SingleEventLineTester:
 
     async def _check_fills_and_place_incremental_bets(self) -> int:
         """
-        Check for fills and place incremental bets only when appropriate
+        ENHANCED: Check for fills and manage liquidity restoration
         
-        Rules:
-        - Only place incremental bets if there are recent fills
-        - Must wait 5 minutes after fills before adding liquidity
-        - Never exceed 4x max position
+        Handles lines with no existing wagers and includes better error handling.
         """
-        print("\\n2️⃣ CHECKING FOR FILLS AND INCREMENTAL BETTING")
-        print("-" * 45)
+        print("\\n2️⃣ LIQUIDITY MANAGEMENT AND FILL MONITORING")
+        print("-" * 50)
         
         incremental_bets = 0
         
@@ -305,116 +302,196 @@ class SingleEventLineTester:
                 position_result = await self.prophetx_wager_service.get_all_wagers_for_line(line_id)
                 
                 if not position_result["success"]:
+                    print(f"   ❌ Could not get position for {strategy_info['selection_name']}")
                     continue
                 
                 summary = position_result["position_summary"]
-                recent_fills = summary.get("recent_fills", [])
+                total_stake = summary.get("total_stake", 0)
+                total_matched = summary.get("total_matched", 0)
+                current_unmatched = total_stake - total_matched
                 last_fill_time = summary.get("last_fill_time")
+                recent_fills = summary.get("recent_fills", [])
+                total_wagers = position_result.get("total_wagers", 0)
                 
-                print(f"   📊 {strategy_info['selection_name']}: {len(recent_fills)} recent fills")
+                recommended_initial = strategy_info["recommended_initial_stake"]
+                max_position = strategy_info["max_position"]
                 
-                # Only proceed if we have fills
-                if not recent_fills and not last_fill_time:
-                    print(f"      ⏸️  No fills detected - no action needed")
+                print(f"\\n📊 {strategy_info['selection_name'][:30]:<30}")
+                
+                # Handle case where no wagers exist yet (shouldn't happen in monitoring phase, but be safe)
+                if total_wagers == 0:
+                    print(f"   ⚠️  No wagers found - this should have been handled in initial phase")
+                    print(f"   ✅ Placing initial ${recommended_initial:.2f} bet")
+                    
+                    success = await self._place_single_bet(
+                        strategy_info, 
+                        recommended_initial, 
+                        "Late initial bet (missed in initial phase)"
+                    )
+                    
+                    if success:
+                        incremental_bets += 1
                     continue
                 
-                # Check wait period
-                if last_fill_time:
-                    try:
-                        last_fill = datetime.fromisoformat(last_fill_time.replace('Z', '+00:00'))
-                        wait_until = last_fill + timedelta(seconds=self.fill_wait_period_seconds)
-                        time_remaining = (wait_until - datetime.now(timezone.utc)).total_seconds()
-                        
-                        if time_remaining > 0:
-                            print(f"      ⏰ Wait period active - {time_remaining:.0f}s remaining")
-                            continue
-                    except:
-                        pass
+                print(f"   📈 Position: ${total_stake:.2f} total, ${total_matched:.2f} matched, ${current_unmatched:.2f} unmatched")
+                print(f"   🎯 Target: ${recommended_initial:.2f} unmatched, max: ${max_position:.2f} total")
+                print(f"   📊 Recent fills: {len(recent_fills)}")
                 
-                # Calculate incremental bet needed
-                current_stake = summary["total_stake"]
-                total_matched = summary["total_matched"]
+                # Calculate liquidity shortfall
+                liquidity_shortfall = max(0, recommended_initial - current_unmatched)
                 
-                # If we've had fills, we need to restore liquidity
-                if total_matched > 0:
-                    target_unmatched = strategy_info["recommended_initial_stake"]
-                    current_unmatched = current_stake - total_matched
+                if liquidity_shortfall == 0:
+                    print(f"   ✅ Liquidity adequate (${current_unmatched:.2f} >= ${recommended_initial:.2f})")
+                    continue
+                
+                print(f"   🔍 Liquidity shortfall: ${liquidity_shortfall:.2f}")
+                
+                # Check if we have recent fills and need to wait
+                if recent_fills or last_fill_time:
+                    wait_needed = False
                     
-                    if current_unmatched < target_unmatched:
-                        needed = target_unmatched - current_unmatched
-                        
-                        # Check position limits
-                        remaining_capacity = strategy_info["max_position"] - current_stake
-                        bet_amount = min(needed, remaining_capacity, strategy_info["increment_size"])
-                        
-                        if bet_amount > 0:
-                            print(f"      ✅ Adding ${bet_amount:.2f} to restore liquidity after fills")
+                    if last_fill_time:
+                        try:
+                            last_fill = datetime.fromisoformat(last_fill_time.replace('Z', '+00:00'))
+                            wait_until = last_fill + timedelta(seconds=self.fill_wait_period_seconds)
+                            time_remaining = (wait_until - datetime.now(timezone.utc)).total_seconds()
                             
-                            success = await self._place_single_bet(
-                                strategy_info,
-                                bet_amount,
-                                f"Incremental bet (restore after ${total_matched:.2f} filled)"
-                            )
-                            
-                            if success:
-                                incremental_bets += 1
-                        else:
-                            print(f"      🛑 At position limit - cannot add more")
+                            if time_remaining > 0:
+                                print(f"   ⏰ WAIT PERIOD: {time_remaining:.0f}s remaining after recent fill")
+                                wait_needed = True
+                            else:
+                                print(f"   ✅ Wait period completed - can restore liquidity")
+                        except Exception as e:
+                            print(f"   ⚠️  Could not parse last fill time: {e}")
+                    
+                    if wait_needed:
+                        continue
+                
+                # Check position limits
+                remaining_capacity = max_position - total_stake
+                if remaining_capacity <= 0:
+                    print(f"   🛑 At max position (${total_stake:.2f} >= ${max_position:.2f}) - cannot add more")
+                    continue
+                
+                # Calculate bet amount to restore liquidity (within limits)
+                bet_amount = min(liquidity_shortfall, remaining_capacity)
+                
+                if bet_amount > 0:
+                    print(f"   ✅ RESTORING LIQUIDITY: Adding ${bet_amount:.2f}")
+                    print(f"      (shortfall: ${liquidity_shortfall:.2f}, capacity: ${remaining_capacity:.2f})")
+                    
+                    success = await self._place_single_bet(
+                        strategy_info,
+                        bet_amount,
+                        f"Restore liquidity (${total_matched:.2f} was filled)"
+                    )
+                    
+                    if success:
+                        incremental_bets += 1
+                        print(f"      ✅ Liquidity restoration bet placed")
                     else:
-                        print(f"      ✅ Liquidity adequate - no incremental bet needed")
-                        
+                        print(f"      ❌ Failed to place liquidity restoration bet")
+                else:
+                    print(f"   ⏸️  No liquidity restoration needed")
+                    
             except Exception as e:
                 print(f"   ❌ Error checking line {line_id}: {e}")
+                import traceback
+                traceback.print_exc()
         
         if incremental_bets == 0:
-            print("   📊 No incremental bets needed this cycle")
+            print("\\n📊 No liquidity restoration needed this cycle")
+        else:
+            print(f"\\n✅ Restored liquidity on {incremental_bets} lines this cycle")
         
         return incremental_bets
 
     async def _initial_bet_phase(self) -> int:
         """
-        PHASE 1: Place initial bets only where no position exists
+        PHASE 1: Ensure each line has the recommended initial liquidity
         
-        This runs ONCE at the start and only places bets on lines with NO existing bets.
+        This runs ONCE at the start and ensures each line has adequate liquidity.
+        Handles lines with no existing wagers correctly.
         """
-        print("🎯 Running initial bet placement...")
-        print("Rule: Only place bet if line has NO existing bets AND is profitable")
-        print("-" * 50)
+        print("🎯 Running initial liquidity setup...")
+        print("Rule: Ensure each line has recommended initial liquidity available")
+        print("-" * 60)
         
         initial_bets = 0
         
         for line_id, strategy_info in self.monitored_lines.items():
             try:
-                # Check if ANY bets exist for this line
+                # Get current position
                 position_result = await self.prophetx_wager_service.get_all_wagers_for_line(line_id)
                 
                 if not position_result["success"]:
                     print(f"❌ Could not check position for {strategy_info['selection_name']}")
                     continue
                 
-                total_bets = position_result["position_summary"]["total_bets"]
-                total_stake = position_result["position_summary"]["total_stake"]
+                summary = position_result["position_summary"]
+                total_stake = summary.get("total_stake", 0)
+                total_matched = summary.get("total_matched", 0)
+                current_unmatched = total_stake - total_matched
+                total_wagers = position_result.get("total_wagers", 0)
                 
-                if total_bets == 0:
-                    # No existing bets - place initial bet
-                    print(f"✅ {strategy_info['selection_name']}: No existing bets - placing initial ${strategy_info['recommended_initial_stake']:.2f}")
+                recommended_initial = strategy_info["recommended_initial_stake"]
+                max_position = strategy_info["max_position"]
+                
+                print(f"📊 {strategy_info['selection_name'][:30]:<30}")
+                
+                # Handle case where no wagers exist yet
+                if total_wagers == 0:
+                    print(f"   ✅ No existing wagers - placing initial ${recommended_initial:.2f} bet")
                     
                     success = await self._place_single_bet(
                         strategy_info, 
-                        strategy_info["recommended_initial_stake"], 
-                        "Initial bet"
+                        recommended_initial, 
+                        "Initial bet (no prior wagers)"
+                    )
+                    
+                    if success:
+                        initial_bets += 1
+                    continue
+                
+                print(f"   Current state: ${total_stake:.2f} total, ${total_matched:.2f} matched, ${current_unmatched:.2f} unmatched")
+                print(f"   Target: ${recommended_initial:.2f} unmatched, max: ${max_position:.2f} total")
+                
+                # Calculate if we need to add liquidity
+                liquidity_needed = max(0, recommended_initial - current_unmatched)
+                
+                if liquidity_needed == 0:
+                    print(f"   ✅ Already has adequate liquidity (${current_unmatched:.2f} >= ${recommended_initial:.2f})")
+                    continue
+                
+                # Check position limits
+                remaining_capacity = max_position - total_stake
+                if remaining_capacity <= 0:
+                    print(f"   🛑 At max position (${total_stake:.2f} >= ${max_position:.2f}) - cannot add more")
+                    continue
+                
+                # Calculate actual bet amount (limited by capacity)
+                bet_amount = min(liquidity_needed, remaining_capacity)
+                
+                if bet_amount > 0:
+                    print(f"   ✅ Adding ${bet_amount:.2f} liquidity (needed: ${liquidity_needed:.2f}, capacity: ${remaining_capacity:.2f})")
+                    
+                    success = await self._place_single_bet(
+                        strategy_info, 
+                        bet_amount, 
+                        f"Restore liquidity to ${recommended_initial:.2f}"
                     )
                     
                     if success:
                         initial_bets += 1
                 else:
-                    # Existing bets found - skip
-                    print(f"⏸️  {strategy_info['selection_name']}: {total_bets} existing bets (${total_stake:.2f}) - skipping")
+                    print(f"   ⏸️  No liquidity needed")
                     
             except Exception as e:
                 print(f"❌ Error checking line {line_id}: {e}")
+                import traceback
+                traceback.print_exc()
         
-        print(f"\\n📊 Initial phase complete: {initial_bets} new bets placed")
+        print(f"\\n📊 Initial phase complete: {initial_bets} bets placed")
         return initial_bets
     
     async def _monitoring_loop(self):
@@ -457,93 +534,7 @@ class SingleEventLineTester:
             except Exception as e:
                 print(f"❌ Error in monitoring cycle {cycle_count}: {e}")
                 await asyncio.sleep(30)  # Wait 30s before retrying
-
-    async def _check_fills_and_place_incremental_bets(self) -> int:
-        """
-        Check for fills and place incremental bets only when appropriate
         
-        Rules:
-        - Only place incremental bets if there are recent fills
-        - Must wait 5 minutes after fills before adding liquidity
-        - Never exceed 4x max position
-        """
-        print("\\n2️⃣ CHECKING FOR FILLS AND INCREMENTAL BETTING")
-        print("-" * 45)
-        
-        incremental_bets = 0
-        
-        for line_id, strategy_info in self.monitored_lines.items():
-            try:
-                # Get current position
-                position_result = await self.prophetx_wager_service.get_all_wagers_for_line(line_id)
-                
-                if not position_result["success"]:
-                    continue
-                
-                summary = position_result["position_summary"]
-                recent_fills = summary.get("recent_fills", [])
-                last_fill_time = summary.get("last_fill_time")
-                
-                print(f"   📊 {strategy_info['selection_name']}: {len(recent_fills)} recent fills")
-                
-                # Only proceed if we have fills
-                if not recent_fills and not last_fill_time:
-                    print(f"      ⏸️  No fills detected - no action needed")
-                    continue
-                
-                # Check wait period
-                if last_fill_time:
-                    try:
-                        last_fill = datetime.fromisoformat(last_fill_time.replace('Z', '+00:00'))
-                        wait_until = last_fill + timedelta(seconds=self.fill_wait_period_seconds)
-                        time_remaining = (wait_until - datetime.now(timezone.utc)).total_seconds()
-                        
-                        if time_remaining > 0:
-                            print(f"      ⏰ Wait period active - {time_remaining:.0f}s remaining")
-                            continue
-                    except:
-                        pass
-                
-                # Calculate incremental bet needed
-                current_stake = summary["total_stake"]
-                total_matched = summary["total_matched"]
-                
-                # If we've had fills, we need to restore liquidity
-                if total_matched > 0:
-                    target_unmatched = strategy_info["recommended_initial_stake"]
-                    current_unmatched = current_stake - total_matched
-                    
-                    if current_unmatched < target_unmatched:
-                        needed = target_unmatched - current_unmatched
-                        
-                        # Check position limits
-                        remaining_capacity = strategy_info["max_position"] - current_stake
-                        bet_amount = min(needed, remaining_capacity, strategy_info["increment_size"])
-                        
-                        if bet_amount > 0:
-                            print(f"      ✅ Adding ${bet_amount:.2f} to restore liquidity after fills")
-                            
-                            success = await self._place_single_bet(
-                                strategy_info,
-                                bet_amount,
-                                f"Incremental bet (restore after ${total_matched:.2f} filled)"
-                            )
-                            
-                            if success:
-                                incremental_bets += 1
-                        else:
-                            print(f"      🛑 At position limit - cannot add more")
-                    else:
-                        print(f"      ✅ Liquidity adequate - no incremental bet needed")
-                        
-            except Exception as e:
-                print(f"   ❌ Error checking line {line_id}: {e}")
-        
-        if incremental_bets == 0:
-            print("   📊 No incremental bets needed this cycle")
-        
-        return incremental_bets
-    
     async def _single_event_monitoring_loop(self):
         """Main monitoring loop for single event"""
         print(f"\\n🔄 Starting single event monitoring loop...")
@@ -627,23 +618,21 @@ class SingleEventLineTester:
     
     async def _place_new_bets(self) -> int:
         """
-        DEPRECATED: This method is replaced by the new phase-based approach
+        UPDATED: Use the new liquidity-based logic
         
-        The new workflow uses:
-        1. _initial_bet_phase() - runs once at startup
-        2. _check_fills_and_place_incremental_bets() - runs in monitoring loop
-        
-        This method should no longer be called in the new workflow.
+        This method now properly manages liquidity instead of just checking 
+        if any bets were ever placed.
         """
-        print("⚠️  WARNING: _place_new_bets called but deprecated")
-        print("   Using new phase-based approach instead")
+        print("\\n🔄 LIQUIDITY-BASED BETTING LOGIC")
+        print("-" * 40)
         
-        # If we're in initial phase, don't place any bets here
+        # If we're in initial phase, use initial logic
         if not hasattr(self, 'initial_phase_complete') or not self.initial_phase_complete:
-            print("   ⏸️  In initial phase - skipping")
-            return 0
+            print("   🎯 Running initial liquidity setup...")
+            return await self._initial_bet_phase()
         
-        # If we're in monitoring phase, delegate to the new method
+        # If we're in monitoring phase, use monitoring logic
+        print("   📊 Running liquidity monitoring and restoration...")
         return await self._check_fills_and_place_incremental_bets()
     
     async def _place_single_bet(self, strategy_info: Dict[str, Any], amount: float, reason: str) -> bool:
