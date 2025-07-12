@@ -993,5 +993,77 @@ class ProphetXService:
             print(f"❌ {error_msg}")
             return {"success": False, "error": error_msg, "wager_id": wager_id, "dry_run": False}
 
+    async def cancel_wagers_by_market(self, event_id: int, market_id: int) -> Dict[str, Any]:
+        """
+        Cancel all wagers for a specific market
+        
+        Args:
+            event_id: ProphetX event ID
+            market_id: ProphetX market ID
+            
+        Returns:
+            Cancellation result
+        """
+        if self.settings.dry_run_mode:
+            print(f"🧪 [DRY RUN] Would cancel all wagers for event {event_id}, market {market_id}")
+            return {
+                "success": True,
+                "dry_run": True,
+                "message": f"Dry run - would cancel wagers for market {market_id}"
+            }
+        
+        try:
+            headers = await self.get_auth_headers()
+            url = f"{self.base_url}/partner/mm/cancel_wagers_by_market"
+            
+            payload = {
+                "event_id": event_id,
+                "market_id": market_id
+            }
+            
+            print(f"🗑️ Cancelling all wagers for event {event_id}, market {market_id}")
+            
+            response = requests.post(url, headers=headers, json=payload)
+            
+            if response.status_code in [200, 201]:
+                data = response.json()
+                success = data.get('data', {}).get('success', False)
+                
+                if success:
+                    print(f"✅ Successfully cancelled wagers for market {market_id}")
+                    return {
+                        "success": True,
+                        "event_id": event_id,
+                        "market_id": market_id,
+                        "message": f"Cancelled all wagers for market {market_id}",
+                        "response_data": data
+                    }
+                else:
+                    print(f"⚠️ Cancel request processed but success=false")
+                    return {
+                        "success": False,
+                        "error": "ProphetX returned success=false",
+                        "response_data": data
+                    }
+            else:
+                error_msg = f"HTTP {response.status_code}: {response.text}"
+                print(f"❌ Cancel request failed: {error_msg}")
+                return {
+                    "success": False,
+                    "error": error_msg,
+                    "event_id": event_id,
+                    "market_id": market_id
+                }
+                
+        except Exception as e:
+            error_msg = f"Exception cancelling wagers: {str(e)}"
+            print(f"❌ {error_msg}")
+            return {
+                "success": False,
+                "error": error_msg,
+                "event_id": event_id,
+                "market_id": market_id
+            }
+
 # Global ProphetX service instance
 prophetx_service = ProphetXService()

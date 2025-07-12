@@ -2169,3 +2169,432 @@ async def debug_liquidity_calculation(
             "error": f"Debug calculation failed: {str(e)}",
             "traceback": traceback.format_exc()
         }
+    
+@router.get("/line-monitoring/test-single-event/metadata", response_model=Dict[str, Any])
+async def get_single_event_metadata():
+    """
+    Get metadata for all lines being monitored in the single event test
+    
+    This shows ProphetX event IDs and market IDs for each line,
+    which will be needed for the cancel_wagers_by_market functionality.
+    """
+    try:
+        from app.services.single_event_line_tester import single_event_line_tester
+        
+        if not single_event_line_tester.session or not single_event_line_tester.session.is_active:
+            return {
+                "success": False,
+                "message": "No active single event test session"
+            }
+        
+        # Get all metadata
+        metadata = single_event_line_tester.get_all_line_metadata()
+        
+        if not metadata:
+            return {
+                "success": False,
+                "message": "No line metadata available"
+            }
+        
+        # Organize metadata by event and market
+        events = {}
+        markets = {}
+        
+        for line_id, meta in metadata.items():
+            # Group by event
+            event_id = meta.prophetx_event_id
+            if event_id:
+                if event_id not in events:
+                    events[event_id] = {
+                        "event_id": event_id,
+                        "lines": [],
+                        "markets": set()
+                    }
+                events[event_id]["lines"].append({
+                    "line_id": line_id,
+                    "selection_name": meta.selection_name,
+                    "market_id": meta.prophetx_market_id,
+                    "market_type": meta.market_type
+                })
+                if meta.prophetx_market_id:
+                    events[event_id]["markets"].add(meta.prophetx_market_id)
+            
+            # Group by market
+            market_id = meta.prophetx_market_id
+            if market_id:
+                if market_id not in markets:
+                    markets[market_id] = {
+                        "market_id": market_id,
+                        "market_type": meta.market_type,
+                        "event_id": event_id,
+                        "lines": []
+                    }
+                markets[market_id]["lines"].append({
+                    "line_id": line_id,
+                    "selection_name": meta.selection_name
+                })
+        
+        # Convert sets to lists for JSON serialization
+        for event_data in events.values():
+            event_data["markets"] = list(event_data["markets"])
+        
+        return {
+            "success": True,
+            "message": f"Retrieved metadata for {len(metadata)} lines",
+            "data": {
+                "total_lines": len(metadata),
+                "total_events": len(events),
+                "total_markets": len(markets),
+                "events": events,
+                "markets": markets,
+                "line_details": [
+                    {
+                        "line_id": line_id,
+                        "selection_name": meta.selection_name,
+                        "prophetx_event_id": meta.prophetx_event_id,
+                        "prophetx_market_id": meta.prophetx_market_id,
+                        "market_type": meta.market_type,
+                        "last_updated": meta.last_updated.isoformat()
+                    }
+                    for line_id, meta in metadata.items()
+                ]
+            }
+        }
+        
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error getting metadata: {str(e)}")
+
+@router.get("/line-monitoring/test-single-event/metadata/{line_id}", response_model=Dict[str, Any])
+async def get_single_line_metadata(line_id: str):
+    """
+    Get metadata for a specific line
+    
+    This shows the ProphetX event ID and market ID for a specific line.
+    """
+    try:
+        from app.services.single_event_line_tester import single_event_line_tester
+        
+        metadata = single_event_line_tester.get_line_metadata(line_id)
+        
+        if not metadata:
+            return {
+                "success": False,
+                "message": f"No metadata found for line {line_id}"
+            }
+        
+        return {
+            "success": True,
+            "message": f"Metadata for line {line_id}",
+            "data": {
+                "line_id": metadata.line_id,
+                "selection_name": metadata.selection_name,
+                "prophetx_event_id": metadata.prophetx_event_id,
+                "prophetx_market_id": metadata.prophetx_market_id,
+                "market_type": metadata.market_type,
+                "last_updated": metadata.last_updated.isoformat(),
+                "can_cancel_by_market": metadata.prophetx_market_id is not None and metadata.prophetx_event_id is not None
+            }
+        }
+        
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error getting line metadata: {str(e)}")
+
+@router.post("/line-monitoring/test-single-event/test-cancel-preparation", response_model=Dict[str, Any])
+async def test_cancel_preparation():
+    """
+    Test preparation for cancel_wagers_by_market calls
+    
+    This shows what parameters would be used for canceling wagers
+    without actually canceling anything.
+    """
+    try:
+        from app.services.single_event_line_tester import single_event_line_tester
+        
+        if not single_event_line_tester.session or not single_event_line_tester.session.is_active:
+            return {
+                "success": False,
+                "message": "No active single event test session"
+            }
+        
+        metadata = single_event_line_tester.get_all_line_metadata()
+        
+        if not metadata:
+            return {
+                "success": False,
+                "message": "No line metadata available"
+            }
+        
+        # Prepare cancel parameters by market
+        cancel_params = []
+        markets_seen = set()
+        
+        for line_id, meta in metadata.items():
+            if meta.prophetx_event_id and meta.prophetx_market_id:
+                market_key = (meta.prophetx_event_id, meta.prophetx_market_id)
+                
+                if market_key not in markets_seen:
+                    cancel_params.append({
+                        "event_id": meta.prophetx_event_id,
+                        "market_id": meta.prophetx_market_id,
+                        "market_type": meta.market_type,
+                        "lines_affected": []
+                    })
+                    markets_seen.add(market_key)
+        
+        # Add lines to each market
+        for line_id, meta in metadata.items():
+            if meta.prophetx_event_id and meta.prophetx_market_id:
+                for param in cancel_params:
+                    if (param["event_id"] == meta.prophetx_event_id and 
+                        param["market_id"] == meta.prophetx_market_id):
+                        param["lines_affected"].append({
+                            "line_id": line_id,
+                            "selection_name": meta.selection_name
+                        })
+        
+        return {
+            "success": True,
+            "message": f"Prepared cancel parameters for {len(cancel_params)} markets",
+            "data": {
+                "total_markets": len(cancel_params),
+                "total_lines": len(metadata),
+                "cancel_params": cancel_params,
+                "note": "These are the parameters that would be used for /mm/cancel_wagers_by_market calls"
+            }
+        }
+        
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error preparing cancel parameters: {str(e)}")
+
+# Add this single endpoint to your markets.py router to test the metadata
+
+@router.get("/line-monitoring/test-single-event/metadata", response_model=Dict[str, Any])
+async def get_single_event_metadata():
+    """
+    Get metadata for all lines being monitored in the single event test
+    
+    This shows ProphetX event IDs and market IDs for each line.
+    """
+    try:
+        from app.services.single_event_line_tester import single_event_line_tester
+        
+        if not single_event_line_tester.session or not single_event_line_tester.session.is_active:
+            return {
+                "success": False,
+                "message": "No active single event test session"
+            }
+        
+        # Get all metadata
+        metadata = single_event_line_tester.get_all_line_metadata()
+        
+        return {
+            "success": True,
+            "message": f"Retrieved metadata for {len(metadata)} lines",
+            "data": {
+                "total_lines": len(metadata),
+                "line_details": [
+                    {
+                        "line_id": line_id,
+                        "selection_name": meta.selection_name,
+                        "prophetx_event_id": meta.prophetx_event_id,
+                        "prophetx_market_id": meta.prophetx_market_id,
+                        "market_type": meta.market_type,
+                        "last_updated": meta.last_updated.isoformat(),
+                        "ready_for_cancel": meta.prophetx_event_id is not None and meta.prophetx_market_id is not None
+                    }
+                    for line_id, meta in metadata.items()
+                ]
+            }
+        }
+        
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error getting metadata: {str(e)}")
+
+@router.get("/line-monitoring/test-single-event/markets", response_model=Dict[str, Any])
+async def get_markets_for_cancellation():
+    """
+    Get list of markets that can be cancelled in the current session
+    
+    This shows all the markets with their event_id and market_id
+    that are available for cancellation.
+    """
+    try:
+        from app.services.single_event_line_tester import single_event_line_tester
+        
+        if not single_event_line_tester.session or not single_event_line_tester.session.is_active:
+            return {
+                "success": False,
+                "message": "No active single event test session"
+            }
+        
+        markets = single_event_line_tester.get_markets_for_cancellation()
+        
+        return {
+            "success": True,
+            "message": f"Found {len(markets)} markets available for cancellation",
+            "data": {
+                "total_markets": len(markets),
+                "markets": markets,
+                "note": "These are the parameters that would be used for cancel_wagers_by_market calls"
+            }
+        }
+        
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error getting markets for cancellation: {str(e)}")
+
+@router.post("/line-monitoring/test-single-event/cancel-market/{market_id}", response_model=Dict[str, Any])
+async def test_cancel_market(market_id: int):
+    """
+    Test cancelling all wagers for a specific market
+    
+    - **market_id**: ProphetX market ID to cancel (e.g., 251 for moneyline, 256 for spreads, 258 for totals)
+    
+    **Warning**: This will actually cancel your real bets if not in dry run mode!
+    """
+    try:
+        from app.services.single_event_line_tester import single_event_line_tester
+        
+        if not single_event_line_tester.session or not single_event_line_tester.session.is_active:
+            return {
+                "success": False,
+                "message": "No active single event test session"
+            }
+        
+        # Show what would be cancelled before doing it
+        affected_lines = []
+        for line_id, metadata in single_event_line_tester.line_metadata.items():
+            if metadata.prophetx_market_id == market_id:
+                affected_lines.append({
+                    "line_id": line_id,
+                    "selection_name": metadata.selection_name
+                })
+        
+        if not affected_lines:
+            return {
+                "success": False,
+                "message": f"Market {market_id} not found in current session"
+            }
+        
+        result = await single_event_line_tester.cancel_wagers_for_market(market_id)
+        
+        return {
+            "success": result["success"],
+            "message": result["message"],
+            "data": result.get("data"),
+            "affected_lines": affected_lines
+        }
+        
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error cancelling market: {str(e)}")
+
+@router.post("/line-monitoring/test-single-event/cancel-all-markets", response_model=Dict[str, Any])
+async def test_cancel_all_markets():
+    """
+    Test cancelling all wagers for all markets in the current event
+    
+    **Warning**: This will cancel ALL your bets for this event if not in dry run mode!
+    
+    This simulates what would happen when odds change and we need to 
+    cancel and replace all bets.
+    """
+    try:
+        from app.services.single_event_line_tester import single_event_line_tester
+        
+        if not single_event_line_tester.session or not single_event_line_tester.session.is_active:
+            return {
+                "success": False,
+                "message": "No active single event test session"
+            }
+        
+        # Show what markets would be cancelled
+        markets = single_event_line_tester.get_markets_for_cancellation()
+        
+        result = await single_event_line_tester.cancel_all_wagers_for_event()
+        
+        return {
+            "success": result["success"],
+            "message": result["message"],
+            "data": result.get("data"),
+            "markets_before_cancel": markets
+        }
+        
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error cancelling all markets: {str(e)}")
+
+@router.post("/line-monitoring/test-single-event/simulate-odds-change", response_model=Dict[str, Any])
+async def simulate_odds_change():
+    """
+    Simulate what happens when odds change
+    
+    This will:
+    1. Show current markets and lines
+    2. Cancel all wagers (simulating odds change response)
+    3. Show the results
+    
+    **Warning**: This will cancel your real bets if not in dry run mode!
+    """
+    try:
+        from app.services.single_event_line_tester import single_event_line_tester
+        
+        if not single_event_line_tester.session or not single_event_line_tester.session.is_active:
+            return {
+                "success": False,
+                "message": "No active single event test session"
+            }
+        
+        # Step 1: Show current state
+        markets_before = single_event_line_tester.get_markets_for_cancellation()
+        
+        print("🎲 SIMULATING ODDS CHANGE")
+        print("=" * 40)
+        print(f"📊 Current markets: {len(markets_before)}")
+        for market in markets_before:
+            print(f"   Market {market['market_id']} ({market['market_type']}): {len(market['lines'])} lines")
+        
+        # Step 2: Cancel all wagers (as if odds changed)
+        print("\\n🗑️ Cancelling all wagers due to 'odds change'...")
+        cancel_result = await single_event_line_tester.cancel_all_wagers_for_event()
+        
+        # Step 3: Show results
+        print("\\n✅ Odds change simulation complete")
+        print(f"   Cancelled: {cancel_result.get('data', {}).get('successful_cancellations', 0)} markets")
+        print("   New bets would be placed in next monitoring cycle")
+        
+        return {
+            "success": True,
+            "message": "Simulated odds change and cancellation",
+            "data": {
+                "simulation_type": "odds_change",
+                "markets_before": markets_before,
+                "cancellation_result": cancel_result,
+                "next_step": "New bets will be placed in next monitoring cycle"
+            }
+        }
+        
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error simulating odds change: {str(e)}")
+
+# Also add this utility endpoint to check ProphetX service directly
+@router.post("/prophetx/test-cancel-market", response_model=Dict[str, Any])
+async def test_prophetx_cancel_market(event_id: int, market_id: int):
+    """
+    Test the ProphetX cancel_wagers_by_market endpoint directly
+    
+    - **event_id**: ProphetX event ID
+    - **market_id**: ProphetX market ID
+    
+    **Warning**: This will cancel real bets if not in dry run mode!
+    """
+    try:
+        from app.services.prophetx_service import prophetx_service
+        
+        result = await prophetx_service.cancel_wagers_by_market(event_id, market_id)
+        
+        return {
+            "success": result["success"],
+            "message": f"Tested cancel for event {event_id}, market {market_id}",
+            "data": result
+        }
+        
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error testing ProphetX cancel: {str(e)}")

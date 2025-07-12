@@ -26,6 +26,16 @@ class SingleEventSession:
     total_fills_detected: int
     last_cycle_time: Optional[datetime]
 
+@dataclass
+class LineMetadata:
+    """Metadata for each monitored line including ProphetX IDs"""
+    line_id: str
+    prophetx_event_id: Optional[int]
+    prophetx_market_id: Optional[int]  # Make sure this stays as int
+    market_type: Optional[str]
+    selection_name: str
+    last_updated: datetime
+
 class SingleEventLineTester:
     """Test line monitoring workflow on a single event"""
     
@@ -34,6 +44,7 @@ class SingleEventLineTester:
         self.monitoring_active = False
         self.monitored_lines: Dict[str, Any] = {}  # line_id -> strategy info
         self.initial_phase_complete = False
+        self.line_metadata: Dict[str, LineMetadata] = {}
         
         # Services (will be injected)
         self.line_position_service = None
@@ -137,17 +148,30 @@ class SingleEventLineTester:
             
             # Step 5: Store lines to monitor
             self.monitored_lines = {}
+            self.line_metadata = {}  # Clear previous metadata
+            
             for instruction in strategy.betting_instructions:
-                self.monitored_lines[instruction.line_id] = {
-                    "line_id": instruction.line_id,
+                line_id = instruction.line_id
+                
+                self.monitored_lines[line_id] = {
+                    "line_id": line_id,
                     "selection_name": instruction.selection_name,
                     "odds": instruction.odds,
                     "recommended_initial_stake": instruction.stake,
                     "max_position": instruction.max_position,
                     "increment_size": instruction.increment_size,
                     "event_id": str(event_match.prophetx_event.event_id),
-                    "market_type": "h2h"
+                    "market_type": "h2h"  # fallback
                 }
+                
+                # ✅ NEW: Store metadata with improved extraction
+                await self._fetch_and_store_line_metadata_improved(
+                    line_id=line_id,
+                    prophetx_event_id=event_match.prophetx_event.event_id,
+                    market_matches=market_matches,  # Pass the full market_matches object
+                    selection_name=instruction.selection_name
+                )
+        
             
             print(f"📋 Lines to monitor: {len(self.monitored_lines)}")
             for line_id, info in self.monitored_lines.items():
@@ -731,7 +755,272 @@ class SingleEventLineTester:
             "total_bets_placed": self.session.total_bets_placed,
             "total_fills_detected": self.session.total_fills_detected,
             "last_cycle_time": self.session.last_cycle_time.isoformat() if self.session.last_cycle_time else None,
-            "monitoring_interval_seconds": self.monitoring_interval_seconds
+            "monitoring_interval_seconds": self.monitoring_interval_seconds,
+            "metadata_summary": {
+                "lines_with_metadata": len(self.line_metadata),
+                "prophetx_events": len(set(m.prophetx_event_id for m in self.line_metadata.values() if m.prophetx_event_id)),
+                "prophetx_markets": len(set(m.prophetx_market_id for m in self.line_metadata.values() if m.prophetx_market_id)),
+                "market_types": list(set(m.market_type for m in self.line_metadata.values() if m.market_type))
+            }
+        }
+    
+    # 4. Add this method to fetch and store metadata when lines are created
+
+    async def _fetch_and_store_line_metadata_improved(self, line_id: str, prophetx_event_id: int, 
+                                        market_matches, selection_name: str):
+        """
+        Improved version that properly extracts market_id from market_matches
+        """
+        try:
+            market_id = None
+            market_type = "unknown"
+            
+            # Search through all market matches to find the one containing this line_id
+            if hasattr(market_matches, 'market_matches'):
+                for market_match in market_matches.market_matches:
+                    if hasattr(market_match, 'outcome_mappings'):
+                        for outcome_mapping in market_match.outcome_mappings:
+                            # Handle both dict and object formats
+                            if isinstance(outcome_mapping, dict):
+                                mapping_line_id = outcome_mapping.get('prophetx_line_id')
+                            else:
+                                mapping_line_id = getattr(outcome_mapping, 'prophetx_line_id', None)
+                            
+                            if mapping_line_id == line_id:
+                                # Found our line! Get the market info
+                                raw_market_id = getattr(market_match, 'prophetx_market_id', None)
+                                market_type = getattr(market_match, 'odds_api_market_type', 'unknown')
+                                
+                                # ✅ FIX: Convert market_id to integer
+                                if raw_market_id is not None:
+                                    try:
+                                        market_id = int(raw_market_id)
+                                    except (ValueError, TypeError):
+                                        print(f"⚠️ Could not convert market_id '{raw_market_id}' to int")
+                                        market_id = None
+                                
+                                print(f"   🎯 Found line {line_id} in market {market_id} ({market_type})")
+                                break
+                    
+                    if market_id:  # Break outer loop too
+                        break
+            
+            # Store the metadata
+            metadata = LineMetadata(
+                line_id=line_id,
+                prophetx_event_id=prophetx_event_id,
+                prophetx_market_id=market_id,  # This will now be an int or None
+                market_type=market_type,
+                selection_name=selection_name,
+                last_updated=datetime.now(timezone.utc)
+            )
+            
+            self.line_metadata[line_id] = metadata
+            
+            # Show status
+            if market_id:
+                print(f"   ✅ Complete metadata for {selection_name}: Event {prophetx_event_id}, Market {market_id} ({market_type})")
+            else:
+                print(f"   ⚠️ Missing market_id for {selection_name}: Event {prophetx_event_id}")
+                
+        except Exception as e:
+            print(f"❌ Error storing metadata for line {line_id}: {e}")
+
+# 5. Add these utility methods to access the metadata
+    def get_line_metadata(self, line_id: str) -> Optional[LineMetadata]:
+        """Get metadata for a specific line"""
+        return self.line_metadata.get(line_id)
+    
+    def get_all_line_metadata(self) -> Dict[str, LineMetadata]:
+        """Get all line metadata"""
+        return self.line_metadata.copy()
+    
+    def get_lines_by_event_id(self, prophetx_event_id: int) -> List[str]:
+        """Get all line IDs for a specific ProphetX event"""
+        return [
+            line_id for line_id, metadata in self.line_metadata.items()
+            if metadata.prophetx_event_id == prophetx_event_id
+        ]
+    
+    def get_lines_by_market_id(self, prophetx_market_id: int) -> List[str]:
+        """Get all line IDs for a specific ProphetX market"""
+        return [
+            line_id for line_id, metadata in self.line_metadata.items()
+            if metadata.prophetx_market_id == prophetx_market_id
+        ]
+    
+
+    def get_markets_for_cancellation(self) -> List[Dict[str, Any]]:
+        """
+        Get list of markets that can be cancelled
+        
+        Returns:
+            List of markets with event_id and market_id for cancellation
+        """
+        markets = {}
+        
+        for line_id, metadata in self.line_metadata.items():
+            if metadata.prophetx_event_id and metadata.prophetx_market_id:
+                market_key = f"{metadata.prophetx_event_id}_{metadata.prophetx_market_id}"
+                
+                if market_key not in markets:
+                    markets[market_key] = {
+                        "event_id": metadata.prophetx_event_id,
+                        "market_id": metadata.prophetx_market_id,
+                        "market_type": metadata.market_type,
+                        "lines": []
+                    }
+                
+                markets[market_key]["lines"].append({
+                    "line_id": line_id,
+                    "selection_name": metadata.selection_name
+                })
+        
+        return list(markets.values())
+
+    async def cancel_wagers_for_market(self, market_id) -> Dict[str, Any]:
+        """
+        Cancel all wagers for a specific market in the current session
+        
+        Args:
+            market_id: ProphetX market ID to cancel (int or string)
+            
+            
+        Returns:
+            Cancellation result
+        """
+        if not self.session or not self.session.is_active:
+            return {
+                "success": False,
+                "message": "No active session"
+            }
+        
+        try:
+            # ✅ FIX: Convert market_id to int for consistent comparison
+            try:
+                market_id_int = int(market_id)
+            except (ValueError, TypeError):
+                return {
+                    "success": False,
+                    "message": f"Invalid market_id: {market_id}"
+                }
+            
+            # Find the event_id for this market
+            event_id = None
+            affected_lines = []
+            
+            for line_id, metadata in self.line_metadata.items():
+                # ✅ FIX: Compare integers
+                if metadata.prophetx_market_id == market_id_int:
+                    event_id = metadata.prophetx_event_id
+                    affected_lines.append({
+                        "line_id": line_id,
+                        "selection_name": metadata.selection_name
+                    })
+            
+            if not event_id:
+                return {
+                    "success": False,
+                    "message": f"Market {market_id_int} not found in current session",
+                    "debug_info": {
+                        "searched_for": market_id_int,
+                        "available_markets": [m.prophetx_market_id for m in self.line_metadata.values() if m.prophetx_market_id],
+                        "market_types": [(m.prophetx_market_id, type(m.prophetx_market_id)) for m in self.line_metadata.values() if m.prophetx_market_id]
+                    }
+                }
+            
+            print(f"🗑️ Cancelling wagers for market {market_id_int} (affects {len(affected_lines)} lines)")
+            for line in affected_lines:
+                print(f"   📏 {line['selection_name']}")
+            
+            # Import and call ProphetX service
+            from app.services.prophetx_service import prophetx_service
+            
+            result = await prophetx_service.cancel_wagers_by_market(event_id, market_id_int)
+            
+            if result["success"]:
+                print(f"✅ Successfully cancelled wagers for market {market_id_int}")
+                
+                # Update our internal tracking - mark affected lines as needing new bets
+                for line in affected_lines:
+                    line_id = line["line_id"]
+                    # Clear any wait periods for these lines so new bets can be placed immediately
+                    if hasattr(self, 'market_making_strategy') and self.market_making_strategy:
+                        if hasattr(self.market_making_strategy, 'betting_manager'):
+                            self.market_making_strategy.betting_manager.clear_wait_period(line_id)
+                
+                return {
+                    "success": True,
+                    "message": f"Cancelled wagers for market {market_id_int}",
+                    "data": {
+                        "event_id": event_id,
+                        "market_id": market_id_int,
+                        "affected_lines": len(affected_lines),
+                        "lines": affected_lines
+                    }
+                }
+            else:
+                return {
+                    "success": False,
+                    "message": f"Failed to cancel wagers for market {market_id_int}",
+                    "error": result.get("error", "Unknown error"),
+                    "prophetx_response": result
+                }
+                
+        except Exception as e:
+            import traceback
+            return {
+                "success": False,
+                "message": f"Exception cancelling market {market_id}: {str(e)}",
+                "traceback": traceback.format_exc()
+            }
+
+    async def cancel_all_wagers_for_event(self) -> Dict[str, Any]:
+        """
+        Cancel all wagers for all markets in the current event
+        
+        Returns:
+            Cancellation results for all markets
+        """
+        if not self.session or not self.session.is_active:
+            return {
+                "success": False,
+                "message": "No active session"
+            }
+        
+        markets = self.get_markets_for_cancellation()
+        
+        if not markets:
+            return {
+                "success": False,
+                "message": "No markets found for cancellation"
+            }
+        
+        print(f"🗑️ Cancelling wagers for {len(markets)} markets")
+        
+        results = []
+        successful_cancellations = 0
+        
+        for market in markets:
+            result = await self.cancel_wagers_for_market(market["market_id"])
+            results.append({
+                "market_id": market["market_id"],
+                "market_type": market["market_type"],
+                "success": result["success"],
+                "message": result["message"]
+            })
+            
+            if result["success"]:
+                successful_cancellations += 1
+        
+        return {
+            "success": successful_cancellations > 0,
+            "message": f"Cancelled {successful_cancellations}/{len(markets)} markets",
+            "data": {
+                "total_markets": len(markets),
+                "successful_cancellations": successful_cancellations,
+                "results": results
+            }
         }
 
 # Global single event tester instance
