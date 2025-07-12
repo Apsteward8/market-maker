@@ -1916,3 +1916,256 @@ async def debug_liquidity_calculation(
             "error": f"Debug calculation failed: {str(e)}",
             "traceback": traceback.format_exc()
         }
+
+# Add this debug endpoint to your markets.py router
+
+@router.get("/debug/system-vs-manual-bets/{line_id}", response_model=Dict[str, Any])
+async def debug_system_vs_manual_bets(
+    line_id: str,
+    show_all_bets: bool = Query(False, description="Show details of all individual bets")
+):
+    """
+    Debug system vs manual bet filtering for a specific line
+    
+    Shows how the system distinguishes between:
+    - System bets (non-empty external_id, counted in position calculations)
+    - Manual UI bets (empty external_id, ignored in position calculations)
+    """
+    try:
+        from app.services.enhanced_prophetx_wager_service import ProphetXWagerService
+        from app.services.prophetx_service import prophetx_service
+        
+        # Create wager service
+        wager_service = ProphetXWagerService(prophetx_service)
+        
+        # Get ALL bets (including manual ones)
+        position_result_all = await wager_service.get_all_wagers_for_line(
+            line_id, 
+            system_bets_only=False  # Include all bets
+        )
+        
+        # Get SYSTEM bets only
+        position_result_system = await wager_service.get_all_wagers_for_line(
+            line_id,
+            system_bets_only=True,
+            external_id_filter="single_test_"
+        )
+        
+        if not position_result_all["success"]:
+            return {
+                "success": False,
+                "message": f"Could not get position data for line {line_id}",
+                "error": position_result_all.get("error")
+            }
+        
+        all_wagers = position_result_all["wagers"]
+        
+        # Categorize bets
+        system_bets = []
+        manual_bets = []
+        
+        for wager in all_wagers:
+            external_id = wager.get("external_id", "")
+            is_system = bool(external_id and external_id.strip())
+            
+            bet_info = {
+                "external_id": external_id or "MANUAL_UI_BET",
+                "created_at": wager.get("created_at"),
+                "stake": wager.get("stake", 0),
+                "matched_stake": wager.get("matched_stake", 0),
+                "status": wager.get("status"),
+                "matching_status": wager.get("matching_status")
+            }
+            
+            if is_system:
+                system_bets.append(bet_info)
+            else:
+                manual_bets.append(bet_info)
+        
+        # Compare position calculations
+        all_summary = position_result_all["position_summary"]
+        system_summary = position_result_system["position_summary"]
+        
+        return {
+            "success": True,
+            "line_id": line_id,
+            "analysis": {
+                "total_bets_found": len(all_wagers),
+                "system_bets_count": len(system_bets),
+                "manual_bets_count": len(manual_bets),
+                "filtering_impact": {
+                    "all_bets_calculation": {
+                        "total_stake": all_summary.get("total_stake", 0),
+                        "total_matched": all_summary.get("total_matched", 0),
+                        "total_unmatched": all_summary.get("total_stake", 0) - all_summary.get("total_matched", 0)
+                    },
+                    "system_only_calculation": {
+                        "total_stake": system_summary.get("total_stake", 0),
+                        "total_matched": system_summary.get("total_matched", 0),
+                        "total_unmatched": system_summary.get("total_stake", 0) - system_summary.get("total_matched", 0)
+                    }
+                }
+            },
+            "system_bets": system_bets if show_all_bets else f"{len(system_bets)} system bets (use ?show_all_bets=true to see details)",
+            "manual_bets": manual_bets if show_all_bets else f"{len(manual_bets)} manual bets (use ?show_all_bets=true to see details)",
+            "position_summary": {
+                "using_system_only": system_summary,
+                "including_all_bets": all_summary
+            },
+            "explanation": {
+                "system_bets": "Bets with non-empty external_id - counted in position calculations",
+                "manual_bets": "Bets with empty external_id (placed via UI) - ignored in calculations",
+                "benefit": "You can place manual test bets without affecting automated system limits",
+                "external_id_pattern": "Your system uses: single_test_<line_id>_<timestamp>"
+            }
+        }
+        
+    except Exception as e:
+        import traceback
+        return {
+            "success": False,
+            "error": f"Debug analysis failed: {str(e)}",
+            "traceback": traceback.format_exc()
+        }
+    
+# Add this debug endpoint to your markets.py router
+
+@router.get("/debug/liquidity-calculation/{line_id}", response_model=Dict[str, Any])
+async def debug_liquidity_calculation(
+    line_id: str,
+    recommended_initial: float = Query(100.0, description="Recommended initial stake"),
+    max_position_multiplier: float = Query(4.0, description="Max position multiplier (e.g., 4x)")
+):
+    """
+    Debug liquidity calculation for a specific line - SYSTEM BETS ONLY
+    
+    Shows exactly how the liquidity management logic works with current position data.
+    Only counts system bets (non-empty external_id) - manual UI bets are ignored.
+    """
+    try:
+        from app.services.enhanced_prophetx_wager_service import ProphetXWagerService
+        from app.services.prophetx_service import prophetx_service
+        
+        # Create wager service
+        wager_service = ProphetXWagerService(prophetx_service)
+        
+        # Get current position (SYSTEM BETS ONLY)
+        position_result = await wager_service.get_all_wagers_for_line(
+            line_id,
+            system_bets_only=True,
+            external_id_filter="single_test_"
+        )
+        
+        if not position_result["success"]:
+            return {
+                "success": False,
+                "message": f"Could not get position data for line {line_id}",
+                "error": position_result.get("error")
+            }
+        
+        summary = position_result["position_summary"]
+        
+        # Extract current state (SYSTEM BETS ONLY)
+        total_stake = summary["total_stake"]
+        total_matched = summary["total_matched"]
+        current_unmatched = total_stake - total_matched
+        system_bets = summary.get("system_bets", 0)
+        manual_bets = summary.get("manual_bets", 0)
+        max_position = recommended_initial * max_position_multiplier
+        
+        # Calculate what we would do
+        liquidity_shortfall = max(0, recommended_initial - current_unmatched)
+        remaining_capacity = max_position - total_stake
+        potential_bet_amount = min(liquidity_shortfall, remaining_capacity) if remaining_capacity > 0 else 0
+        
+        # Determine action
+        if system_bets == 0:
+            action = f"💰 Place initial ${recommended_initial:.2f} bet (no system bets found)"
+            action_type = "initial_bet"
+        elif liquidity_shortfall == 0:
+            action = "✅ No action needed - adequate liquidity"
+            action_type = "none"
+        elif remaining_capacity <= 0:
+            action = "🛑 No action - at maximum system position"
+            action_type = "blocked_by_limit"
+        elif potential_bet_amount > 0:
+            action = f"💰 Place ${potential_bet_amount:.2f} bet to restore liquidity"
+            action_type = "place_bet"
+        else:
+            action = "⏸️ No action needed"
+            action_type = "none"
+        
+        # Check wait period
+        wait_status = "none"
+        wait_message = "No recent fills - no wait period"
+        
+        if summary.get("last_fill_time"):
+            try:
+                from datetime import datetime, timezone, timedelta
+                last_fill = datetime.fromisoformat(summary["last_fill_time"].replace('Z', '+00:00'))
+                wait_until = last_fill + timedelta(seconds=300)  # 5 minutes
+                time_remaining = (wait_until - datetime.now(timezone.utc)).total_seconds()
+                
+                if time_remaining > 0:
+                    wait_status = "active"
+                    wait_message = f"⏰ Wait period active - {time_remaining:.0f}s remaining"
+                    if action_type == "place_bet":
+                        action = f"⏰ Would place ${potential_bet_amount:.2f} but waiting {time_remaining:.0f}s"
+                        action_type = "waiting"
+                else:
+                    wait_status = "completed"
+                    wait_message = "✅ Wait period completed"
+            except:
+                wait_message = "⚠️ Could not parse last fill time"
+        
+        return {
+            "success": True,
+            "line_id": line_id,
+            "filtering_note": "🔥 SYSTEM BETS ONLY - Manual UI bets are ignored",
+            "liquidity_analysis": {
+                "current_state": {
+                    "system_bets": system_bets,
+                    "manual_bets": manual_bets,
+                    "total_stake": total_stake,
+                    "total_matched": total_matched,
+                    "current_unmatched": current_unmatched,
+                    "note": f"Only counting {system_bets} system bets, ignoring {manual_bets} manual bets"
+                },
+                "targets": {
+                    "recommended_initial": recommended_initial,
+                    "max_position": max_position,
+                    "max_multiplier": max_position_multiplier
+                },
+                "calculations": {
+                    "liquidity_shortfall": liquidity_shortfall,
+                    "remaining_capacity": remaining_capacity,
+                    "potential_bet_amount": potential_bet_amount
+                },
+                "decision": {
+                    "action": action,
+                    "action_type": action_type,
+                    "wait_status": wait_status,
+                    "wait_message": wait_message
+                }
+            },
+            "examples_explanation": {
+                "your_case": f"system_stake=${total_stake}, system_matched=${total_matched}, system_unmatched=${current_unmatched}",
+                "manual_bets_ignored": f"{manual_bets} manual UI bets completely ignored in calculations",
+                "example_1": "system_stake=25, system_matched=25, unmatched=0 → Need $25 to reach target",
+                "example_2": "system_stake=25, system_matched=0, unmatched=25 → Already at target", 
+                "example_3": "Manual bet: $500 + System bet: $25 → Only count the $25 system bet"
+            },
+            "benefits": [
+                "✅ Place manual test bets without affecting system position limits",
+                "✅ Manual hedge bets don't interfere with automated liquidity management",
+                "✅ System maintains independent control of its own position"
+            ]
+        }
+        
+    except Exception as e:
+        import traceback
+        return {
+            "success": False,
+            "error": f"Debug calculation failed: {str(e)}",
+            "traceback": traceback.format_exc()
+        }

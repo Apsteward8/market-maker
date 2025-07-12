@@ -37,10 +37,95 @@ class MarketMatchingService:
         
         # Name normalization patterns
         self.team_name_patterns = {
-            r'\b(red sox|redsox)\b': 'red sox',
-            r'\b(white sox|whitesox)\b': 'white sox',
-            r'\b(blue jays|bluejays)\b': 'blue jays',
-            r'\btampa bay\b': 'rays',  # Sometimes just "Rays" vs "Tampa Bay Rays"
+            # Red Sox variations
+            r'\b(red sox|redsox|boston red sox|boston)\b': 'red sox',
+            
+            # White Sox variations  
+            r'\b(white sox|whitesox|chicago white sox|chicago ws)\b': 'white sox',
+            
+            # Blue Jays variations
+            r'\b(blue jays|bluejays|toronto blue jays|toronto|jays)\b': 'blue jays',
+            
+            # Athletics variations - THIS WAS MISSING
+            r'\b(athletics|oakland athletics|oakland|a\'s|as)\b': 'athletics',
+            
+            # Yankees variations
+            r'\b(yankees|new york yankees|ny yankees|yanks)\b': 'yankees',
+            
+            # Mets variations
+            r'\b(mets|new york mets|ny mets)\b': 'mets',
+            
+            # Rays variations
+            r'\b(rays|tampa bay rays|tampa bay|tb rays)\b': 'rays',
+            
+            # Angels variations
+            r'\b(angels|los angeles angels|la angels|anaheim angels)\b': 'angels',
+            
+            # Dodgers variations
+            r'\b(dodgers|los angeles dodgers|la dodgers)\b': 'dodgers',
+            
+            # Giants variations
+            r'\b(giants|san francisco giants|sf giants)\b': 'giants',
+            
+            # Padres variations
+            r'\b(padres|san diego padres|sd padres)\b': 'padres',
+            
+            # Diamondbacks variations
+            r'\b(diamondbacks|arizona diamondbacks|d-backs|dbacks)\b': 'diamondbacks',
+            
+            # Guardians/Indians variations
+            r'\b(guardians|cleveland guardians|indians|cleveland indians)\b': 'guardians',
+            
+            # Twins variations
+            r'\b(twins|minnesota twins|mn twins)\b': 'twins',
+            
+            # Royals variations
+            r'\b(royals|kansas city royals|kc royals)\b': 'royals',
+            
+            # Tigers variations
+            r'\b(tigers|detroit tigers)\b': 'tigers',
+            
+            # Brewers variations
+            r'\b(brewers|milwaukee brewers)\b': 'brewers',
+            
+            # Cubs variations
+            r'\b(cubs|chicago cubs)\b': 'cubs',
+            
+            # Cardinals variations
+            r'\b(cardinals|st louis cardinals|st. louis cardinals)\b': 'cardinals',
+            
+            # Pirates variations
+            r'\b(pirates|pittsburgh pirates)\b': 'pirates',
+            
+            # Reds variations
+            r'\b(reds|cincinnati reds)\b': 'reds',
+            
+            # Braves variations
+            r'\b(braves|atlanta braves)\b': 'braves',
+            
+            # Marlins variations
+            r'\b(marlins|miami marlins|florida marlins)\b': 'marlins',
+            
+            # Phillies variations
+            r'\b(phillies|philadelphia phillies)\b': 'phillies',
+            
+            # Nationals variations
+            r'\b(nationals|washington nationals|nats)\b': 'nationals',
+            
+            # Astros variations
+            r'\b(astros|houston astros)\b': 'astros',
+            
+            # Rangers variations
+            r'\b(rangers|texas rangers)\b': 'rangers',
+            
+            # Mariners variations
+            r'\b(mariners|seattle mariners)\b': 'mariners',
+            
+            # Orioles variations
+            r'\b(orioles|baltimore orioles|o\'s)\b': 'orioles',
+            
+            # Rockies variations
+            r'\b(rockies|colorado rockies)\b': 'rockies'
         }
     
     async def fetch_prophetx_markets(self, event_id: int) -> Optional[ProphetXEventMarkets]:
@@ -762,37 +847,58 @@ class MarketMatchingService:
         return self._find_matching_line(outcome_name, point_matches, home_team, away_team)
     
     def _normalize_selection_name(self, name: str) -> str:
-        """Normalize selection name for comparison"""
+        """ENHANCED normalize selection name for comparison"""
         if not name:
             return ""
         
         normalized = name.lower().strip()
         
-        # Apply team name patterns
+        # Apply team name patterns (now includes Athletics!)
         for pattern, replacement in self.team_name_patterns.items():
-            normalized = re.sub(pattern, replacement, normalized)
+            normalized = re.sub(pattern, replacement, normalized, flags=re.IGNORECASE)
         
         # Remove extra whitespace
         normalized = re.sub(r'\s+', ' ', normalized)
         
+        # Remove common prefixes/suffixes that don't affect matching
+        normalized = re.sub(r'\b(the|team)\b', '', normalized)
+        normalized = normalized.strip()
+        
         return normalized
     
     def _calculate_name_similarity(self, name1: str, name2: str) -> float:
-        """Calculate similarity between two names"""
+        """ENHANCED calculate similarity between two names"""
         if not name1 or not name2:
             return 0.0
         
         norm1 = self._normalize_selection_name(name1)
         norm2 = self._normalize_selection_name(name2)
         
+        # Exact match after normalization
         if norm1 == norm2:
             return 1.0
         
+        # One contains the other (handles partial matches)
         if norm1 in norm2 or norm2 in norm1:
-            return 0.9
+            return 0.95
         
-        # Use sequence matcher for fuzzy comparison
-        return SequenceMatcher(None, norm1, norm2).ratio()
+        # Word-level matching for team names
+        words1 = set(norm1.split())
+        words2 = set(norm2.split())
+        
+        if words1 and words2:
+            intersection = words1.intersection(words2)
+            if intersection:
+                # If we have any word overlap, it's likely the same team
+                union = words1.union(words2)
+                jaccard = len(intersection) / len(union)
+                return min(0.9, jaccard + 0.3)  # Boost for any word match
+        
+        # Fuzzy string matching as fallback
+        similarity = SequenceMatcher(None, norm1, norm2).ratio()
+        
+        # Lower the threshold for team names to be more permissive
+        return similarity
     
     def _calculate_spread_match_confidence(self, odds_outcome: ProcessedOutcome, px_line: ProphetXLine) -> float:
         """Calculate confidence for spread match"""

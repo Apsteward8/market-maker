@@ -115,17 +115,25 @@ class ProphetXWagerService:
                 "error": f"Exception: {str(e)}"
             }
     
-    def _calculate_position_summary(self, wagers: List[Dict[str, Any]]) -> Dict[str, Any]:
+
+    def _calculate_position_summary(self, wagers: List[Dict[str, Any]], external_id_filter: str = None) -> Dict[str, Any]:
         """
-        Calculate position summary from wager list - HANDLES EMPTY WAGERS
+        Calculate position summary from wager list - SYSTEM BETS ONLY
         
-        Returns consistent summary structure even when no wagers exist.
+        Key change: Only counts bets with non-empty external_id (system bets)
+        Ignores manual UI bets (external_id: "")
+        
+        Args:
+            wagers: List of wager dictionaries
+            external_id_filter: Optional prefix filter (e.g., "single_test_")
         """
-        # Handle empty wagers list (no bets ever placed on this line)
+        # Handle empty wagers list
         if not wagers:
             return {
                 "total_bets": 0,
-                "active_bets": 0,  # This was missing and causing the error
+                "system_bets": 0,
+                "manual_bets": 0,
+                "active_system_bets": 0,
                 "total_stake": 0.0,
                 "total_matched": 0.0,
                 "total_unmatched": 0.0,
@@ -135,48 +143,61 @@ class ProphetXWagerService:
                 "recent_fills": [],
                 "debug_info": {
                     "all_bets_count": 0,
-                    "active_bets_count": 0,
+                    "system_bets_count": 0,
+                    "manual_bets_count": 0,
+                    "active_system_bets_count": 0,
                     "cancelled_bets_count": 0,
                     "fills_detected": 0,
                     "status": "no_wagers_found"
                 }
             }
         
-        # Process existing wagers
-        active_bets = []
-        all_bets = []
+        # Separate bets by type
+        system_bets = []
+        manual_bets = []
+        active_system_bets = []
         
         for wager in wagers:
+            external_id = wager.get("external_id", "")
             status = wager.get("status", "").lower()
-            stake = wager.get("stake", 0) or 0  # Handle None values
-            matched_stake = wager.get("matched_stake", 0) or 0
+            stake = wager.get("stake", 0) or 0
             
-            all_bets.append(wager)
+            # Classify bet type
+            is_system_bet = bool(external_id and external_id.strip())
             
-            # Only include bets that are NOT cancelled and have stake > 0
-            if status not in ["canceled", "cancelled", "void"] and stake > 0:
-                active_bets.append(wager)
+            # Apply additional external_id filter if specified
+            if is_system_bet and external_id_filter:
+                is_system_bet = external_id.startswith(external_id_filter)
+            
+            if is_system_bet:
+                system_bets.append(wager)
+                
+                # Only include active system bets in calculations
+                if status not in ["canceled", "cancelled", "void"] and stake > 0:
+                    active_system_bets.append(wager)
+            else:
+                manual_bets.append(wager)
         
-        # Calculate totals from ACTIVE bets only (ignore cancelled)
-        total_stake = sum(bet.get("stake", 0) or 0 for bet in active_bets)
-        total_matched = sum(bet.get("matched_stake", 0) or 0 for bet in active_bets)
+        # Calculate totals from ACTIVE SYSTEM BETS only
+        total_stake = sum(bet.get("stake", 0) or 0 for bet in active_system_bets)
+        total_matched = sum(bet.get("matched_stake", 0) or 0 for bet in active_system_bets)
         total_unmatched = total_stake - total_matched
         
-        # Find last bet time (from all bets)
+        # Find last system bet time
         last_bet_time = None
-        if all_bets:
+        if system_bets:
             try:
-                sorted_bets = sorted(all_bets, key=lambda x: x.get("created_at", ""), reverse=True)
+                sorted_bets = sorted(system_bets, key=lambda x: x.get("created_at", ""), reverse=True)
                 if sorted_bets[0].get("created_at"):
                     last_bet_time = sorted_bets[0]["created_at"]
             except:
                 pass
         
-        # Find fills and last fill time
+        # Find fills from system bets only
         recent_fills = []
         last_fill_time = None
         
-        for wager in active_bets:
+        for wager in active_system_bets:
             matched_stake = wager.get("matched_stake", 0) or 0
             if matched_stake > 0:
                 fill_info = {
@@ -194,21 +215,26 @@ class ProphetXWagerService:
                         last_fill_time = wager.get("updated_at")
         
         return {
-            "total_bets": len(all_bets),
-            "active_bets": len(active_bets),
-            "total_stake": total_stake,
-            "total_matched": total_matched,
-            "total_unmatched": total_unmatched,
-            "has_active_bets": len(active_bets) > 0 and total_unmatched > 0,
-            "last_bet_time": last_bet_time,
-            "last_fill_time": last_fill_time,
-            "recent_fills": recent_fills,
+            "total_bets": len(wagers),  # All bets (for reference)
+            "system_bets": len(system_bets),  # System bets (with external_id)
+            "manual_bets": len(manual_bets),  # Manual UI bets (empty external_id)
+            "active_system_bets": len(active_system_bets),  # Active system bets only
+            "total_stake": total_stake,  # Only from active system bets
+            "total_matched": total_matched,  # Only from active system bets
+            "total_unmatched": total_unmatched,  # Current system liquidity
+            "has_active_bets": len(active_system_bets) > 0 and total_unmatched > 0,
+            "last_bet_time": last_bet_time,  # Last system bet
+            "last_fill_time": last_fill_time,  # Last system fill
+            "recent_fills": recent_fills,  # System fills only
             "debug_info": {
-                "all_bets_count": len(all_bets),
-                "active_bets_count": len(active_bets),
-                "cancelled_bets_count": len(all_bets) - len(active_bets),
+                "all_bets_count": len(wagers),
+                "system_bets_count": len(system_bets),
+                "manual_bets_count": len(manual_bets),
+                "active_system_bets_count": len(active_system_bets),
+                "cancelled_system_bets": len(system_bets) - len(active_system_bets),
                 "fills_detected": len(recent_fills),
-                "status": "processed_wagers"
+                "external_id_filter": external_id_filter,
+                "status": "processed_with_system_filter"
             }
         }
     
@@ -324,10 +350,19 @@ class ProphetXWagerService:
         self,
         line_id: str,
         days_back: int = 7,
-        include_all_statuses: bool = True
+        include_all_statuses: bool = True,
+        system_bets_only: bool = True,
+        external_id_filter: str = None
     ) -> Dict[str, Any]:
         """
-        Get ALL wagers for a specific line_id - ENHANCED with better error handling
+        Get ALL wagers for a specific line_id - ENHANCED with system bet filtering
+        
+        Args:
+            line_id: ProphetX line ID
+            days_back: How many days back to search
+            include_all_statuses: Whether to include cancelled/expired bets
+            system_bets_only: If True, only count bets with non-empty external_id
+            external_id_filter: Optional prefix filter (e.g., "single_test_")
         """
         try:
             # Calculate time range
@@ -338,6 +373,10 @@ class ProphetXWagerService:
             next_cursor = None
             
             print(f"🔍 Searching for wagers on line_id: {line_id}")
+            if system_bets_only:
+                print(f"   📊 System bets only (non-empty external_id)")
+                if external_id_filter:
+                    print(f"   🔍 External ID filter: '{external_id_filter}*'")
             
             # Paginate through all results
             while True:
@@ -361,9 +400,14 @@ class ProphetXWagerService:
                     wager_line_id = wager.get("line_id")
                     if wager_line_id == line_id:
                         line_wagers.append(wager)
+                        
+                        # Log details about found wagers
                         stake = wager.get("stake", 0)
                         status = wager.get("status", "")
-                        print(f"✅ Found wager for line {line_id}: {wager.get('external_id', 'unknown')} - ${stake} ({status})")
+                        external_id = wager.get("external_id", "")
+                        bet_type = "system" if external_id else "manual"
+                        
+                        print(f"✅ Found {bet_type} wager: {external_id or 'UI_BET'} - ${stake} ({status})")
                 
                 all_wagers.extend(line_wagers)
                 print(f"📊 Found {len(line_wagers)} wagers for line {line_id} in this batch")
@@ -374,15 +418,18 @@ class ProphetXWagerService:
             
             print(f"📊 TOTAL: Found {len(all_wagers)} wagers for line {line_id}")
             
-            # Calculate position summary (handles empty list correctly)
+            # Calculate position summary with system bet filtering
             try:
-                position_summary = self._calculate_position_summary(all_wagers)
+                filter_to_use = external_id_filter if system_bets_only else None
+                position_summary = self._calculate_position_summary(all_wagers, filter_to_use)
             except Exception as summary_error:
                 print(f"❌ Error calculating position summary: {summary_error}")
                 # Return a safe default summary
                 position_summary = {
                     "total_bets": len(all_wagers),
-                    "active_bets": 0,
+                    "system_bets": 0,
+                    "manual_bets": 0,
+                    "active_system_bets": 0,
                     "total_stake": 0.0,
                     "total_matched": 0.0,
                     "total_unmatched": 0.0,
@@ -396,23 +443,35 @@ class ProphetXWagerService:
                     }
                 }
             
-            # Log summary for debugging
+            # Enhanced logging for debugging
             if len(all_wagers) == 0:
                 print(f"💰 No wagers found for line {line_id[-8:]} - ready for initial bet")
             else:
-                print(f"💰 Line position summary:")
-                print(f"   Total bets: {position_summary['total_bets']} ({position_summary.get('active_bets', 0)} active)")
-                print(f"   Total stake: ${position_summary['total_stake']:.2f} (active bets only)")
-                print(f"   Total matched: ${position_summary['total_matched']:.2f}")
-                print(f"   Current unmatched: ${position_summary['total_unmatched']:.2f}")
-                print(f"   Has active liquidity: {position_summary['has_active_bets']}")
+                system_count = position_summary.get('system_bets', 0)
+                manual_count = position_summary.get('manual_bets', 0)
+                
+                print(f"💰 Line position summary (SYSTEM BETS ONLY):")
+                print(f"   All bets: {len(all_wagers)} ({system_count} system, {manual_count} manual)")
+                print(f"   Active system bets: {position_summary.get('active_system_bets', 0)}")
+                print(f"   System stake: ${position_summary['total_stake']:.2f}")
+                print(f"   System matched: ${position_summary['total_matched']:.2f}")
+                print(f"   System unmatched: ${position_summary['total_unmatched']:.2f}")
+                print(f"   Has active system liquidity: {position_summary['has_active_bets']}")
+                
+                if manual_count > 0:
+                    print(f"   📝 Note: {manual_count} manual UI bets ignored in calculations")
             
             return {
                 "success": True,
                 "line_id": line_id,
                 "total_wagers": len(all_wagers),
                 "wagers": all_wagers,
-                "position_summary": position_summary
+                "position_summary": position_summary,
+                "filtering": {
+                    "system_bets_only": system_bets_only,
+                    "external_id_filter": external_id_filter,
+                    "days_back": days_back
+                }
             }
             
         except Exception as e:
@@ -429,7 +488,9 @@ class ProphetXWagerService:
                 "wagers": [],
                 "position_summary": {
                     "total_bets": 0,
-                    "active_bets": 0,
+                    "system_bets": 0,
+                    "manual_bets": 0,
+                    "active_system_bets": 0,
                     "total_stake": 0.0,
                     "total_matched": 0.0,
                     "total_unmatched": 0.0,

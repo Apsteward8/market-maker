@@ -289,17 +289,23 @@ class SingleEventLineTester:
         """
         ENHANCED: Check for fills and manage liquidity restoration
         
-        Handles lines with no existing wagers and includes better error handling.
+        Now only counts SYSTEM BETS for position calculations.
+        Manual UI bets are completely ignored.
         """
         print("\\n2️⃣ LIQUIDITY MANAGEMENT AND FILL MONITORING")
+        print("📊 Only counting system bets (non-empty external_id)")
         print("-" * 50)
         
         incremental_bets = 0
         
         for line_id, strategy_info in self.monitored_lines.items():
             try:
-                # Get current position
-                position_result = await self.prophetx_wager_service.get_all_wagers_for_line(line_id)
+                # Get current position (system bets only)
+                position_result = await self.prophetx_wager_service.get_all_wagers_for_line(
+                    line_id,
+                    system_bets_only=True,
+                    external_id_filter="single_test_"  # Filter for our system's bets
+                )
                 
                 if not position_result["success"]:
                     print(f"   ❌ Could not get position for {strategy_info['selection_name']}")
@@ -311,16 +317,20 @@ class SingleEventLineTester:
                 current_unmatched = total_stake - total_matched
                 last_fill_time = summary.get("last_fill_time")
                 recent_fills = summary.get("recent_fills", [])
-                total_wagers = position_result.get("total_wagers", 0)
+                system_bets = summary.get("system_bets", 0)
+                manual_bets = summary.get("manual_bets", 0)
                 
                 recommended_initial = strategy_info["recommended_initial_stake"]
                 max_position = strategy_info["max_position"]
                 
                 print(f"\\n📊 {strategy_info['selection_name'][:30]:<30}")
                 
-                # Handle case where no wagers exist yet (shouldn't happen in monitoring phase, but be safe)
-                if total_wagers == 0:
-                    print(f"   ⚠️  No wagers found - this should have been handled in initial phase")
+                if manual_bets > 0:
+                    print(f"   📝 Found {manual_bets} manual UI bets (ignored in system calculations)")
+                
+                # Handle case where no SYSTEM wagers exist yet
+                if system_bets == 0:
+                    print(f"   ⚠️  No system wagers found - this should have been handled in initial phase")
                     print(f"   ✅ Placing initial ${recommended_initial:.2f} bet")
                     
                     success = await self._place_single_bet(
@@ -333,9 +343,9 @@ class SingleEventLineTester:
                         incremental_bets += 1
                     continue
                 
-                print(f"   📈 Position: ${total_stake:.2f} total, ${total_matched:.2f} matched, ${current_unmatched:.2f} unmatched")
+                print(f"   📈 System position: ${total_stake:.2f} total, ${total_matched:.2f} matched, ${current_unmatched:.2f} unmatched")
                 print(f"   🎯 Target: ${recommended_initial:.2f} unmatched, max: ${max_position:.2f} total")
-                print(f"   📊 Recent fills: {len(recent_fills)}")
+                print(f"   📊 System fills: {len(recent_fills)}")
                 
                 # Calculate liquidity shortfall
                 liquidity_shortfall = max(0, recommended_initial - current_unmatched)
@@ -357,7 +367,7 @@ class SingleEventLineTester:
                             time_remaining = (wait_until - datetime.now(timezone.utc)).total_seconds()
                             
                             if time_remaining > 0:
-                                print(f"   ⏰ WAIT PERIOD: {time_remaining:.0f}s remaining after recent fill")
+                                print(f"   ⏰ WAIT PERIOD: {time_remaining:.0f}s remaining after recent system fill")
                                 wait_needed = True
                             else:
                                 print(f"   ✅ Wait period completed - can restore liquidity")
@@ -367,10 +377,10 @@ class SingleEventLineTester:
                     if wait_needed:
                         continue
                 
-                # Check position limits
+                # Check position limits (based on system bets only)
                 remaining_capacity = max_position - total_stake
                 if remaining_capacity <= 0:
-                    print(f"   🛑 At max position (${total_stake:.2f} >= ${max_position:.2f}) - cannot add more")
+                    print(f"   🛑 At max system position (${total_stake:.2f} >= ${max_position:.2f}) - cannot add more")
                     continue
                 
                 # Calculate bet amount to restore liquidity (within limits)
@@ -383,7 +393,7 @@ class SingleEventLineTester:
                     success = await self._place_single_bet(
                         strategy_info,
                         bet_amount,
-                        f"Restore liquidity (${total_matched:.2f} was filled)"
+                        f"Restore liquidity (${total_matched:.2f} system filled)"
                     )
                     
                     if success:
@@ -406,23 +416,29 @@ class SingleEventLineTester:
         
         return incremental_bets
 
+
     async def _initial_bet_phase(self) -> int:
         """
         PHASE 1: Ensure each line has the recommended initial liquidity
         
-        This runs ONCE at the start and ensures each line has adequate liquidity.
-        Handles lines with no existing wagers correctly.
+        Now only counts SYSTEM BETS (non-empty external_id) for position calculations.
+        Manual UI bets are completely ignored.
         """
         print("🎯 Running initial liquidity setup...")
         print("Rule: Ensure each line has recommended initial liquidity available")
+        print("📊 Only counting system bets (non-empty external_id)")
         print("-" * 60)
         
         initial_bets = 0
         
         for line_id, strategy_info in self.monitored_lines.items():
             try:
-                # Get current position
-                position_result = await self.prophetx_wager_service.get_all_wagers_for_line(line_id)
+                # Get current position (system bets only)
+                position_result = await self.prophetx_wager_service.get_all_wagers_for_line(
+                    line_id, 
+                    system_bets_only=True,
+                    external_id_filter="single_test_"  # Filter for our system's bets
+                )
                 
                 if not position_result["success"]:
                     print(f"❌ Could not check position for {strategy_info['selection_name']}")
@@ -432,28 +448,32 @@ class SingleEventLineTester:
                 total_stake = summary.get("total_stake", 0)
                 total_matched = summary.get("total_matched", 0)
                 current_unmatched = total_stake - total_matched
-                total_wagers = position_result.get("total_wagers", 0)
+                system_bets = summary.get("system_bets", 0)
+                manual_bets = summary.get("manual_bets", 0)
                 
                 recommended_initial = strategy_info["recommended_initial_stake"]
                 max_position = strategy_info["max_position"]
                 
                 print(f"📊 {strategy_info['selection_name'][:30]:<30}")
                 
-                # Handle case where no wagers exist yet
-                if total_wagers == 0:
-                    print(f"   ✅ No existing wagers - placing initial ${recommended_initial:.2f} bet")
+                if manual_bets > 0:
+                    print(f"   📝 Found {manual_bets} manual UI bets (ignored in calculations)")
+                
+                # Handle case where no SYSTEM wagers exist yet
+                if system_bets == 0:
+                    print(f"   ✅ No system wagers - placing initial ${recommended_initial:.2f} bet")
                     
                     success = await self._place_single_bet(
                         strategy_info, 
                         recommended_initial, 
-                        "Initial bet (no prior wagers)"
+                        "Initial bet (no prior system wagers)"
                     )
                     
                     if success:
                         initial_bets += 1
                     continue
                 
-                print(f"   Current state: ${total_stake:.2f} total, ${total_matched:.2f} matched, ${current_unmatched:.2f} unmatched")
+                print(f"   System position: ${total_stake:.2f} total, ${total_matched:.2f} matched, ${current_unmatched:.2f} unmatched")
                 print(f"   Target: ${recommended_initial:.2f} unmatched, max: ${max_position:.2f} total")
                 
                 # Calculate if we need to add liquidity
@@ -463,10 +483,10 @@ class SingleEventLineTester:
                     print(f"   ✅ Already has adequate liquidity (${current_unmatched:.2f} >= ${recommended_initial:.2f})")
                     continue
                 
-                # Check position limits
+                # Check position limits (based on system bets only)
                 remaining_capacity = max_position - total_stake
                 if remaining_capacity <= 0:
-                    print(f"   🛑 At max position (${total_stake:.2f} >= ${max_position:.2f}) - cannot add more")
+                    print(f"   🛑 At max system position (${total_stake:.2f} >= ${max_position:.2f}) - cannot add more")
                     continue
                 
                 # Calculate actual bet amount (limited by capacity)
