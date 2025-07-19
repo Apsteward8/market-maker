@@ -2598,3 +2598,102 @@ async def test_prophetx_cancel_market(event_id: int, market_id: int):
         
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error testing ProphetX cancel: {str(e)}")
+    
+@router.post("/line-monitoring/test-single-event/check-odds", response_model=Dict[str, Any])
+async def manual_odds_check():
+    """
+    Manually trigger a Pinnacle odds check
+    
+    Useful for testing the odds monitoring logic without waiting for the monitoring cycle.
+    """
+    try:
+        from app.services.single_event_line_tester import single_event_line_tester
+        
+        if not single_event_line_tester.session or not single_event_line_tester.session.is_active:
+            return {
+                "success": False,
+                "message": "No active single event test session"
+            }
+        
+        # Manually trigger odds monitoring
+        await single_event_line_tester._monitor_pinnacle_odds_changes()
+        
+        return {
+            "success": True,
+            "message": "Manual odds check completed",
+            "data": {
+                "session_id": single_event_line_tester.session.odds_api_event_id,
+                "odds_changes_detected_total": getattr(single_event_line_tester, 'odds_changes_detected', 0)
+            }
+        }
+        
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error during manual odds check: {str(e)}")
+    
+# ADD this endpoint to your markets.py router
+
+@router.get("/line-monitoring/test-single-event/debug-odds", response_model=Dict[str, Any])
+async def debug_odds_monitoring():
+    """
+    Debug odds monitoring - shows current vs original odds comparison
+    
+    This helps troubleshoot odds monitoring issues by showing:
+    - What original odds were stored
+    - What current odds are being fetched  
+    - How they compare
+    - Why changes might/might not be detected
+    """
+    try:
+        from app.services.single_event_line_tester import single_event_line_tester
+        
+        if not single_event_line_tester.session or not single_event_line_tester.session.is_active:
+            return {
+                "success": False,
+                "message": "No active single event test session"
+            }
+        
+        debug_info = await single_event_line_tester.debug_odds_comparison()
+        
+        return {
+            "success": True,
+            "message": "Odds monitoring debug information",
+            "data": debug_info
+        }
+        
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error getting debug info: {str(e)}")
+
+@router.post("/line-monitoring/test-single-event/force-odds-check", response_model=Dict[str, Any])
+async def force_odds_check():
+    """
+    Force an immediate odds check (for testing)
+    
+    This manually triggers the odds monitoring logic without waiting 
+    for the next monitoring cycle.
+    """
+    try:
+        from app.services.single_event_line_tester import single_event_line_tester
+        
+        if not single_event_line_tester.session or not single_event_line_tester.session.is_active:
+            return {
+                "success": False,
+                "message": "No active single event test session"
+            }
+        
+        print("🔄 MANUAL ODDS CHECK TRIGGERED")
+        
+        # Run the odds monitoring logic manually
+        await single_event_line_tester._monitor_pinnacle_odds_changes()
+        
+        return {
+            "success": True,
+            "message": "Manual odds check completed",
+            "data": {
+                "session_id": single_event_line_tester.session.odds_api_event_id,
+                "event_name": single_event_line_tester.session.event_name,
+                "last_check_time": datetime.now().isoformat()
+            }
+        }
+        
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error during manual odds check: {str(e)}")

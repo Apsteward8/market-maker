@@ -50,6 +50,10 @@ class SingleEventLineTester:
         self.line_position_service = None
         self.prophetx_wager_service = None
         self.market_making_strategy = None
+
+        self.original_pinnacle_odds = {}  # Store original odds for comparison
+        self.last_odds_check_time = None
+        self.odds_changes_detected = 0
         
         # Settings
         self.monitoring_interval_seconds = 60  # Check every 30 seconds for testing
@@ -101,6 +105,7 @@ class SingleEventLineTester:
                 }
             
             print(f"✅ Found event: {target_event.away_team} vs {target_event.home_team}")
+            self._store_original_pinnacle_odds(target_event)
             
             # Step 2: Match to ProphetX
             from app.services.event_matching_service import event_matching_service
@@ -289,8 +294,11 @@ class SingleEventLineTester:
                 
                 # Step 2: Check for fills and place incremental bets if needed
                 new_bets = await self._check_fills_and_place_incremental_bets()
-                
-                # Step 3: Update session stats
+
+                # Step 3: **NEW** - Monitor Pinnacle for odds changes
+                await self._monitor_pinnacle_odds_changes()
+
+                # Step 4: Update session stats
                 if hasattr(self, 'session') and self.session:
                     self.session.monitoring_cycles += 1
                     if new_bets > 0:
@@ -306,8 +314,10 @@ class SingleEventLineTester:
                 await asyncio.sleep(self.monitoring_interval_seconds)
                 
             except Exception as e:
-                print(f"❌ Error in monitoring cycle {cycle_count}: {e}")
-                await asyncio.sleep(30)  # Wait 30s before retrying
+                print(f"❌ Error in monitoring cycle: {e}")
+                import traceback
+                traceback.print_exc()
+                await asyncio.sleep(30)
 
     async def _check_fills_and_place_incremental_bets(self) -> int:
         """
@@ -537,47 +547,6 @@ class SingleEventLineTester:
         
         print(f"\\n📊 Initial phase complete: {initial_bets} bets placed")
         return initial_bets
-    
-    async def _monitoring_loop(self):
-        """
-        PHASE 2: Monitoring loop for fills and incremental betting
-        
-        This runs every 60 seconds and ONLY places incremental bets after fills + wait periods.
-        """
-        cycle_count = 0
-        
-        while self.monitoring_active:
-            try:
-                cycle_count += 1
-                cycle_start = time.time()
-                
-                print(f"\\n🔄 MONITORING CYCLE #{cycle_count} ({datetime.now().strftime('%H:%M:%S')})")
-                print("=" * 50)
-                
-                # Step 1: Check current positions
-                await self._check_current_positions()
-                
-                # Step 2: Check for fills and place incremental bets if needed
-                new_bets = await self._check_fills_and_place_incremental_bets()
-                
-                # Step 3: Update session stats
-                if hasattr(self, 'session') and self.session:
-                    self.session.monitoring_cycles += 1
-                    if new_bets > 0:
-                        self.session.total_bets_placed += new_bets
-                
-                cycle_duration = time.time() - cycle_start
-                print(f"\\n📈 CYCLE #{cycle_count} COMPLETE")
-                print(f"   Duration: {cycle_duration:.1f}s")
-                print(f"   New incremental bets: {new_bets}")
-                print(f"   Next cycle in: {self.monitoring_interval_seconds}s")
-                
-                # Wait before next cycle
-                await asyncio.sleep(self.monitoring_interval_seconds)
-                
-            except Exception as e:
-                print(f"❌ Error in monitoring cycle {cycle_count}: {e}")
-                await asyncio.sleep(30)  # Wait 30s before retrying
         
     async def _single_event_monitoring_loop(self):
         """Main monitoring loop for single event"""
@@ -754,6 +723,10 @@ class SingleEventLineTester:
             "lines_monitored": len(self.session.lines_identified),
             "total_bets_placed": self.session.total_bets_placed,
             "total_fills_detected": self.session.total_fills_detected,
+            # NEW: Odds monitoring stats
+            "odds_changes_detected": getattr(self, 'odds_changes_detected', 0),
+            "last_odds_check": self.last_odds_check_time.isoformat() if self.last_odds_check_time else None,
+            "has_original_odds_stored": bool(getattr(self, 'original_pinnacle_odds', {})),
             "last_cycle_time": self.session.last_cycle_time.isoformat() if self.session.last_cycle_time else None,
             "monitoring_interval_seconds": self.monitoring_interval_seconds,
             "metadata_summary": {
@@ -878,13 +851,14 @@ class SingleEventLineTester:
         
         return list(markets.values())
 
+
     async def cancel_wagers_for_market(self, market_id) -> Dict[str, Any]:
         """
-        Cancel all wagers for a specific market in the current session
+        FIXED: Cancel all wagers for a specific market in the current session
+        Now properly passes both event_id and market_id to ProphetX service
         
         Args:
             market_id: ProphetX market ID to cancel (int or string)
-            
             
         Returns:
             Cancellation result
@@ -929,17 +903,18 @@ class SingleEventLineTester:
                     }
                 }
             
-            print(f"🗑️ Cancelling wagers for market {market_id_int} (affects {len(affected_lines)} lines)")
+            print(f"🗑️ Cancelling wagers for event {event_id}, market {market_id_int} (affects {len(affected_lines)} lines)")
             for line in affected_lines:
                 print(f"   📏 {line['selection_name']}")
             
             # Import and call ProphetX service
             from app.services.prophetx_service import prophetx_service
             
+            # ✅ MAJOR FIX: Pass BOTH event_id AND market_id
             result = await prophetx_service.cancel_wagers_by_market(event_id, market_id_int)
             
             if result["success"]:
-                print(f"✅ Successfully cancelled wagers for market {market_id_int}")
+                print(f"✅ Successfully cancelled wagers for event {event_id}, market {market_id_int}")
                 
                 # Update our internal tracking - mark affected lines as needing new bets
                 for line in affected_lines:
@@ -951,18 +926,19 @@ class SingleEventLineTester:
                 
                 return {
                     "success": True,
-                    "message": f"Cancelled wagers for market {market_id_int}",
+                    "message": f"Cancelled wagers for event {event_id}, market {market_id_int}",
                     "data": {
                         "event_id": event_id,
                         "market_id": market_id_int,
                         "affected_lines": len(affected_lines),
-                        "lines": affected_lines
+                        "lines": affected_lines,
+                        "cancelled_count": result.get("data", {}).get("cancelled_count", "unknown")
                     }
                 }
             else:
                 return {
                     "success": False,
-                    "message": f"Failed to cancel wagers for market {market_id_int}",
+                    "message": f"Failed to cancel wagers for event {event_id}, market {market_id_int}",
                     "error": result.get("error", "Unknown error"),
                     "prophetx_response": result
                 }
@@ -1022,6 +998,587 @@ class SingleEventLineTester:
                 "results": results
             }
         }
+    
+    async def _monitor_pinnacle_odds_changes(self):
+        """
+        NEW STEP 3: Monitor Pinnacle for odds changes and update bets accordingly
+        
+        This will:
+        1. Fetch current Pinnacle odds for our event
+        2. Compare with odds we originally bet at
+        3. If significant changes detected, cancel affected markets and place new bets
+        """
+        print("\n3️⃣ MONITORING PINNACLE ODDS CHANGES")
+        print("-" * 30)
+        
+        try:
+            # Fetch current Pinnacle odds
+            current_pinnacle_odds = await self._fetch_current_pinnacle_odds()
+            
+            if not current_pinnacle_odds:
+                print("⚠️  Could not fetch current Pinnacle odds")
+                return
+            
+            # Compare with our original odds and detect changes
+            odds_changes = await self._detect_significant_odds_changes(current_pinnacle_odds)
+            
+            if not odds_changes:
+                print("✅ No significant odds changes detected")
+                return
+            
+            print(f"🚨 SIGNIFICANT ODDS CHANGES DETECTED: {len(odds_changes)} markets affected")
+            
+            # Process each market with changes
+            for market_change in odds_changes:
+                await self._handle_market_odds_change(market_change)
+            
+            print("✅ All odds changes processed")
+            
+        except Exception as e:
+            print(f"❌ Error monitoring Pinnacle odds: {e}")
+
+    async def _fetch_current_pinnacle_odds(self):
+        """
+        FIXED: Fetch current Pinnacle odds for our specific event
+        Uses the EXACT same logic as start_single_event_test()
+        """
+        try:
+            from app.services.odds_api_service import odds_api_service
+            
+            print(f"📊 Fetching current odds for event: {self.session.odds_api_event_id}")
+            
+            # Step 1: Get ALL current events (same as initial setup)
+            odds_api_events = await odds_api_service.get_events()
+            
+            # Step 2: Find our SPECIFIC event by ID (same as initial setup)
+            target_event = None
+            for event in odds_api_events:
+                if event.event_id == self.session.odds_api_event_id:
+                    target_event = event
+                    break
+            
+            if not target_event:
+                print(f"⚠️  Event {self.session.odds_api_event_id} no longer available in Odds API")
+                print(f"    This usually means the game has started or odds were removed")
+                return None
+            
+            # Step 3: Verify it's the same event (safety check)
+            expected_name = self.session.event_name
+            actual_name = f"{target_event.away_team} vs {target_event.home_team}"
+            
+            if expected_name != actual_name:
+                print(f"⚠️  Event name mismatch!")
+                print(f"    Expected: {expected_name}")
+                print(f"    Found: {actual_name}")
+                print(f"    Event ID: {target_event.event_id}")
+                # Continue anyway, but log the discrepancy
+            
+            print(f"✅ Found current odds for: {actual_name}")
+            print(f"   Event ID: {target_event.event_id}")
+            print(f"   Commence time: {target_event.commence_time}")
+            
+            # Step 4: Log available markets for debugging
+            available_markets = []
+            if target_event.moneyline:
+                available_markets.append(f"moneyline ({len(target_event.moneyline.outcomes)} outcomes)")
+            if target_event.spreads:
+                available_markets.append(f"spreads ({len(target_event.spreads.outcomes)} outcomes)")
+            if target_event.totals:
+                available_markets.append(f"totals ({len(target_event.totals.outcomes)} outcomes)")
+            
+            print(f"   Available markets: {', '.join(available_markets)}")
+            
+            return target_event
+            
+        except Exception as e:
+            print(f"❌ Error fetching current Pinnacle odds: {e}")
+            import traceback
+            traceback.print_exc()
+            return None
+
+    async def _detect_significant_odds_changes(self, current_pinnacle_event):
+        """
+        ENHANCED: Compare current Pinnacle odds with stored original odds
+        
+        Returns list of market changes that require bet updates
+        """
+        SIGNIFICANT_CHANGE_THRESHOLD = 1  # 1 point odds change threshold
+
+        if not hasattr(self, 'original_pinnacle_odds') or not self.original_pinnacle_odds:
+            print("⚠️  No original odds stored for comparison")
+            return []
+        
+        changes = []
+        
+        try:
+            print("🔍 Comparing current odds with original odds...")
+            
+            # Compare moneyline
+            if current_pinnacle_event.moneyline and self.original_pinnacle_odds.get('moneyline'):
+                changes.extend(await self._compare_market_odds(
+                    'moneyline', 
+                    current_pinnacle_event.moneyline.outcomes,
+                    self.original_pinnacle_odds['moneyline'],
+                    SIGNIFICANT_CHANGE_THRESHOLD
+                ))
+            
+            # Compare spreads
+            if current_pinnacle_event.spreads and self.original_pinnacle_odds.get('spreads'):
+                changes.extend(await self._compare_market_odds(
+                    'spreads',
+                    current_pinnacle_event.spreads.outcomes, 
+                    self.original_pinnacle_odds['spreads'],
+                    SIGNIFICANT_CHANGE_THRESHOLD
+                ))
+            
+            # Compare totals
+            if current_pinnacle_event.totals and self.original_pinnacle_odds.get('totals'):
+                changes.extend(await self._compare_market_odds(
+                    'totals',
+                    current_pinnacle_event.totals.outcomes,
+                    self.original_pinnacle_odds['totals'], 
+                    SIGNIFICANT_CHANGE_THRESHOLD
+                ))
+            
+            if changes:
+                print(f"🚨 {len(changes)} significant odds changes detected:")
+                for change in changes:
+                    print(f"   {change['market_type']}: {change['outcome_name']} {change['old_odds']:+d} → {change['new_odds']:+d} ({change['change_amount']:+d})")
+            else:
+                print("✅ No significant odds changes detected")
+            
+            return changes
+            
+        except Exception as e:
+            print(f"❌ Error detecting odds changes: {e}")
+            return []
+
+    async def _handle_market_odds_change(self, market_change):
+        """
+        ENHANCED: Handle a significant odds change in a market by cancelling and replacing bets
+        """
+        market_id = market_change['prophetx_market_id']
+        market_type = market_change['market_type']
+        
+        print(f"\n🔄 HANDLING ODDS CHANGE: {market_type.upper()} Market (ID: {market_id})")
+        print(f"   Change: {market_change['outcome_name']} {market_change['old_odds']:+d} → {market_change['new_odds']:+d}")
+        
+        if market_id is None:
+            print(f"❌ Cannot handle odds change - market_id is None for {market_type}")
+            print(f"   This usually means the market type isn't found in line metadata")
+            return
+        
+        try:
+            # Step 1: Cancel all existing bets for this market
+            print(f"🗑️  Cancelling existing bets for market {market_id}")
+            cancel_result = await self.cancel_wagers_for_market(market_id)
+            
+            if not cancel_result['success']:
+                print(f"❌ Failed to cancel market {market_id}: {cancel_result['message']}")
+                return
+            
+            cancelled_count = cancel_result.get('data', {}).get('cancelled_count', 'unknown')
+            print(f"✅ Cancelled {cancelled_count} bets for market {market_id}")
+            
+            # Step 2: Wait a moment for cancellations to process
+            print("⏳ Waiting 2 seconds for cancellations to process...")
+            await asyncio.sleep(2)
+            
+            # Step 3: Create new strategy with updated odds
+            print("📊 Creating new strategy with updated Pinnacle odds")
+            new_strategy = await self._create_updated_strategy_for_market(market_type)
+            
+            if not new_strategy:
+                print(f"❌ Could not create updated strategy for {market_type}")
+                return
+            
+            # Filter strategy to only include the affected market
+            filtered_instructions = []
+            for instruction in new_strategy.betting_instructions:
+                # Check if this instruction belongs to our affected market
+                instruction_market_id = self._get_market_id_for_line(instruction.line_id)
+                if instruction_market_id == market_id:
+                    filtered_instructions.append(instruction)
+            
+            if not filtered_instructions:
+                print(f"❌ No betting instructions found for market {market_id} in new strategy")
+                return
+            
+            print(f"📋 Found {len(filtered_instructions)} new betting instructions for this market")
+            
+            # Step 4: Place new bets according to updated strategy
+            print("💰 Placing new bets with updated odds")
+            
+            # Create a minimal strategy object with just the filtered instructions
+            class FilteredStrategy:
+                def __init__(self, instructions):
+                    self.betting_instructions = instructions
+            
+            filtered_strategy = FilteredStrategy(filtered_instructions)
+            new_bets_result = await self._place_bets_from_strategy(filtered_strategy)
+            
+            if new_bets_result['success']:
+                print(f"✅ Placed {new_bets_result['bets_placed']} new bets with updated odds")
+                
+                # Update our monitored lines with new strategy
+                await self._update_monitored_lines_from_strategy(filtered_strategy)
+                
+                # Track this as an odds change event
+                if hasattr(self, 'odds_changes_detected'):
+                    self.odds_changes_detected += 1
+                
+            else:
+                print(f"❌ Failed to place new bets: {new_bets_result['message']}")
+            
+        except Exception as e:
+            print(f"❌ Error handling market odds change: {e}")
+            import traceback
+            traceback.print_exc()
+
+    async def _compare_market_odds(self, market_type, current_outcomes, original_outcomes, threshold):
+        """Helper method to compare odds for a specific market type"""
+        changes = []
+        
+        for current_outcome in current_outcomes:
+            # Find matching original outcome
+            original_outcome = None
+            for orig in original_outcomes:
+                if current_outcome.name == orig['name']:
+                    # For spreads/totals, also check point value matches
+                    if market_type in ['spreads', 'totals']:
+                        if hasattr(current_outcome, 'point') and current_outcome.point == orig.get('point'):
+                            original_outcome = orig
+                            break
+                    else:
+                        original_outcome = orig
+                        break
+            
+            if original_outcome:
+                odds_diff = current_outcome.american_odds - original_outcome['odds']
+                
+                if abs(odds_diff) >= threshold:
+                    changes.append({
+                        'market_type': market_type,
+                        'outcome_name': current_outcome.name,
+                        'old_odds': original_outcome['odds'],
+                        'new_odds': current_outcome.american_odds,
+                        'change_amount': odds_diff,
+                        'prophetx_market_id': self._get_market_id_for_type(market_type),
+                        'point': getattr(current_outcome, 'point', None)  # For spreads/totals
+                    })
+        
+        return changes
+
+    def _store_original_pinnacle_odds(self, pinnacle_event):
+        """
+        ENHANCED: Store the original Pinnacle odds with better structure
+        """
+        self.original_pinnacle_odds = {}
+        
+        print("💾 Storing original Pinnacle odds for monitoring...")
+        
+        if pinnacle_event.moneyline:
+            self.original_pinnacle_odds['moneyline'] = [
+                {
+                    'name': outcome.name,
+                    'odds': outcome.american_odds
+                }
+                for outcome in pinnacle_event.moneyline.outcomes
+            ]
+            print(f"   Moneyline: {len(pinnacle_event.moneyline.outcomes)} outcomes stored")
+        
+        if pinnacle_event.spreads:
+            self.original_pinnacle_odds['spreads'] = [
+                {
+                    'name': outcome.name,
+                    'odds': outcome.american_odds,
+                    'point': outcome.point
+                }
+                for outcome in pinnacle_event.spreads.outcomes
+            ]
+            print(f"   Spreads: {len(pinnacle_event.spreads.outcomes)} outcomes stored")
+        
+        if pinnacle_event.totals:
+            self.original_pinnacle_odds['totals'] = [
+                {
+                    'name': outcome.name,
+                    'odds': outcome.american_odds,
+                    'point': outcome.point
+                }
+                for outcome in pinnacle_event.totals.outcomes
+            ]
+            print(f"   Totals: {len(pinnacle_event.totals.outcomes)} outcomes stored")
+        
+        print(f"✅ Original odds stored for {len(self.original_pinnacle_odds)} market types")
+
+    # ADD: New debugging endpoint to check what's being stored/compared
+    async def debug_odds_comparison(self):
+        """Debug method to show current vs original odds comparison"""
+        if not hasattr(self, 'original_pinnacle_odds') or not self.original_pinnacle_odds:
+            return {"error": "No original odds stored"}
+        
+        current_event = await self._fetch_current_pinnacle_odds()
+        if not current_event:
+            return {"error": "Cannot fetch current odds"}
+        
+        debug_info = {
+            "event_id": self.session.odds_api_event_id,
+            "event_name": self.session.event_name,
+            "current_event_name": f"{current_event.away_team} vs {current_event.home_team}",
+            "comparison": {}
+        }
+        
+        # Compare each market type
+        for market_type in ['moneyline', 'spreads', 'totals']:
+            if market_type in self.original_pinnacle_odds:
+                debug_info["comparison"][market_type] = {
+                    "original": self.original_pinnacle_odds[market_type],
+                    "current": None
+                }
+                
+                # Get current market data
+                if market_type == 'moneyline' and current_event.moneyline:
+                    debug_info["comparison"][market_type]["current"] = [
+                        {"name": o.name, "odds": o.american_odds} 
+                        for o in current_event.moneyline.outcomes
+                    ]
+                elif market_type == 'spreads' and current_event.spreads:
+                    debug_info["comparison"][market_type]["current"] = [
+                        {"name": o.name, "odds": o.american_odds, "point": o.point}
+                        for o in current_event.spreads.outcomes
+                    ]
+                elif market_type == 'totals' and current_event.totals:
+                    debug_info["comparison"][market_type]["current"] = [
+                        {"name": o.name, "odds": o.american_odds, "point": o.point}
+                        for o in current_event.totals.outcomes
+                    ]
+        
+        return debug_info
+
+    def _get_market_id_for_type(self, market_type):
+        """
+        ENHANCED: Get the ProphetX market ID for a given market type with better debugging
+        """
+        print(f"🔍 Looking for market_type: '{market_type}'")
+        print(f"   Available line metadata: {len(self.line_metadata)} lines")
+        
+        # Debug: Show all available market types
+        available_types = set()
+        for line_id, metadata in self.line_metadata.items():
+            if metadata.market_type:
+                available_types.add(metadata.market_type)
+                print(f"   Line {line_id[-8:]}: market_type='{metadata.market_type}', market_id={metadata.prophetx_market_id}")
+        
+        print(f"   Available market types: {list(available_types)}")
+        
+        # ✅ FIX: Handle different market type naming conventions
+        # The issue might be that market_type is stored differently than what we're searching for
+        market_type_mappings = {
+            'moneyline': ['moneyline', 'h2h', 'match_winner'],
+            'spreads': ['spreads', 'spread', 'handicap'],
+            'totals': ['totals', 'total', 'over_under']
+        }
+        
+        possible_names = market_type_mappings.get(market_type, [market_type])
+        
+        for line_id, metadata in self.line_metadata.items():
+            if metadata.market_type in possible_names:
+                print(f"✅ Found market_id {metadata.prophetx_market_id} for market_type '{market_type}' (stored as '{metadata.market_type}')")
+                return metadata.prophetx_market_id
+        
+        print(f"❌ No market_id found for market_type '{market_type}'")
+        print(f"   Tried variations: {possible_names}")
+        return None
+    
+    async def _create_updated_strategy_for_market(self, market_type):
+        """Create new strategy with current Pinnacle odds for a specific market"""
+        try:
+            # Get current event match (reuse existing logic)
+            from app.services.event_matching_service import event_matching_service
+            from app.services.market_matching_service import market_matching_service
+            
+            # Get fresh Pinnacle data
+            current_pinnacle_event = await self._fetch_current_pinnacle_odds()
+            if not current_pinnacle_event:
+                return None
+            
+            # Recreate event match with current odds
+            # (You can reuse the logic from your start_single_event_test method)
+            odds_api_events = [current_pinnacle_event]
+            matching_attempts = await event_matching_service.find_matches_for_events(odds_api_events)
+            
+            if not matching_attempts or not matching_attempts[0].best_match:
+                return None
+            
+            event_match = matching_attempts[0].best_match
+            
+            # Get market matching
+            market_match_result = await market_matching_service.match_event_markets(event_match)
+            
+            # Create new strategy with updated odds
+            strategy = self.market_making_strategy.create_market_making_plan(event_match, market_match_result)
+            
+            return strategy
+            
+        except Exception as e:
+            print(f"❌ Error creating updated strategy: {e}")
+            return None
+
+    async def _place_bets_from_strategy(self, strategy):
+        """
+        FIXED: Place bets according to a strategy using the correct ProphetX service
+        
+        Uses the same bet placement logic as the initial setup
+        """
+        try:
+            if not strategy or not strategy.betting_instructions:
+                return {"success": False, "message": "No betting instructions in strategy"}
+            
+            from app.services.prophetx_service import prophetx_service
+            import uuid
+            
+            bets_placed = 0
+            failed_bets = 0
+            bet_results = []
+            
+            print(f"💰 Placing {len(strategy.betting_instructions)} bets with updated odds")
+            
+            for instruction in strategy.betting_instructions:
+                try:
+                    # Generate unique external_id for tracking
+                    external_id = f"odds_update_{int(time.time())}_{str(uuid.uuid4())[:8]}"
+                    
+                    print(f"   💰 Placing: {instruction.selection_name} @ {instruction.odds:+d} for ${instruction.stake:.2f}")
+                    
+                    # Use the correct service and method name
+                    bet_result = await prophetx_service.place_bet(
+                        line_id=instruction.line_id,
+                        odds=instruction.odds,
+                        stake=instruction.stake,
+                        external_id=external_id
+                    )
+                    
+                    if bet_result["success"]:
+                        bets_placed += 1
+                        print(f"   ✅ Success: {instruction.selection_name}")
+                        
+                        # Update our tracking for this line
+                        self.session.total_bets_placed += 1
+                        
+                        bet_results.append({
+                            "selection_name": instruction.selection_name,
+                            "line_id": instruction.line_id,
+                            "odds": instruction.odds,
+                            "stake": instruction.stake,
+                            "status": "success",
+                            "external_id": external_id,
+                            "bet_id": bet_result.get("bet_id")
+                        })
+                        
+                    else:
+                        failed_bets += 1
+                        error_msg = bet_result.get("error", "Unknown error")
+                        print(f"   ❌ Failed: {instruction.selection_name} - {error_msg}")
+                        
+                        bet_results.append({
+                            "selection_name": instruction.selection_name,
+                            "line_id": instruction.line_id,
+                            "odds": instruction.odds,
+                            "stake": instruction.stake,
+                            "status": "failed",
+                            "error": error_msg
+                        })
+                    
+                except Exception as e:
+                    failed_bets += 1
+                    error_msg = f"Exception placing bet: {str(e)}"
+                    print(f"   ❌ Exception: {instruction.selection_name} - {error_msg}")
+                    
+                    bet_results.append({
+                        "selection_name": instruction.selection_name,
+                        "line_id": instruction.line_id,
+                        "odds": instruction.odds,
+                        "stake": instruction.stake,
+                        "status": "exception",
+                        "error": error_msg
+                    })
+            
+            # Summary
+            success_rate = (bets_placed / len(strategy.betting_instructions)) * 100 if strategy.betting_instructions else 0
+            
+            if bets_placed > 0:
+                print(f"✅ Successfully placed {bets_placed}/{len(strategy.betting_instructions)} bets ({success_rate:.1f}% success rate)")
+            
+            if failed_bets > 0:
+                print(f"❌ {failed_bets} bets failed to place")
+            
+            return {
+                "success": bets_placed > 0,
+                "bets_placed": bets_placed,
+                "failed_bets": failed_bets,
+                "success_rate": success_rate,
+                "message": f"Placed {bets_placed}/{len(strategy.betting_instructions)} updated bets",
+                "bet_details": bet_results
+            }
+            
+        except Exception as e:
+            import traceback
+            error_msg = f"Error placing bets from strategy: {str(e)}"
+            print(f"❌ {error_msg}")
+            traceback.print_exc()
+            
+            return {
+                "success": False, 
+                "message": error_msg,
+                "bets_placed": 0,
+                "failed_bets": 0
+            }
+
+    async def _update_monitored_lines_from_strategy(self, strategy):
+        """
+        ENHANCED: Update our monitored lines with new strategy information
+        
+        This ensures our monitoring data reflects the new odds and stakes
+        """
+        try:
+            if not strategy or not strategy.betting_instructions:
+                print("⚠️  No strategy instructions to update from")
+                return
+            
+            updated_lines = 0
+            
+            print(f"📝 Updating monitored lines with new strategy data...")
+            
+            for instruction in strategy.betting_instructions:
+                line_id = instruction.line_id
+                
+                # Update the monitored line with new odds/strategy
+                if line_id in self.monitored_lines:
+                    # Keep the existing data but update the key fields
+                    old_odds = self.monitored_lines[line_id].get("odds", "unknown")
+                    
+                    self.monitored_lines[line_id].update({
+                        "odds": instruction.odds,
+                        "recommended_initial_stake": instruction.stake,
+                        "last_updated": datetime.now(timezone.utc),
+                        "updated_due_to_odds_change": True
+                    })
+                    
+                    print(f"   📝 Updated {instruction.selection_name}: {old_odds} → {instruction.odds:+d}")
+                    updated_lines += 1
+                    
+                    # Also update line metadata if we have it
+                    if hasattr(self, 'line_metadata') and line_id in self.line_metadata:
+                        self.line_metadata[line_id].last_updated = datetime.now(timezone.utc)
+                
+                else:
+                    print(f"   ⚠️  Line {line_id} not found in monitored lines")
+            
+            print(f"✅ Updated {updated_lines} monitored lines with new strategy")
+            
+        except Exception as e:
+            print(f"❌ Error updating monitored lines: {e}")
+
 
 # Global single event tester instance
 single_event_line_tester = SingleEventLineTester()

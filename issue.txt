@@ -1,0 +1,2023 @@
+[2025-07-19 11:43:01.378] \n🔄 MONITORING CYCLE #29 (11:43:01)
+[2025-07-19 11:43:01.379] ==================================================
+[2025-07-19 11:43:01.379] \n1️⃣ CHECKING CURRENT POSITIONS
+[2025-07-19 11:43:01.379] ------------------------------
+[2025-07-19 11:43:01.380] 🔍 Searching for wagers on line_id: 82f619981f80114f704ddb9b44420c70
+[2025-07-19 11:43:01.380]    📊 System bets only (non-empty external_id)
+[2025-07-19 11:43:01.380] 🔍 Calling ProphetX API: https://api-ss-sandbox.betprophet.co/partner/v2/mm/get_wager_histories
+[2025-07-19 11:43:01.380] 📊 Query params: {'from': 1752338581, 'to': 1752943381, 'limit': 1000}
+[2025-07-19 11:43:01.569] 📡 API Response: HTTP 200
+[2025-07-19 11:43:01.650] 📊 Retrieved 367 total wagers from ProphetX
+[2025-07-19 11:43:01.652] 📊 Retrieved 367 total wagers from ProphetX
+[2025-07-19 11:43:01.652] ✅ Found system wager: single_test_82f619981f80114f704ddb9b44420c70_1752943304 - $0 (canceled)
+[2025-07-19 11:43:01.652] ✅ Found system wager: single_test_82f619981f80114f704ddb9b44420c70_1752943225 - $0 (canceled)
+[2025-07-19 11:43:01.652] ✅ Found system wager: single_test_82f619981f80114f704ddb9b44420c70_1752943146 - $0 (canceled)
+[2025-07-19 11:43:01.652] ✅ Found system wager: single_test_82f619981f80114f704ddb9b44420c70_1752943068 - $0 (canceled)
+[2025-07-19 11:43:01.652] ✅ Found system wager: single_test_82f619981f80114f704ddb9b44420c70_1752942988 - $0 (canceled)
+[2025-07-19 11:43:01.652] ✅ Found system wager: single_test_82f619981f80114f704ddb9b44420c70_1752942910 - $0 (canceled)
+[2025-07-19 11:43:01.652] ✅ Found system wager: single_test_82f619981f80114f704ddb9b44420c70_1752942828 - $0 (canceled)
+[2025-07-19 11:43:01.652] ✅ Found system wager: single_test_82f619981f80114f704ddb9b44420c70_1752942749 - $0 (canceled)
+[2025-07-19 11:43:01.653] ✅ Found system wager: single_test_82f619981f80114f704ddb9b44420c70_1752942670 - $0 (canceled)
+[2025-07-19 11:43:01.653] ✅ Found system wager: single_test_82f619981f80114f704ddb9b44420c70_1752942589 - $0 (canceled)
+[2025-07-19 11:43:01.653] ✅ Found system wager: single_test_82f619981f80114f704ddb9b44420c70_1752942511 - $0 (canceled)
+[2025-07-19 11:43:01.653] ✅ Found system wager: single_test_82f619981f80114f704ddb9b44420c70_1752942432 - $0 (canceled)
+[2025-07-19 11:43:01.653] ✅ Found system wager: single_test_82f619981f80114f704ddb9b44420c70_1752942353 - $0 (canceled)
+[2025-07-19 11:43:01.653] ✅ Found system wager: single_test_82f619981f80114f704ddb9b44420c70_1752942210 - $0 (canceled)
+[2025-07-19 11:43:01.653] ✅ Found system wager: single_test_82f619981f80114f704ddb9b44420c70_1752941361 - $0 (canceled)
+[2025-07-19 11:43:01.654] 📊 Found 15 wagers for line 82f619981f80114f704ddb9b44420c70 in this batch
+[2025-07-19 11:43:01.654] 📊 TOTAL: Found 15 wagers for line 82f619981f80114f704ddb9b44420c70
+[2025-07-19 11:43:01.654] 💰 Line position summary (SYSTEM BETS ONLY):
+[2025-07-19 11:43:01.654]    All bets: 15 (15 system, 0 manual)
+[2025-07-19 11:43:01.654]    Active system bets: 0
+[2025-07-19 11:43:01.654]    System stake: $0.00
+[2025-07-19 11:43:01.654]    System matched: $0.00
+[2025-07-19 11:43:01.654]    System unmatched: $0.00
+[2025-07-19 11:43:01.654]    Has active system liquidity: False
+[2025-07-19 11:43:01.655]    📊 Toronto Blue Jays         (44420c70): $0/$500 (0%) - no bets
+[2025-07-19 11:43:01.655] 🔍 Searching for wagers on line_id: 924f14a69d0df401202d0b12069deeee
+[2025-07-19 11:43:01.655]    📊 System bets only (non-empty external_id)
+[2025-07-19 11:43:01.655] 🔍 Calling ProphetX API: https://api-ss-sandbox.betprophet.co/partner/v2/mm/get_wager_histories
+[2025-07-19 11:43:01.655] 📊 Query params: {'from': 1752338581, 'to': 1752943381, 'limit': 1000}
+[2025-07-19 11:43:01.981] 📡 API Response: HTTP 200
+[2025-07-19 11:43:02.072] 📊 Retrieved 367 total wagers from ProphetX
+[2025-07-19 11:43:02.072] 📊 Retrieved 367 total wagers from ProphetX
+[2025-07-19 11:43:02.073] ✅ Found system wager: single_test_924f14a69d0df401202d0b12069deeee_1752943304 - $0 (canceled)
+[2025-07-19 11:43:02.073] ✅ Found system wager: single_test_924f14a69d0df401202d0b12069deeee_1752943226 - $0 (canceled)
+[2025-07-19 11:43:02.073] ✅ Found system wager: single_test_924f14a69d0df401202d0b12069deeee_1752943147 - $0 (canceled)
+[2025-07-19 11:43:02.073] ✅ Found system wager: single_test_924f14a69d0df401202d0b12069deeee_1752943068 - $0 (canceled)
+[2025-07-19 11:43:02.073] ✅ Found system wager: single_test_924f14a69d0df401202d0b12069deeee_1752942989 - $0 (canceled)
+[2025-07-19 11:43:02.073] ✅ Found system wager: single_test_924f14a69d0df401202d0b12069deeee_1752942910 - $0 (canceled)
+[2025-07-19 11:43:02.073] ✅ Found system wager: single_test_924f14a69d0df401202d0b12069deeee_1752942829 - $0 (canceled)
+[2025-07-19 11:43:02.073] ✅ Found system wager: single_test_924f14a69d0df401202d0b12069deeee_1752942750 - $0 (canceled)
+[2025-07-19 11:43:02.073] ✅ Found system wager: single_test_924f14a69d0df401202d0b12069deeee_1752942671 - $0 (canceled)
+[2025-07-19 11:43:02.073] ✅ Found system wager: single_test_924f14a69d0df401202d0b12069deeee_1752942590 - $0 (canceled)
+[2025-07-19 11:43:02.073] ✅ Found system wager: single_test_924f14a69d0df401202d0b12069deeee_1752942511 - $0 (canceled)
+[2025-07-19 11:43:02.073] ✅ Found system wager: single_test_924f14a69d0df401202d0b12069deeee_1752942432 - $0 (canceled)
+[2025-07-19 11:43:02.073] ✅ Found system wager: single_test_924f14a69d0df401202d0b12069deeee_1752942353 - $0 (canceled)
+[2025-07-19 11:43:02.073] ✅ Found system wager: single_test_924f14a69d0df401202d0b12069deeee_1752942211 - $0 (canceled)
+[2025-07-19 11:43:02.073] ✅ Found system wager: single_test_924f14a69d0df401202d0b12069deeee_1752941362 - $0 (canceled)
+[2025-07-19 11:43:02.073] 📊 Found 15 wagers for line 924f14a69d0df401202d0b12069deeee in this batch
+[2025-07-19 11:43:02.073] 📊 TOTAL: Found 15 wagers for line 924f14a69d0df401202d0b12069deeee
+[2025-07-19 11:43:02.073] 💰 Line position summary (SYSTEM BETS ONLY):
+[2025-07-19 11:43:02.073]    All bets: 15 (15 system, 0 manual)
+[2025-07-19 11:43:02.073]    Active system bets: 0
+[2025-07-19 11:43:02.073]    System stake: $0.00
+[2025-07-19 11:43:02.073]    System matched: $0.00
+[2025-07-19 11:43:02.073]    System unmatched: $0.00
+[2025-07-19 11:43:02.073]    Has active system liquidity: False
+[2025-07-19 11:43:02.073]    📊 San Francisco Giants      (069deeee): $0/$515 (0%) - no bets
+[2025-07-19 11:43:02.073] 🔍 Searching for wagers on line_id: a74a2253b9eb6d59f49686c1f4096e67
+[2025-07-19 11:43:02.073]    📊 System bets only (non-empty external_id)
+[2025-07-19 11:43:02.073] 🔍 Calling ProphetX API: https://api-ss-sandbox.betprophet.co/partner/v2/mm/get_wager_histories
+[2025-07-19 11:43:02.073] 📊 Query params: {'from': 1752338582, 'to': 1752943382, 'limit': 1000}
+[2025-07-19 11:43:02.204] 📡 API Response: HTTP 200
+[2025-07-19 11:43:02.410] 📊 Retrieved 367 total wagers from ProphetX
+[2025-07-19 11:43:02.411] 📊 Retrieved 367 total wagers from ProphetX
+[2025-07-19 11:43:02.411] ✅ Found system wager: single_test_a74a2253b9eb6d59f49686c1f4096e67_1752943305 - $0 (canceled)
+[2025-07-19 11:43:02.411] ✅ Found system wager: single_test_a74a2253b9eb6d59f49686c1f4096e67_1752943226 - $0 (canceled)
+[2025-07-19 11:43:02.411] ✅ Found system wager: single_test_a74a2253b9eb6d59f49686c1f4096e67_1752943147 - $0 (canceled)
+[2025-07-19 11:43:02.411] ✅ Found system wager: single_test_a74a2253b9eb6d59f49686c1f4096e67_1752943069 - $0 (canceled)
+[2025-07-19 11:43:02.411] ✅ Found system wager: single_test_a74a2253b9eb6d59f49686c1f4096e67_1752942989 - $0 (canceled)
+[2025-07-19 11:43:02.411] ✅ Found system wager: single_test_a74a2253b9eb6d59f49686c1f4096e67_1752942910 - $0 (canceled)
+[2025-07-19 11:43:02.411] ✅ Found system wager: single_test_a74a2253b9eb6d59f49686c1f4096e67_1752942829 - $0 (canceled)
+[2025-07-19 11:43:02.411] ✅ Found system wager: single_test_a74a2253b9eb6d59f49686c1f4096e67_1752942750 - $0 (canceled)
+[2025-07-19 11:43:02.411] ✅ Found system wager: single_test_a74a2253b9eb6d59f49686c1f4096e67_1752942671 - $0 (canceled)
+[2025-07-19 11:43:02.411] ✅ Found system wager: single_test_a74a2253b9eb6d59f49686c1f4096e67_1752942590 - $0 (canceled)
+[2025-07-19 11:43:02.411] ✅ Found system wager: single_test_a74a2253b9eb6d59f49686c1f4096e67_1752942511 - $0 (canceled)
+[2025-07-19 11:43:02.411] ✅ Found system wager: single_test_a74a2253b9eb6d59f49686c1f4096e67_1752942433 - $0 (canceled)
+[2025-07-19 11:43:02.411] ✅ Found system wager: single_test_a74a2253b9eb6d59f49686c1f4096e67_1752942354 - $0 (canceled)
+[2025-07-19 11:43:02.412] ✅ Found system wager: single_test_a74a2253b9eb6d59f49686c1f4096e67_1752942211 - $0 (canceled)
+[2025-07-19 11:43:02.412] ✅ Found system wager: single_test_a74a2253b9eb6d59f49686c1f4096e67_1752941362 - $0 (canceled)
+[2025-07-19 11:43:02.412] 📊 Found 15 wagers for line a74a2253b9eb6d59f49686c1f4096e67 in this batch
+[2025-07-19 11:43:02.412] 📊 TOTAL: Found 15 wagers for line a74a2253b9eb6d59f49686c1f4096e67
+[2025-07-19 11:43:02.412] 💰 Line position summary (SYSTEM BETS ONLY):
+[2025-07-19 11:43:02.412]    All bets: 15 (15 system, 0 manual)
+[2025-07-19 11:43:02.412]    Active system bets: 0
+[2025-07-19 11:43:02.412]    System stake: $0.00
+[2025-07-19 11:43:02.412]    System matched: $0.00
+[2025-07-19 11:43:02.412]    System unmatched: $0.00
+[2025-07-19 11:43:02.412]    Has active system liquidity: False
+[2025-07-19 11:43:02.412]    📊 San Francisco Giants -1.5 (f4096e67): $0/$500 (0%) - no bets
+[2025-07-19 11:43:02.412] 🔍 Searching for wagers on line_id: c26762e66b2ca975e90e4e374f25ab29
+[2025-07-19 11:43:02.412]    📊 System bets only (non-empty external_id)
+[2025-07-19 11:43:02.412] 🔍 Calling ProphetX API: https://api-ss-sandbox.betprophet.co/partner/v2/mm/get_wager_histories
+[2025-07-19 11:43:02.412] 📊 Query params: {'from': 1752338582, 'to': 1752943382, 'limit': 1000}
+[2025-07-19 11:43:02.538] 📡 API Response: HTTP 200
+[2025-07-19 11:43:02.601] 📊 Retrieved 367 total wagers from ProphetX
+[2025-07-19 11:43:02.602] 📊 Retrieved 367 total wagers from ProphetX
+[2025-07-19 11:43:02.602] ✅ Found system wager: single_test_c26762e66b2ca975e90e4e374f25ab29_1752943305 - $0 (canceled)
+[2025-07-19 11:43:02.602] ✅ Found system wager: single_test_c26762e66b2ca975e90e4e374f25ab29_1752943227 - $0 (canceled)
+[2025-07-19 11:43:02.602] ✅ Found system wager: single_test_c26762e66b2ca975e90e4e374f25ab29_1752943148 - $0 (canceled)
+[2025-07-19 11:43:02.602] ✅ Found system wager: single_test_c26762e66b2ca975e90e4e374f25ab29_1752943069 - $0 (canceled)
+[2025-07-19 11:43:02.602] ✅ Found system wager: single_test_c26762e66b2ca975e90e4e374f25ab29_1752942990 - $0 (canceled)
+[2025-07-19 11:43:02.602] ✅ Found system wager: single_test_c26762e66b2ca975e90e4e374f25ab29_1752942911 - $0 (canceled)
+[2025-07-19 11:43:02.602] ✅ Found system wager: single_test_c26762e66b2ca975e90e4e374f25ab29_1752942830 - $0 (canceled)
+[2025-07-19 11:43:02.602] ✅ Found system wager: single_test_c26762e66b2ca975e90e4e374f25ab29_1752942751 - $0 (canceled)
+[2025-07-19 11:43:02.602] ✅ Found system wager: single_test_c26762e66b2ca975e90e4e374f25ab29_1752942672 - $0 (canceled)
+[2025-07-19 11:43:02.602] ✅ Found system wager: single_test_c26762e66b2ca975e90e4e374f25ab29_1752942591 - $0 (canceled)
+[2025-07-19 11:43:02.602] ✅ Found system wager: single_test_c26762e66b2ca975e90e4e374f25ab29_1752942512 - $0 (canceled)
+[2025-07-19 11:43:02.602] ✅ Found system wager: single_test_c26762e66b2ca975e90e4e374f25ab29_1752942433 - $0 (canceled)
+[2025-07-19 11:43:02.602] ✅ Found system wager: single_test_c26762e66b2ca975e90e4e374f25ab29_1752942354 - $0 (canceled)
+[2025-07-19 11:43:02.602] ✅ Found system wager: single_test_c26762e66b2ca975e90e4e374f25ab29_1752942212 - $0 (canceled)
+[2025-07-19 11:43:02.602] ✅ Found system wager: single_test_c26762e66b2ca975e90e4e374f25ab29_1752941363 - $0 (canceled)
+[2025-07-19 11:43:02.602] 📊 Found 15 wagers for line c26762e66b2ca975e90e4e374f25ab29 in this batch
+[2025-07-19 11:43:02.602] 📊 TOTAL: Found 15 wagers for line c26762e66b2ca975e90e4e374f25ab29
+[2025-07-19 11:43:02.602] 💰 Line position summary (SYSTEM BETS ONLY):
+[2025-07-19 11:43:02.602]    All bets: 15 (15 system, 0 manual)
+[2025-07-19 11:43:02.602]    Active system bets: 0
+[2025-07-19 11:43:02.602]    System stake: $0.00
+[2025-07-19 11:43:02.602]    System matched: $0.00
+[2025-07-19 11:43:02.602]    System unmatched: $0.00
+[2025-07-19 11:43:02.602]    Has active system liquidity: False
+[2025-07-19 11:43:02.602]    📊 Toronto Blue Jays +1.5    (4f25ab29): $0/$796 (0%) - no bets
+[2025-07-19 11:43:02.602] 🔍 Searching for wagers on line_id: 45ab87a67ec8d1f5c8df10c31a1965d8
+[2025-07-19 11:43:02.602]    📊 System bets only (non-empty external_id)
+[2025-07-19 11:43:02.602] 🔍 Calling ProphetX API: https://api-ss-sandbox.betprophet.co/partner/v2/mm/get_wager_histories
+[2025-07-19 11:43:02.602] 📊 Query params: {'from': 1752338582, 'to': 1752943382, 'limit': 1000}
+[2025-07-19 11:43:02.894] 📡 API Response: HTTP 200
+[2025-07-19 11:43:02.977] 📊 Retrieved 367 total wagers from ProphetX
+[2025-07-19 11:43:02.978] 📊 Retrieved 367 total wagers from ProphetX
+[2025-07-19 11:43:02.978] ✅ Found system wager: single_test_45ab87a67ec8d1f5c8df10c31a1965d8_1752943306 - $0 (canceled)
+[2025-07-19 11:43:02.978] ✅ Found system wager: single_test_45ab87a67ec8d1f5c8df10c31a1965d8_1752943227 - $0 (canceled)
+[2025-07-19 11:43:02.978] ✅ Found system wager: single_test_45ab87a67ec8d1f5c8df10c31a1965d8_1752943148 - $0 (canceled)
+[2025-07-19 11:43:02.978] ✅ Found system wager: single_test_45ab87a67ec8d1f5c8df10c31a1965d8_1752943069 - $0 (canceled)
+[2025-07-19 11:43:02.978] ✅ Found system wager: single_test_45ab87a67ec8d1f5c8df10c31a1965d8_1752942990 - $0 (canceled)
+[2025-07-19 11:43:02.978] ✅ Found system wager: single_test_45ab87a67ec8d1f5c8df10c31a1965d8_1752942911 - $0 (canceled)
+[2025-07-19 11:43:02.978] ✅ Found system wager: single_test_45ab87a67ec8d1f5c8df10c31a1965d8_1752942830 - $0 (canceled)
+[2025-07-19 11:43:02.978] ✅ Found system wager: single_test_45ab87a67ec8d1f5c8df10c31a1965d8_1752942751 - $0 (canceled)
+[2025-07-19 11:43:02.978] ✅ Found system wager: single_test_45ab87a67ec8d1f5c8df10c31a1965d8_1752942672 - $0 (canceled)
+[2025-07-19 11:43:02.978] ✅ Found system wager: single_test_45ab87a67ec8d1f5c8df10c31a1965d8_1752942591 - $0 (canceled)
+[2025-07-19 11:43:02.978] ✅ Found system wager: single_test_45ab87a67ec8d1f5c8df10c31a1965d8_1752942512 - $0 (canceled)
+[2025-07-19 11:43:02.978] ✅ Found system wager: single_test_45ab87a67ec8d1f5c8df10c31a1965d8_1752942433 - $0 (canceled)
+[2025-07-19 11:43:02.978] ✅ Found system wager: single_test_45ab87a67ec8d1f5c8df10c31a1965d8_1752942355 - $0 (canceled)
+[2025-07-19 11:43:02.978] ✅ Found system wager: single_test_45ab87a67ec8d1f5c8df10c31a1965d8_1752942212 - $0 (canceled)
+[2025-07-19 11:43:02.978] ✅ Found system wager: single_test_45ab87a67ec8d1f5c8df10c31a1965d8_1752941363 - $0 (canceled)
+[2025-07-19 11:43:02.978] 📊 Found 15 wagers for line 45ab87a67ec8d1f5c8df10c31a1965d8 in this batch
+[2025-07-19 11:43:02.979] 📊 TOTAL: Found 15 wagers for line 45ab87a67ec8d1f5c8df10c31a1965d8
+[2025-07-19 11:43:02.979] 💰 Line position summary (SYSTEM BETS ONLY):
+[2025-07-19 11:43:02.979]    All bets: 15 (15 system, 0 manual)
+[2025-07-19 11:43:02.979]    Active system bets: 0
+[2025-07-19 11:43:02.979]    System stake: $0.00
+[2025-07-19 11:43:02.979]    System matched: $0.00
+[2025-07-19 11:43:02.979]    System unmatched: $0.00
+[2025-07-19 11:43:02.979]    Has active system liquidity: False
+[2025-07-19 11:43:02.979]    📊 over 8                    (1a1965d8): $0/$500 (0%) - no bets
+[2025-07-19 11:43:02.979] 🔍 Searching for wagers on line_id: eac46f8b97d1aea73467f8c6b97e419b
+[2025-07-19 11:43:02.979]    📊 System bets only (non-empty external_id)
+[2025-07-19 11:43:02.979] 🔍 Calling ProphetX API: https://api-ss-sandbox.betprophet.co/partner/v2/mm/get_wager_histories
+[2025-07-19 11:43:02.979] 📊 Query params: {'from': 1752338582, 'to': 1752943382, 'limit': 1000}
+[2025-07-19 11:43:03.117] 📡 API Response: HTTP 200
+[2025-07-19 11:43:03.189] 📊 Retrieved 367 total wagers from ProphetX
+[2025-07-19 11:43:03.190] 📊 Retrieved 367 total wagers from ProphetX
+[2025-07-19 11:43:03.190] ✅ Found system wager: single_test_eac46f8b97d1aea73467f8c6b97e419b_1752943306 - $0 (canceled)
+[2025-07-19 11:43:03.190] ✅ Found system wager: single_test_eac46f8b97d1aea73467f8c6b97e419b_1752943228 - $0 (canceled)
+[2025-07-19 11:43:03.190] ✅ Found system wager: single_test_eac46f8b97d1aea73467f8c6b97e419b_1752943149 - $0 (canceled)
+[2025-07-19 11:43:03.190] ✅ Found system wager: single_test_eac46f8b97d1aea73467f8c6b97e419b_1752943070 - $0 (canceled)
+[2025-07-19 11:43:03.191] ✅ Found system wager: single_test_eac46f8b97d1aea73467f8c6b97e419b_1752942991 - $0 (canceled)
+[2025-07-19 11:43:03.191] ✅ Found system wager: single_test_eac46f8b97d1aea73467f8c6b97e419b_1752942912 - $0 (canceled)
+[2025-07-19 11:43:03.191] ✅ Found system wager: single_test_eac46f8b97d1aea73467f8c6b97e419b_1752942831 - $0 (canceled)
+[2025-07-19 11:43:03.191] ✅ Found system wager: single_test_eac46f8b97d1aea73467f8c6b97e419b_1752942752 - $0 (canceled)
+[2025-07-19 11:43:03.191] ✅ Found system wager: single_test_eac46f8b97d1aea73467f8c6b97e419b_1752942673 - $0 (canceled)
+[2025-07-19 11:43:03.191] ✅ Found system wager: single_test_eac46f8b97d1aea73467f8c6b97e419b_1752942592 - $0 (canceled)
+[2025-07-19 11:43:03.191] ✅ Found system wager: single_test_eac46f8b97d1aea73467f8c6b97e419b_1752942513 - $0 (canceled)
+[2025-07-19 11:43:03.191] ✅ Found system wager: single_test_eac46f8b97d1aea73467f8c6b97e419b_1752942434 - $0 (canceled)
+[2025-07-19 11:43:03.191] ✅ Found system wager: single_test_eac46f8b97d1aea73467f8c6b97e419b_1752942355 - $0 (canceled)
+[2025-07-19 11:43:03.191] ✅ Found system wager: single_test_eac46f8b97d1aea73467f8c6b97e419b_1752942212 - $0 (canceled)
+[2025-07-19 11:43:03.191] ✅ Found system wager: single_test_eac46f8b97d1aea73467f8c6b97e419b_1752941364 - $0 (canceled)
+[2025-07-19 11:43:03.191] 📊 Found 15 wagers for line eac46f8b97d1aea73467f8c6b97e419b in this batch
+[2025-07-19 11:43:03.191] 📊 TOTAL: Found 15 wagers for line eac46f8b97d1aea73467f8c6b97e419b
+[2025-07-19 11:43:03.191] 💰 Line position summary (SYSTEM BETS ONLY):
+[2025-07-19 11:43:03.191]    All bets: 15 (15 system, 0 manual)
+[2025-07-19 11:43:03.191]    Active system bets: 0
+[2025-07-19 11:43:03.191]    System stake: $0.00
+[2025-07-19 11:43:03.191]    System matched: $0.00
+[2025-07-19 11:43:03.191]    System unmatched: $0.00
+[2025-07-19 11:43:03.191]    Has active system liquidity: False
+[2025-07-19 11:43:03.191]    📊 under 8                   (b97e419b): $0/$524 (0%) - no bets
+[2025-07-19 11:43:03.191] \n2️⃣ LIQUIDITY MANAGEMENT AND FILL MONITORING
+[2025-07-19 11:43:03.191] 📊 Only counting system bets (non-empty external_id)
+[2025-07-19 11:43:03.191] --------------------------------------------------
+[2025-07-19 11:43:03.191] 🔍 Searching for wagers on line_id: 82f619981f80114f704ddb9b44420c70
+[2025-07-19 11:43:03.191]    📊 System bets only (non-empty external_id)
+[2025-07-19 11:43:03.191]    🔍 External ID filter: 'single_test_*'
+[2025-07-19 11:43:03.191] 🔍 Calling ProphetX API: https://api-ss-sandbox.betprophet.co/partner/v2/mm/get_wager_histories
+[2025-07-19 11:43:03.191] 📊 Query params: {'from': 1752338583, 'to': 1752943383, 'limit': 1000}
+[2025-07-19 11:43:03.416] 📡 API Response: HTTP 200
+[2025-07-19 11:43:03.500] 📊 Retrieved 367 total wagers from ProphetX
+[2025-07-19 11:43:03.500] 📊 Retrieved 367 total wagers from ProphetX
+[2025-07-19 11:43:03.500] ✅ Found system wager: single_test_82f619981f80114f704ddb9b44420c70_1752943304 - $0 (canceled)
+[2025-07-19 11:43:03.500] ✅ Found system wager: single_test_82f619981f80114f704ddb9b44420c70_1752943225 - $0 (canceled)
+[2025-07-19 11:43:03.500] ✅ Found system wager: single_test_82f619981f80114f704ddb9b44420c70_1752943146 - $0 (canceled)
+[2025-07-19 11:43:03.500] ✅ Found system wager: single_test_82f619981f80114f704ddb9b44420c70_1752943068 - $0 (canceled)
+[2025-07-19 11:43:03.500] ✅ Found system wager: single_test_82f619981f80114f704ddb9b44420c70_1752942988 - $0 (canceled)
+[2025-07-19 11:43:03.500] ✅ Found system wager: single_test_82f619981f80114f704ddb9b44420c70_1752942910 - $0 (canceled)
+[2025-07-19 11:43:03.500] ✅ Found system wager: single_test_82f619981f80114f704ddb9b44420c70_1752942828 - $0 (canceled)
+[2025-07-19 11:43:03.500] ✅ Found system wager: single_test_82f619981f80114f704ddb9b44420c70_1752942749 - $0 (canceled)
+[2025-07-19 11:43:03.500] ✅ Found system wager: single_test_82f619981f80114f704ddb9b44420c70_1752942670 - $0 (canceled)
+[2025-07-19 11:43:03.500] ✅ Found system wager: single_test_82f619981f80114f704ddb9b44420c70_1752942589 - $0 (canceled)
+[2025-07-19 11:43:03.501] ✅ Found system wager: single_test_82f619981f80114f704ddb9b44420c70_1752942511 - $0 (canceled)
+[2025-07-19 11:43:03.501] ✅ Found system wager: single_test_82f619981f80114f704ddb9b44420c70_1752942432 - $0 (canceled)
+[2025-07-19 11:43:03.501] ✅ Found system wager: single_test_82f619981f80114f704ddb9b44420c70_1752942353 - $0 (canceled)
+[2025-07-19 11:43:03.501] ✅ Found system wager: single_test_82f619981f80114f704ddb9b44420c70_1752942210 - $0 (canceled)
+[2025-07-19 11:43:03.501] ✅ Found system wager: single_test_82f619981f80114f704ddb9b44420c70_1752941361 - $0 (canceled)
+[2025-07-19 11:43:03.501] 📊 Found 15 wagers for line 82f619981f80114f704ddb9b44420c70 in this batch
+[2025-07-19 11:43:03.501] 📊 TOTAL: Found 15 wagers for line 82f619981f80114f704ddb9b44420c70
+[2025-07-19 11:43:03.501] 💰 Line position summary (SYSTEM BETS ONLY):
+[2025-07-19 11:43:03.501]    All bets: 15 (15 system, 0 manual)
+[2025-07-19 11:43:03.501]    Active system bets: 0
+[2025-07-19 11:43:03.501]    System stake: $0.00
+[2025-07-19 11:43:03.501]    System matched: $0.00
+[2025-07-19 11:43:03.501]    System unmatched: $0.00
+[2025-07-19 11:43:03.501]    Has active system liquidity: False
+[2025-07-19 11:43:03.501] \n📊 Toronto Blue Jays             
+[2025-07-19 11:43:03.501]    📈 System position: $0.00 total, $0.00 matched, $0.00 unmatched
+[2025-07-19 11:43:03.501]    🎯 Target: $100.00 unmatched, max: $500.00 total
+[2025-07-19 11:43:03.501]    📊 System fills: 0
+[2025-07-19 11:43:03.501]    🔍 Liquidity shortfall: $100.00
+[2025-07-19 11:43:03.501]    ✅ RESTORING LIQUIDITY: Adding $100.00
+[2025-07-19 11:43:03.501]       (shortfall: $100.00, capacity: $500.00)
+[2025-07-19 11:43:03.501]    🎯 Placing: Toronto Blue Jays +107 for $100.00
+[2025-07-19 11:43:03.501]       Reason: Restore liquidity ($0.00 system filled)
+[2025-07-19 11:43:03.501] 💰 Placing bet: 44420c70, +107, $100.0
+[2025-07-19 11:43:03.694] ✅ Bet placed successfully: 52943383
+[2025-07-19 11:43:03.695]       ✅ Bet placed successfully (ID: single_test_82f619981f80114f704ddb9b44420c70_1752943383)
+[2025-07-19 11:43:03.695]       ✅ Liquidity restoration bet placed
+[2025-07-19 11:43:03.695] 🔍 Searching for wagers on line_id: 924f14a69d0df401202d0b12069deeee
+[2025-07-19 11:43:03.695]    📊 System bets only (non-empty external_id)
+[2025-07-19 11:43:03.695]    🔍 External ID filter: 'single_test_*'
+[2025-07-19 11:43:03.695] 🔍 Calling ProphetX API: https://api-ss-sandbox.betprophet.co/partner/v2/mm/get_wager_histories
+[2025-07-19 11:43:03.695] 📊 Query params: {'from': 1752338583, 'to': 1752943383, 'limit': 1000}
+[2025-07-19 11:43:03.941] 📡 API Response: HTTP 200
+[2025-07-19 11:43:04.028] 📊 Retrieved 367 total wagers from ProphetX
+[2025-07-19 11:43:04.029] 📊 Retrieved 367 total wagers from ProphetX
+[2025-07-19 11:43:04.029] ✅ Found system wager: single_test_924f14a69d0df401202d0b12069deeee_1752943304 - $0 (canceled)
+[2025-07-19 11:43:04.029] ✅ Found system wager: single_test_924f14a69d0df401202d0b12069deeee_1752943226 - $0 (canceled)
+[2025-07-19 11:43:04.029] ✅ Found system wager: single_test_924f14a69d0df401202d0b12069deeee_1752943147 - $0 (canceled)
+[2025-07-19 11:43:04.029] ✅ Found system wager: single_test_924f14a69d0df401202d0b12069deeee_1752943068 - $0 (canceled)
+[2025-07-19 11:43:04.029] ✅ Found system wager: single_test_924f14a69d0df401202d0b12069deeee_1752942989 - $0 (canceled)
+[2025-07-19 11:43:04.029] ✅ Found system wager: single_test_924f14a69d0df401202d0b12069deeee_1752942910 - $0 (canceled)
+[2025-07-19 11:43:04.030] ✅ Found system wager: single_test_924f14a69d0df401202d0b12069deeee_1752942829 - $0 (canceled)
+[2025-07-19 11:43:04.030] ✅ Found system wager: single_test_924f14a69d0df401202d0b12069deeee_1752942750 - $0 (canceled)
+[2025-07-19 11:43:04.030] ✅ Found system wager: single_test_924f14a69d0df401202d0b12069deeee_1752942671 - $0 (canceled)
+[2025-07-19 11:43:04.030] ✅ Found system wager: single_test_924f14a69d0df401202d0b12069deeee_1752942590 - $0 (canceled)
+[2025-07-19 11:43:04.030] ✅ Found system wager: single_test_924f14a69d0df401202d0b12069deeee_1752942511 - $0 (canceled)
+[2025-07-19 11:43:04.030] ✅ Found system wager: single_test_924f14a69d0df401202d0b12069deeee_1752942432 - $0 (canceled)
+[2025-07-19 11:43:04.030] ✅ Found system wager: single_test_924f14a69d0df401202d0b12069deeee_1752942353 - $0 (canceled)
+[2025-07-19 11:43:04.030] ✅ Found system wager: single_test_924f14a69d0df401202d0b12069deeee_1752942211 - $0 (canceled)
+[2025-07-19 11:43:04.030] ✅ Found system wager: single_test_924f14a69d0df401202d0b12069deeee_1752941362 - $0 (canceled)
+[2025-07-19 11:43:04.030] 📊 Found 15 wagers for line 924f14a69d0df401202d0b12069deeee in this batch
+[2025-07-19 11:43:04.030] 📊 TOTAL: Found 15 wagers for line 924f14a69d0df401202d0b12069deeee
+[2025-07-19 11:43:04.030] 💰 Line position summary (SYSTEM BETS ONLY):
+[2025-07-19 11:43:04.030]    All bets: 15 (15 system, 0 manual)
+[2025-07-19 11:43:04.030]    Active system bets: 0
+[2025-07-19 11:43:04.030]    System stake: $0.00
+[2025-07-19 11:43:04.030]    System matched: $0.00
+[2025-07-19 11:43:04.030]    System unmatched: $0.00
+[2025-07-19 11:43:04.030]    Has active system liquidity: False
+[2025-07-19 11:43:04.030] \n📊 San Francisco Giants          
+[2025-07-19 11:43:04.030]    📈 System position: $0.00 total, $0.00 matched, $0.00 unmatched
+[2025-07-19 11:43:04.030]    🎯 Target: $102.94 unmatched, max: $514.70 total
+[2025-07-19 11:43:04.030]    📊 System fills: 0
+[2025-07-19 11:43:04.030]    🔍 Liquidity shortfall: $102.94
+[2025-07-19 11:43:04.030]    ✅ RESTORING LIQUIDITY: Adding $102.94
+[2025-07-19 11:43:04.030]       (shortfall: $102.94, capacity: $514.70)
+[2025-07-19 11:43:04.030]    🎯 Placing: San Francisco Giants +101 for $102.94
+[2025-07-19 11:43:04.030]       Reason: Restore liquidity ($0.00 system filled)
+[2025-07-19 11:43:04.030] 💰 Placing bet: 069deeee, +101, $102.93983936960146
+[2025-07-19 11:43:04.184] ✅ Bet placed successfully: 52943384
+[2025-07-19 11:43:04.185]       ✅ Bet placed successfully (ID: single_test_924f14a69d0df401202d0b12069deeee_1752943384)
+[2025-07-19 11:43:04.185]       ✅ Liquidity restoration bet placed
+[2025-07-19 11:43:04.185] 🔍 Searching for wagers on line_id: a74a2253b9eb6d59f49686c1f4096e67
+[2025-07-19 11:43:04.185]    📊 System bets only (non-empty external_id)
+[2025-07-19 11:43:04.185]    🔍 External ID filter: 'single_test_*'
+[2025-07-19 11:43:04.185] 🔍 Calling ProphetX API: https://api-ss-sandbox.betprophet.co/partner/v2/mm/get_wager_histories
+[2025-07-19 11:43:04.185] 📊 Query params: {'from': 1752338584, 'to': 1752943384, 'limit': 1000}
+[2025-07-19 11:43:04.312] 📡 API Response: HTTP 200
+[2025-07-19 11:43:04.547] 📊 Retrieved 367 total wagers from ProphetX
+[2025-07-19 11:43:04.547] 📊 Retrieved 367 total wagers from ProphetX
+[2025-07-19 11:43:04.548] ✅ Found system wager: single_test_a74a2253b9eb6d59f49686c1f4096e67_1752943305 - $0 (canceled)
+[2025-07-19 11:43:04.548] ✅ Found system wager: single_test_a74a2253b9eb6d59f49686c1f4096e67_1752943226 - $0 (canceled)
+[2025-07-19 11:43:04.548] ✅ Found system wager: single_test_a74a2253b9eb6d59f49686c1f4096e67_1752943147 - $0 (canceled)
+[2025-07-19 11:43:04.548] ✅ Found system wager: single_test_a74a2253b9eb6d59f49686c1f4096e67_1752943069 - $0 (canceled)
+[2025-07-19 11:43:04.548] ✅ Found system wager: single_test_a74a2253b9eb6d59f49686c1f4096e67_1752942989 - $0 (canceled)
+[2025-07-19 11:43:04.548] ✅ Found system wager: single_test_a74a2253b9eb6d59f49686c1f4096e67_1752942910 - $0 (canceled)
+[2025-07-19 11:43:04.548] ✅ Found system wager: single_test_a74a2253b9eb6d59f49686c1f4096e67_1752942829 - $0 (canceled)
+[2025-07-19 11:43:04.548] ✅ Found system wager: single_test_a74a2253b9eb6d59f49686c1f4096e67_1752942750 - $0 (canceled)
+[2025-07-19 11:43:04.548] ✅ Found system wager: single_test_a74a2253b9eb6d59f49686c1f4096e67_1752942671 - $0 (canceled)
+[2025-07-19 11:43:04.548] ✅ Found system wager: single_test_a74a2253b9eb6d59f49686c1f4096e67_1752942590 - $0 (canceled)
+[2025-07-19 11:43:04.548] ✅ Found system wager: single_test_a74a2253b9eb6d59f49686c1f4096e67_1752942511 - $0 (canceled)
+[2025-07-19 11:43:04.548] ✅ Found system wager: single_test_a74a2253b9eb6d59f49686c1f4096e67_1752942433 - $0 (canceled)
+[2025-07-19 11:43:04.548] ✅ Found system wager: single_test_a74a2253b9eb6d59f49686c1f4096e67_1752942354 - $0 (canceled)
+[2025-07-19 11:43:04.548] ✅ Found system wager: single_test_a74a2253b9eb6d59f49686c1f4096e67_1752942211 - $0 (canceled)
+[2025-07-19 11:43:04.548] ✅ Found system wager: single_test_a74a2253b9eb6d59f49686c1f4096e67_1752941362 - $0 (canceled)
+[2025-07-19 11:43:04.548] 📊 Found 15 wagers for line a74a2253b9eb6d59f49686c1f4096e67 in this batch
+[2025-07-19 11:43:04.548] 📊 TOTAL: Found 15 wagers for line a74a2253b9eb6d59f49686c1f4096e67
+[2025-07-19 11:43:04.548] 💰 Line position summary (SYSTEM BETS ONLY):
+[2025-07-19 11:43:04.548]    All bets: 15 (15 system, 0 manual)
+[2025-07-19 11:43:04.548]    Active system bets: 0
+[2025-07-19 11:43:04.548]    System stake: $0.00
+[2025-07-19 11:43:04.548]    System matched: $0.00
+[2025-07-19 11:43:04.548]    System unmatched: $0.00
+[2025-07-19 11:43:04.548]    Has active system liquidity: False
+[2025-07-19 11:43:04.548] \n📊 San Francisco Giants -1.5     
+[2025-07-19 11:43:04.548]    📈 System position: $0.00 total, $0.00 matched, $0.00 unmatched
+[2025-07-19 11:43:04.548]    🎯 Target: $100.00 unmatched, max: $500.00 total
+[2025-07-19 11:43:04.548]    📊 System fills: 0
+[2025-07-19 11:43:04.548]    🔍 Liquidity shortfall: $100.00
+[2025-07-19 11:43:04.548]    ✅ RESTORING LIQUIDITY: Adding $100.00
+[2025-07-19 11:43:04.548]       (shortfall: $100.00, capacity: $500.00)
+[2025-07-19 11:43:04.548]    🎯 Placing: San Francisco Giants -1.5 +166 for $100.00
+[2025-07-19 11:43:04.548]       Reason: Restore liquidity ($0.00 system filled)
+[2025-07-19 11:43:04.548] 💰 Placing bet: f4096e67, +166, $100.0
+[2025-07-19 11:43:04.718] ✅ Bet placed successfully: 52943384
+[2025-07-19 11:43:04.719]       ✅ Bet placed successfully (ID: single_test_a74a2253b9eb6d59f49686c1f4096e67_1752943384)
+[2025-07-19 11:43:04.719]       ✅ Liquidity restoration bet placed
+[2025-07-19 11:43:04.719] 🔍 Searching for wagers on line_id: c26762e66b2ca975e90e4e374f25ab29
+[2025-07-19 11:43:04.719]    📊 System bets only (non-empty external_id)
+[2025-07-19 11:43:04.719]    🔍 External ID filter: 'single_test_*'
+[2025-07-19 11:43:04.719] 🔍 Calling ProphetX API: https://api-ss-sandbox.betprophet.co/partner/v2/mm/get_wager_histories
+[2025-07-19 11:43:04.719] 📊 Query params: {'from': 1752338584, 'to': 1752943384, 'limit': 1000}
+[2025-07-19 11:43:04.989] 📡 API Response: HTTP 200
+[2025-07-19 11:43:05.079] 📊 Retrieved 368 total wagers from ProphetX
+[2025-07-19 11:43:05.081] 📊 Retrieved 368 total wagers from ProphetX
+[2025-07-19 11:43:05.081] ✅ Found system wager: single_test_c26762e66b2ca975e90e4e374f25ab29_1752943305 - $0 (canceled)
+[2025-07-19 11:43:05.081] ✅ Found system wager: single_test_c26762e66b2ca975e90e4e374f25ab29_1752943227 - $0 (canceled)
+[2025-07-19 11:43:05.081] ✅ Found system wager: single_test_c26762e66b2ca975e90e4e374f25ab29_1752943148 - $0 (canceled)
+[2025-07-19 11:43:05.081] ✅ Found system wager: single_test_c26762e66b2ca975e90e4e374f25ab29_1752943069 - $0 (canceled)
+[2025-07-19 11:43:05.081] ✅ Found system wager: single_test_c26762e66b2ca975e90e4e374f25ab29_1752942990 - $0 (canceled)
+[2025-07-19 11:43:05.081] ✅ Found system wager: single_test_c26762e66b2ca975e90e4e374f25ab29_1752942911 - $0 (canceled)
+[2025-07-19 11:43:05.081] ✅ Found system wager: single_test_c26762e66b2ca975e90e4e374f25ab29_1752942830 - $0 (canceled)
+[2025-07-19 11:43:05.081] ✅ Found system wager: single_test_c26762e66b2ca975e90e4e374f25ab29_1752942751 - $0 (canceled)
+[2025-07-19 11:43:05.081] ✅ Found system wager: single_test_c26762e66b2ca975e90e4e374f25ab29_1752942672 - $0 (canceled)
+[2025-07-19 11:43:05.081] ✅ Found system wager: single_test_c26762e66b2ca975e90e4e374f25ab29_1752942591 - $0 (canceled)
+[2025-07-19 11:43:05.081] ✅ Found system wager: single_test_c26762e66b2ca975e90e4e374f25ab29_1752942512 - $0 (canceled)
+[2025-07-19 11:43:05.081] ✅ Found system wager: single_test_c26762e66b2ca975e90e4e374f25ab29_1752942433 - $0 (canceled)
+[2025-07-19 11:43:05.081] ✅ Found system wager: single_test_c26762e66b2ca975e90e4e374f25ab29_1752942354 - $0 (canceled)
+[2025-07-19 11:43:05.081] ✅ Found system wager: single_test_c26762e66b2ca975e90e4e374f25ab29_1752942212 - $0 (canceled)
+[2025-07-19 11:43:05.081] ✅ Found system wager: single_test_c26762e66b2ca975e90e4e374f25ab29_1752941363 - $0 (canceled)
+[2025-07-19 11:43:05.081] 📊 Found 15 wagers for line c26762e66b2ca975e90e4e374f25ab29 in this batch
+[2025-07-19 11:43:05.081] 📊 TOTAL: Found 15 wagers for line c26762e66b2ca975e90e4e374f25ab29
+[2025-07-19 11:43:05.081] 💰 Line position summary (SYSTEM BETS ONLY):
+[2025-07-19 11:43:05.081]    All bets: 15 (15 system, 0 manual)
+[2025-07-19 11:43:05.081]    Active system bets: 0
+[2025-07-19 11:43:05.081]    System stake: $0.00
+[2025-07-19 11:43:05.081]    System matched: $0.00
+[2025-07-19 11:43:05.081]    System unmatched: $0.00
+[2025-07-19 11:43:05.081]    Has active system liquidity: False
+[2025-07-19 11:43:05.081] \n📊 Toronto Blue Jays +1.5        
+[2025-07-19 11:43:05.081]    📈 System position: $0.00 total, $0.00 matched, $0.00 unmatched
+[2025-07-19 11:43:05.081]    🎯 Target: $159.10 unmatched, max: $795.52 total
+[2025-07-19 11:43:05.081]    📊 System fills: 0
+[2025-07-19 11:43:05.081]    🔍 Liquidity shortfall: $159.10
+[2025-07-19 11:43:05.081]    ✅ RESTORING LIQUIDITY: Adding $159.10
+[2025-07-19 11:43:05.081]       (shortfall: $159.10, capacity: $795.52)
+[2025-07-19 11:43:05.081]    🎯 Placing: Toronto Blue Jays +1.5 -150 for $159.10
+[2025-07-19 11:43:05.081]       Reason: Restore liquidity ($0.00 system filled)
+[2025-07-19 11:43:05.081] 💰 Placing bet: 4f25ab29, -150, $159.1032388663968
+[2025-07-19 11:43:05.257] ✅ Bet placed successfully: 52943385
+[2025-07-19 11:43:05.258]       ✅ Bet placed successfully (ID: single_test_c26762e66b2ca975e90e4e374f25ab29_1752943385)
+[2025-07-19 11:43:05.258]       ✅ Liquidity restoration bet placed
+[2025-07-19 11:43:05.258] 🔍 Searching for wagers on line_id: 45ab87a67ec8d1f5c8df10c31a1965d8
+[2025-07-19 11:43:05.258]    📊 System bets only (non-empty external_id)
+[2025-07-19 11:43:05.258]    🔍 External ID filter: 'single_test_*'
+[2025-07-19 11:43:05.258] 🔍 Calling ProphetX API: https://api-ss-sandbox.betprophet.co/partner/v2/mm/get_wager_histories
+[2025-07-19 11:43:05.258] 📊 Query params: {'from': 1752338585, 'to': 1752943385, 'limit': 1000}
+[2025-07-19 11:43:05.514] 📡 API Response: HTTP 200
+[2025-07-19 11:43:05.599] 📊 Retrieved 370 total wagers from ProphetX
+[2025-07-19 11:43:05.601] 📊 Retrieved 370 total wagers from ProphetX
+[2025-07-19 11:43:05.601] ✅ Found system wager: single_test_45ab87a67ec8d1f5c8df10c31a1965d8_1752943306 - $0 (canceled)
+[2025-07-19 11:43:05.601] ✅ Found system wager: single_test_45ab87a67ec8d1f5c8df10c31a1965d8_1752943227 - $0 (canceled)
+[2025-07-19 11:43:05.601] ✅ Found system wager: single_test_45ab87a67ec8d1f5c8df10c31a1965d8_1752943148 - $0 (canceled)
+[2025-07-19 11:43:05.601] ✅ Found system wager: single_test_45ab87a67ec8d1f5c8df10c31a1965d8_1752943069 - $0 (canceled)
+[2025-07-19 11:43:05.601] ✅ Found system wager: single_test_45ab87a67ec8d1f5c8df10c31a1965d8_1752942990 - $0 (canceled)
+[2025-07-19 11:43:05.601] ✅ Found system wager: single_test_45ab87a67ec8d1f5c8df10c31a1965d8_1752942911 - $0 (canceled)
+[2025-07-19 11:43:05.601] ✅ Found system wager: single_test_45ab87a67ec8d1f5c8df10c31a1965d8_1752942830 - $0 (canceled)
+[2025-07-19 11:43:05.601] ✅ Found system wager: single_test_45ab87a67ec8d1f5c8df10c31a1965d8_1752942751 - $0 (canceled)
+[2025-07-19 11:43:05.601] ✅ Found system wager: single_test_45ab87a67ec8d1f5c8df10c31a1965d8_1752942672 - $0 (canceled)
+[2025-07-19 11:43:05.601] ✅ Found system wager: single_test_45ab87a67ec8d1f5c8df10c31a1965d8_1752942591 - $0 (canceled)
+[2025-07-19 11:43:05.601] ✅ Found system wager: single_test_45ab87a67ec8d1f5c8df10c31a1965d8_1752942512 - $0 (canceled)
+[2025-07-19 11:43:05.601] ✅ Found system wager: single_test_45ab87a67ec8d1f5c8df10c31a1965d8_1752942433 - $0 (canceled)
+[2025-07-19 11:43:05.601] ✅ Found system wager: single_test_45ab87a67ec8d1f5c8df10c31a1965d8_1752942355 - $0 (canceled)
+[2025-07-19 11:43:05.601] ✅ Found system wager: single_test_45ab87a67ec8d1f5c8df10c31a1965d8_1752942212 - $0 (canceled)
+[2025-07-19 11:43:05.601] ✅ Found system wager: single_test_45ab87a67ec8d1f5c8df10c31a1965d8_1752941363 - $0 (canceled)
+[2025-07-19 11:43:05.601] 📊 Found 15 wagers for line 45ab87a67ec8d1f5c8df10c31a1965d8 in this batch
+[2025-07-19 11:43:05.601] 📊 TOTAL: Found 15 wagers for line 45ab87a67ec8d1f5c8df10c31a1965d8
+[2025-07-19 11:43:05.601] 💰 Line position summary (SYSTEM BETS ONLY):
+[2025-07-19 11:43:05.601]    All bets: 15 (15 system, 0 manual)
+[2025-07-19 11:43:05.601]    Active system bets: 0
+[2025-07-19 11:43:05.601]    System stake: $0.00
+[2025-07-19 11:43:05.601]    System matched: $0.00
+[2025-07-19 11:43:05.601]    System unmatched: $0.00
+[2025-07-19 11:43:05.601]    Has active system liquidity: False
+[2025-07-19 11:43:05.601] \n📊 over 8                        
+[2025-07-19 11:43:05.601]    📈 System position: $0.00 total, $0.00 matched, $0.00 unmatched
+[2025-07-19 11:43:05.601]    🎯 Target: $100.00 unmatched, max: $500.00 total
+[2025-07-19 11:43:05.601]    📊 System fills: 0
+[2025-07-19 11:43:05.601]    🔍 Liquidity shortfall: $100.00
+[2025-07-19 11:43:05.601]    ✅ RESTORING LIQUIDITY: Adding $100.00
+[2025-07-19 11:43:05.602]       (shortfall: $100.00, capacity: $500.00)
+[2025-07-19 11:43:05.602]    🎯 Placing: over 8 +111 for $100.00
+[2025-07-19 11:43:05.602]       Reason: Restore liquidity ($0.00 system filled)
+[2025-07-19 11:43:05.602] 💰 Placing bet: 1a1965d8, +111, $100.0
+[2025-07-19 11:43:05.761] ✅ Bet placed successfully: 52943385
+[2025-07-19 11:43:05.762]       ✅ Bet placed successfully (ID: single_test_45ab87a67ec8d1f5c8df10c31a1965d8_1752943385)
+[2025-07-19 11:43:05.762]       ✅ Liquidity restoration bet placed
+[2025-07-19 11:43:05.762] 🔍 Searching for wagers on line_id: eac46f8b97d1aea73467f8c6b97e419b
+[2025-07-19 11:43:05.762]    📊 System bets only (non-empty external_id)
+[2025-07-19 11:43:05.762]    🔍 External ID filter: 'single_test_*'
+[2025-07-19 11:43:05.762] 🔍 Calling ProphetX API: https://api-ss-sandbox.betprophet.co/partner/v2/mm/get_wager_histories
+[2025-07-19 11:43:05.763] 📊 Query params: {'from': 1752338585, 'to': 1752943385, 'limit': 1000}
+[2025-07-19 11:43:05.888] 📡 API Response: HTTP 200
+[2025-07-19 11:43:06.121] 📊 Retrieved 370 total wagers from ProphetX
+[2025-07-19 11:43:06.122] 📊 Retrieved 370 total wagers from ProphetX
+[2025-07-19 11:43:06.122] ✅ Found system wager: single_test_eac46f8b97d1aea73467f8c6b97e419b_1752943306 - $0 (canceled)
+[2025-07-19 11:43:06.122] ✅ Found system wager: single_test_eac46f8b97d1aea73467f8c6b97e419b_1752943228 - $0 (canceled)
+[2025-07-19 11:43:06.122] ✅ Found system wager: single_test_eac46f8b97d1aea73467f8c6b97e419b_1752943149 - $0 (canceled)
+[2025-07-19 11:43:06.122] ✅ Found system wager: single_test_eac46f8b97d1aea73467f8c6b97e419b_1752943070 - $0 (canceled)
+[2025-07-19 11:43:06.122] ✅ Found system wager: single_test_eac46f8b97d1aea73467f8c6b97e419b_1752942991 - $0 (canceled)
+[2025-07-19 11:43:06.122] ✅ Found system wager: single_test_eac46f8b97d1aea73467f8c6b97e419b_1752942912 - $0 (canceled)
+[2025-07-19 11:43:06.122] ✅ Found system wager: single_test_eac46f8b97d1aea73467f8c6b97e419b_1752942831 - $0 (canceled)
+[2025-07-19 11:43:06.122] ✅ Found system wager: single_test_eac46f8b97d1aea73467f8c6b97e419b_1752942752 - $0 (canceled)
+[2025-07-19 11:43:06.122] ✅ Found system wager: single_test_eac46f8b97d1aea73467f8c6b97e419b_1752942673 - $0 (canceled)
+[2025-07-19 11:43:06.122] ✅ Found system wager: single_test_eac46f8b97d1aea73467f8c6b97e419b_1752942592 - $0 (canceled)
+[2025-07-19 11:43:06.122] ✅ Found system wager: single_test_eac46f8b97d1aea73467f8c6b97e419b_1752942513 - $0 (canceled)
+[2025-07-19 11:43:06.122] ✅ Found system wager: single_test_eac46f8b97d1aea73467f8c6b97e419b_1752942434 - $0 (canceled)
+[2025-07-19 11:43:06.122] ✅ Found system wager: single_test_eac46f8b97d1aea73467f8c6b97e419b_1752942355 - $0 (canceled)
+[2025-07-19 11:43:06.122] ✅ Found system wager: single_test_eac46f8b97d1aea73467f8c6b97e419b_1752942212 - $0 (canceled)
+[2025-07-19 11:43:06.122] ✅ Found system wager: single_test_eac46f8b97d1aea73467f8c6b97e419b_1752941364 - $0 (canceled)
+[2025-07-19 11:43:06.123] 📊 Found 15 wagers for line eac46f8b97d1aea73467f8c6b97e419b in this batch
+[2025-07-19 11:43:06.123] 📊 TOTAL: Found 15 wagers for line eac46f8b97d1aea73467f8c6b97e419b
+[2025-07-19 11:43:06.123] 💰 Line position summary (SYSTEM BETS ONLY):
+[2025-07-19 11:43:06.123]    All bets: 15 (15 system, 0 manual)
+[2025-07-19 11:43:06.123]    Active system bets: 0
+[2025-07-19 11:43:06.123]    System stake: $0.00
+[2025-07-19 11:43:06.123]    System matched: $0.00
+[2025-07-19 11:43:06.123]    System unmatched: $0.00
+[2025-07-19 11:43:06.123]    Has active system liquidity: False
+[2025-07-19 11:43:06.123] \n📊 under 8                       
+[2025-07-19 11:43:06.123]    📈 System position: $0.00 total, $0.00 matched, $0.00 unmatched
+[2025-07-19 11:43:06.123]    🎯 Target: $104.90 unmatched, max: $524.50 total
+[2025-07-19 11:43:06.123]    📊 System fills: 0
+[2025-07-19 11:43:06.123]    🔍 Liquidity shortfall: $104.90
+[2025-07-19 11:43:06.123]    ✅ RESTORING LIQUIDITY: Adding $104.90
+[2025-07-19 11:43:06.123]       (shortfall: $104.90, capacity: $524.50)
+[2025-07-19 11:43:06.123]    🎯 Placing: under 8 +101 for $104.90
+[2025-07-19 11:43:06.123]       Reason: Restore liquidity ($0.00 system filled)
+[2025-07-19 11:43:06.123] 💰 Placing bet: b97e419b, +101, $104.89973228266909
+[2025-07-19 11:43:06.286] ✅ Bet placed successfully: 52943386
+[2025-07-19 11:43:06.287]       ✅ Bet placed successfully (ID: single_test_eac46f8b97d1aea73467f8c6b97e419b_1752943386)
+[2025-07-19 11:43:06.287]       ✅ Liquidity restoration bet placed
+[2025-07-19 11:43:06.287] \n✅ Restored liquidity on 6 lines this cycle
+[2025-07-19 11:43:06.287] 
+3️⃣ MONITORING PINNACLE ODDS CHANGES
+[2025-07-19 11:43:06.287] ------------------------------
+[2025-07-19 11:43:06.287] 📊 Fetching current odds for event: ed3e13e94c688be2638b4fa08636db33
+[2025-07-19 11:43:06.287] 🔍 Fetching SportKey.BASEBALL odds from The Odds API...
+[2025-07-19 11:43:06.287]    Markets: h2h, spreads, totals
+[2025-07-19 11:43:06.287]    Bookmakers: pinnacle
+[2025-07-19 11:43:06.287]    Estimated credits: 3
+[2025-07-19 11:43:06.650] ✅ Successfully fetched 15 events
+[2025-07-19 11:43:06.650]    Credits used: 3 (Total: 255)
+[2025-07-19 11:43:06.652] 📊 Processed 15 events with pinnacle odds
+[2025-07-19 11:43:06.653] ✅ Found current odds for: San Francisco Giants vs Toronto Blue Jays
+[2025-07-19 11:43:06.653]    Event ID: ed3e13e94c688be2638b4fa08636db33
+[2025-07-19 11:43:06.653]    Commence time: 2025-07-19 19:07:00+00:00
+[2025-07-19 11:43:06.653]    Available markets: moneyline (2 outcomes), spreads (2 outcomes), totals (2 outcomes)
+[2025-07-19 11:43:06.653] 🔍 Comparing current odds with original odds...
+[2025-07-19 11:43:06.653] 🔍 Looking for market_type: 'moneyline'
+[2025-07-19 11:43:06.653]    Available line metadata: 6 lines
+[2025-07-19 11:43:06.653]    Line 44420c70: market_type='h2h', market_id=251
+[2025-07-19 11:43:06.654]    Line 069deeee: market_type='h2h', market_id=251
+[2025-07-19 11:43:06.654]    Line f4096e67: market_type='spreads', market_id=256
+[2025-07-19 11:43:06.654]    Line 4f25ab29: market_type='spreads', market_id=256
+[2025-07-19 11:43:06.654]    Line 1a1965d8: market_type='totals', market_id=258
+[2025-07-19 11:43:06.654]    Line b97e419b: market_type='totals', market_id=258
+[2025-07-19 11:43:06.654]    Available market types: ['h2h', 'totals', 'spreads']
+[2025-07-19 11:43:06.654] ✅ Found market_id 251 for market_type 'moneyline' (stored as 'h2h')
+[2025-07-19 11:43:06.654] 🔍 Looking for market_type: 'moneyline'
+[2025-07-19 11:43:06.654]    Available line metadata: 6 lines
+[2025-07-19 11:43:06.654]    Line 44420c70: market_type='h2h', market_id=251
+[2025-07-19 11:43:06.654]    Line 069deeee: market_type='h2h', market_id=251
+[2025-07-19 11:43:06.654]    Line f4096e67: market_type='spreads', market_id=256
+[2025-07-19 11:43:06.654]    Line 4f25ab29: market_type='spreads', market_id=256
+[2025-07-19 11:43:06.654]    Line 1a1965d8: market_type='totals', market_id=258
+[2025-07-19 11:43:06.654]    Line b97e419b: market_type='totals', market_id=258
+[2025-07-19 11:43:06.654]    Available market types: ['h2h', 'totals', 'spreads']
+[2025-07-19 11:43:06.654] ✅ Found market_id 251 for market_type 'moneyline' (stored as 'h2h')
+[2025-07-19 11:43:06.654] 🔍 Looking for market_type: 'spreads'
+[2025-07-19 11:43:06.655]    Available line metadata: 6 lines
+[2025-07-19 11:43:06.655]    Line 44420c70: market_type='h2h', market_id=251
+[2025-07-19 11:43:06.655]    Line 069deeee: market_type='h2h', market_id=251
+[2025-07-19 11:43:06.655]    Line f4096e67: market_type='spreads', market_id=256
+[2025-07-19 11:43:06.655]    Line 4f25ab29: market_type='spreads', market_id=256
+[2025-07-19 11:43:06.655]    Line 1a1965d8: market_type='totals', market_id=258
+[2025-07-19 11:43:06.655]    Line b97e419b: market_type='totals', market_id=258
+[2025-07-19 11:43:06.655]    Available market types: ['h2h', 'totals', 'spreads']
+[2025-07-19 11:43:06.655] ✅ Found market_id 256 for market_type 'spreads' (stored as 'spreads')
+[2025-07-19 11:43:06.655] 🔍 Looking for market_type: 'spreads'
+[2025-07-19 11:43:06.655]    Available line metadata: 6 lines
+[2025-07-19 11:43:06.655]    Line 44420c70: market_type='h2h', market_id=251
+[2025-07-19 11:43:06.656]    Line 069deeee: market_type='h2h', market_id=251
+[2025-07-19 11:43:06.656]    Line f4096e67: market_type='spreads', market_id=256
+[2025-07-19 11:43:06.656]    Line 4f25ab29: market_type='spreads', market_id=256
+[2025-07-19 11:43:06.656]    Line 1a1965d8: market_type='totals', market_id=258
+[2025-07-19 11:43:06.656]    Line b97e419b: market_type='totals', market_id=258
+[2025-07-19 11:43:06.656]    Available market types: ['h2h', 'totals', 'spreads']
+[2025-07-19 11:43:06.656] ✅ Found market_id 256 for market_type 'spreads' (stored as 'spreads')
+[2025-07-19 11:43:06.656] 🔍 Looking for market_type: 'totals'
+[2025-07-19 11:43:06.656]    Available line metadata: 6 lines
+[2025-07-19 11:43:06.656]    Line 44420c70: market_type='h2h', market_id=251
+[2025-07-19 11:43:06.656]    Line 069deeee: market_type='h2h', market_id=251
+[2025-07-19 11:43:06.656]    Line f4096e67: market_type='spreads', market_id=256
+[2025-07-19 11:43:06.656]    Line 4f25ab29: market_type='spreads', market_id=256
+[2025-07-19 11:43:06.656]    Line 1a1965d8: market_type='totals', market_id=258
+[2025-07-19 11:43:06.656]    Line b97e419b: market_type='totals', market_id=258
+[2025-07-19 11:43:06.657]    Available market types: ['h2h', 'totals', 'spreads']
+[2025-07-19 11:43:06.657] ✅ Found market_id 258 for market_type 'totals' (stored as 'totals')
+[2025-07-19 11:43:06.657] 🔍 Looking for market_type: 'totals'
+[2025-07-19 11:43:06.657]    Available line metadata: 6 lines
+[2025-07-19 11:43:06.657]    Line 44420c70: market_type='h2h', market_id=251
+[2025-07-19 11:43:06.657]    Line 069deeee: market_type='h2h', market_id=251
+[2025-07-19 11:43:06.657]    Line f4096e67: market_type='spreads', market_id=256
+[2025-07-19 11:43:06.657]    Line 4f25ab29: market_type='spreads', market_id=256
+[2025-07-19 11:43:06.657]    Line 1a1965d8: market_type='totals', market_id=258
+[2025-07-19 11:43:06.657]    Line b97e419b: market_type='totals', market_id=258
+[2025-07-19 11:43:06.657]    Available market types: ['h2h', 'totals', 'spreads']
+[2025-07-19 11:43:06.657] ✅ Found market_id 258 for market_type 'totals' (stored as 'totals')
+[2025-07-19 11:43:06.657] 🚨 6 significant odds changes detected:
+[2025-07-19 11:43:06.657]    moneyline: San Francisco Giants -107 → -117 (-10)
+[2025-07-19 11:43:06.657]    moneyline: Toronto Blue Jays -101 → +108 (+209)
+[2025-07-19 11:43:06.657]    spreads: San Francisco Giants +150 → +140 (-10)
+[2025-07-19 11:43:06.657]    spreads: Toronto Blue Jays -167 → -155 (+12)
+[2025-07-19 11:43:06.657]    totals: Over -101 → -103 (-2)
+[2025-07-19 11:43:06.657]    totals: Under -111 → -109 (+2)
+[2025-07-19 11:43:06.657] 🚨 SIGNIFICANT ODDS CHANGES DETECTED: 6 markets affected
+[2025-07-19 11:43:06.657] 
+🔄 HANDLING ODDS CHANGE: MONEYLINE Market (ID: 251)
+[2025-07-19 11:43:06.657]    Change: San Francisco Giants -107 → -117
+[2025-07-19 11:43:06.658] 🗑️  Cancelling existing bets for market 251
+[2025-07-19 11:43:06.658] 🗑️ Cancelling wagers for event 10075782, market 251 (affects 2 lines)
+[2025-07-19 11:43:06.658]    📏 Toronto Blue Jays
+[2025-07-19 11:43:06.658]    📏 San Francisco Giants
+[2025-07-19 11:43:06.658] 🗑️ Cancelling all wagers for event 10075782, market 251
+[2025-07-19 11:43:06.794] ✅ Successfully cancelled wagers for market 251
+[2025-07-19 11:43:06.795] ✅ Successfully cancelled wagers for event 10075782, market 251
+[2025-07-19 11:43:06.795] ✅ Cancelled unknown bets for market 251
+[2025-07-19 11:43:06.795] ⏳ Waiting 2 seconds for cancellations to process...
+[2025-07-19 11:43:08.797] 📊 Creating new strategy with updated Pinnacle odds
+[2025-07-19 11:43:08.797] 📊 Fetching current odds for event: ed3e13e94c688be2638b4fa08636db33
+[2025-07-19 11:43:08.797] 🔍 Fetching SportKey.BASEBALL odds from The Odds API...
+[2025-07-19 11:43:08.797]    Markets: h2h, spreads, totals
+[2025-07-19 11:43:08.797]    Bookmakers: pinnacle
+[2025-07-19 11:43:08.797]    Estimated credits: 3
+[2025-07-19 11:43:08.950] ✅ Successfully fetched 15 events
+[2025-07-19 11:43:08.951]    Credits used: 3 (Total: 258)
+[2025-07-19 11:43:08.953] 📊 Processed 15 events with pinnacle odds
+[2025-07-19 11:43:08.954] ✅ Found current odds for: San Francisco Giants vs Toronto Blue Jays
+[2025-07-19 11:43:08.954]    Event ID: ed3e13e94c688be2638b4fa08636db33
+[2025-07-19 11:43:08.954]    Commence time: 2025-07-19 19:07:00+00:00
+[2025-07-19 11:43:08.955]    Available markets: moneyline (2 outcomes), spreads (2 outcomes), totals (2 outcomes)
+[2025-07-19 11:43:08.955] 🔗 Finding ProphetX matches for 1 Odds API events...
+[2025-07-19 11:43:08.955]    Confidence threshold: 0.7
+[2025-07-19 11:43:08.955] 🔍 Fetching all upcoming ProphetX baseball events (next 72 hours)...
+[2025-07-19 11:43:08.955] 🏆 Fetching ProphetX tournaments (filter: baseball)...
+[2025-07-19 11:43:09.193] ✅ Found 10 baseball tournaments on ProphetX
+[2025-07-19 11:43:09.193]    📋 Bet Against Mattress Mack (ID: 1500000000)
+[2025-07-19 11:43:09.194]    📋 MLB All Star Game (ID: 803)
+[2025-07-19 11:43:09.194]    📋 MLB Props (ID: 1600000162)
+[2025-07-19 11:43:09.194]    📋 MLB Homerun Props (ID: 1600000138)
+[2025-07-19 11:43:09.194]    📋 MLB Up 2 Early Win (ID: 1600000157)
+[2025-07-19 11:43:09.196] 📅 Fetching events for ProphetX tournament 1500000000...
+[2025-07-19 11:43:09.320] ❌ Error fetching events for tournament 1500000000: 404
+[2025-07-19 11:43:09.320] 📅 Fetching events for ProphetX tournament 803...
+[2025-07-19 11:43:09.441] ❌ Error fetching events for tournament 803: 404
+[2025-07-19 11:43:09.442] 📅 Fetching events for ProphetX tournament 1600000162...
+[2025-07-19 11:43:09.710] ❌ Error fetching events for tournament 1600000162: 404
+[2025-07-19 11:43:09.710] 📅 Fetching events for ProphetX tournament 1600000138...
+[2025-07-19 11:43:09.839] ❌ Error fetching events for tournament 1600000138: 404
+[2025-07-19 11:43:09.840] 📅 Fetching events for ProphetX tournament 1600000157...
+[2025-07-19 11:43:09.971] ❌ Error fetching events for tournament 1600000157: 404
+[2025-07-19 11:43:09.972] 📅 Fetching events for ProphetX tournament 109...
+[2025-07-19 11:43:10.236]    📝 Extracted teams: San Francisco Giants @ Toronto Blue Jays
+[2025-07-19 11:43:10.238]    📝 Extracted teams: Kansas City Royals @ Miami Marlins
+[2025-07-19 11:43:10.238]    📝 Extracted teams: Cincinnati Reds @ New York Mets
+[2025-07-19 11:43:10.238]    📝 Extracted teams: Los Angeles Angels @ Philadelphia Phillies
+[2025-07-19 11:43:10.238]    📝 Extracted teams: Chicago White Sox @ Pittsburgh Pirates
+[2025-07-19 11:43:10.238]    📝 Extracted teams: San Diego Padres @ Washington Nationals
+[2025-07-19 11:43:10.238]    📝 Extracted teams: Baltimore Orioles @ Tampa Bay Rays
+[2025-07-19 11:43:10.238]    📝 Extracted teams: Detroit Tigers @ Texas Rangers
+[2025-07-19 11:43:10.238]    📝 Extracted teams: Athletics @ Cleveland Guardians
+[2025-07-19 11:43:10.238]    📝 Extracted teams: St. Louis Cardinals @ Arizona Diamondbacks
+[2025-07-19 11:43:10.238]    📝 Extracted teams: Boston Red Sox @ Chicago Cubs
+[2025-07-19 11:43:10.238]    📝 Extracted teams: New York Yankees @ Atlanta Braves
+[2025-07-19 11:43:10.238]    📝 Extracted teams: Minnesota Twins @ Colorado Rockies
+[2025-07-19 11:43:10.239]    📝 Extracted teams: Milwaukee Brewers @ Los Angeles Dodgers
+[2025-07-19 11:43:10.239]    📝 Extracted teams: Houston Astros @ Seattle Mariners
+[2025-07-19 11:43:10.239] ✅ Found 15 upcoming events in tournament 109
+[2025-07-19 11:43:10.239]    ⚾ San Francisco Giants vs Toronto Blue Jays (starts in 2.4h)
+[2025-07-19 11:43:10.239]    ⚾ Kansas City Royals vs Miami Marlins (starts in 3.4h)
+[2025-07-19 11:43:10.239]    ⚾ Cincinnati Reds vs New York Mets (starts in 3.4h)
+[2025-07-19 11:43:10.239] 📅 Fetching events for ProphetX tournament 1036...
+[2025-07-19 11:43:10.364] ❌ Error fetching events for tournament 1036: 404
+[2025-07-19 11:43:10.364] 📅 Fetching events for ProphetX tournament 28416...
+[2025-07-19 11:43:10.482] ❌ Error fetching events for tournament 28416: 404
+[2025-07-19 11:43:10.483] 📅 Fetching events for ProphetX tournament 1600000159...
+[2025-07-19 11:43:10.599] ❌ Error fetching events for tournament 1600000159: 404
+[2025-07-19 11:43:10.599] 📅 Fetching events for ProphetX tournament 2541...
+[2025-07-19 11:43:10.869] ❌ Error fetching events for tournament 2541: 404
+[2025-07-19 11:43:10.870] ✅ Total upcoming ProphetX baseball events: 15
+[2025-07-19 11:43:10.870] 📋 Found 15 upcoming ProphetX events to match against
+[2025-07-19 11:43:10.871] ✅ Match: San Francisco Giants vs Toronto Blue Jays ↔ San Francisco Giants vs Toronto Blue Jays (confidence: 1.00)
+[2025-07-19 11:43:10.872] 🎯 Successfully matched 1/1 events
+[2025-07-19 11:43:10.872] 🎯 Matching markets for: San Francisco Giants vs Toronto Blue Jays
+[2025-07-19 11:43:10.872] 📊 Fetching ProphetX markets for event 10075782...
+[2025-07-19 11:43:11.085] 📊 Found 244 raw markets for event 10075782
+[2025-07-19 11:43:11.085]    ⏭️  Skipping non-Game Line market: SF: Team Total Runs (Category: Team Totals)
+[2025-07-19 11:43:11.085]    ⏭️  Skipping non-Game Line market: TOR: Team Total Runs (Category: Team Totals)
+[2025-07-19 11:43:11.085]    ⏭️  Skipping non-Game Line market: Innings 1 to 5 - Winner (Category: 1st 5 Innings)
+[2025-07-19 11:43:11.085]    ⏭️  Skipping non-Game Line market: Innings 1 to 5 - handicap (Category: 1st 5 Innings)
+[2025-07-19 11:43:11.085]    ⏭️  Skipping non-Game Line market: Innings 1 to 5 - total (Category: 1st 5 Innings)
+[2025-07-19 11:43:11.085]    ✅ Found Game Line market: Moneyline (ID: 251)
+[2025-07-19 11:43:11.085]    ✅ Found Game Line market: Run Line (ID: 256)
+[2025-07-19 11:43:11.085]    ✅ Found Game Line market: Total Runs (ID: 258)
+[2025-07-19 11:43:11.085]    ⏭️  Skipping non-Game Line market: 1st Inning Moneyline (Category: 1st Inning)
+[2025-07-19 11:43:11.086]    ⏭️  Skipping non-Game Line market: 1st Inning Total Runs (Category: 1st Inning)
+[2025-07-19 11:43:11.086]    ⏭️  Skipping non-Game Line market: 1st Inning Spread (Category: 1st Inning)
+[2025-07-19 11:43:11.086]    ⏭️  Skipping non-Game Line market: Bo Bichette Total Fantasy Points (Category: Fantasy Points)
+[2025-07-19 11:43:11.086]    ⏭️  Skipping non-Game Line market: Rafael Devers Total Fantasy Points (Category: Fantasy Points)
+[2025-07-19 11:43:11.086]    ⏭️  Skipping non-Game Line market: Vladimir Guerrero Jr. Total Fantasy Points (Category: Fantasy Points)
+[2025-07-19 11:43:11.086]    ⏭️  Skipping non-Game Line market: Heliot Ramos Total Fantasy Points (Category: Fantasy Points)
+[2025-07-19 11:43:11.086]    ⏭️  Skipping non-Game Line market: George Springer Total Fantasy Points (Category: Fantasy Points)
+[2025-07-19 11:43:11.086]    ⏭️  Skipping non-Game Line market: Eric Lauer Hits Allowed (Category: Hits Allowed)
+[2025-07-19 11:43:11.086]    ⏭️  Skipping non-Game Line market: Alejandro Kirk Total Walks (Category: Walks)
+[2025-07-19 11:43:11.086]    ⏭️  Skipping non-Game Line market: Bo Bichette Total Bases (Category: Total Bases)
+[2025-07-19 11:43:11.086]    ⏭️  Skipping non-Game Line market: Alejandro Kirk Total RBIs (Category: RBIs)
+[2025-07-19 11:43:11.086]    ⏭️  Skipping non-Game Line market: George Springer Total Hits, Runs & RBIs (Category: Hits + Runs + RBIs)
+[2025-07-19 11:43:11.086]    ⏭️  Skipping non-Game Line market: Addison Barger Total Bases (Category: Total Bases)
+[2025-07-19 11:43:11.086]    ⏭️  Skipping non-Game Line market: Ernie Clement Total Bases (Category: Total Bases)
+[2025-07-19 11:43:11.086]    ⏭️  Skipping non-Game Line market: Ernie Clement Total Runs (Category: Runs)
+[2025-07-19 11:43:11.086]    ⏭️  Skipping non-Game Line market: Ernie Clement Stolen Bases (Category: Stolen Bases)
+[2025-07-19 11:43:11.086]    ⏭️  Skipping non-Game Line market: Will Wagner Total Hits, Runs & RBIs (Category: Hits + Runs + RBIs)
+[2025-07-19 11:43:11.086]    ⏭️  Skipping non-Game Line market: George Springer Total RBIs (Category: RBIs)
+[2025-07-19 11:43:11.086]    ⏭️  Skipping non-Game Line market: Will Wagner Total Walks (Category: Walks)
+[2025-07-19 11:43:11.086]    ⏭️  Skipping non-Game Line market: Alejandro Kirk Total Runs (Category: Runs)
+[2025-07-19 11:43:11.086]    ⏭️  Skipping non-Game Line market: Nathan Lukes Total Bases (Category: Total Bases)
+[2025-07-19 11:43:11.086]    ⏭️  Skipping non-Game Line market: Addison Barger Total RBIs (Category: RBIs)
+[2025-07-19 11:43:11.086]    ⏭️  Skipping non-Game Line market: Joey Loperfido Total Runs (Category: Runs)
+[2025-07-19 11:43:11.086]    ⏭️  Skipping non-Game Line market: Joey Loperfido Stolen Bases (Category: Stolen Bases)
+[2025-07-19 11:43:11.086]    ⏭️  Skipping non-Game Line market: Addison Barger Total Hits, Runs & RBIs (Category: Hits + Runs + RBIs)
+[2025-07-19 11:43:11.086]    ⏭️  Skipping non-Game Line market: Addison Barger Total Walks (Category: Walks)
+[2025-07-19 11:43:11.086]    ⏭️  Skipping non-Game Line market: Vladimir Guerrero Jr. Total Walks (Category: Walks)
+[2025-07-19 11:43:11.086]    ⏭️  Skipping non-Game Line market: Joey Loperfido Total Walks (Category: Walks)
+[2025-07-19 11:43:11.086]    ⏭️  Skipping non-Game Line market: Bo Bichette Total RBIs (Category: RBIs)
+[2025-07-19 11:43:11.086]    ⏭️  Skipping non-Game Line market: Nathan Lukes Total Walks (Category: Walks)
+[2025-07-19 11:43:11.086]    ⏭️  Skipping non-Game Line market: George Springer Total Runs (Category: Runs)
+[2025-07-19 11:43:11.086]    ⏭️  Skipping non-Game Line market: Bo Bichette Stolen Bases (Category: Stolen Bases)
+[2025-07-19 11:43:11.086]    ⏭️  Skipping non-Game Line market: Addison Barger Stolen Bases (Category: Stolen Bases)
+[2025-07-19 11:43:11.086]    ⏭️  Skipping non-Game Line market: Bo Bichette Total Hits, Runs & RBIs (Category: Hits + Runs + RBIs)
+[2025-07-19 11:43:11.086]    ⏭️  Skipping non-Game Line market: George Springer Total Walks (Category: Walks)
+[2025-07-19 11:43:11.086]    ⏭️  Skipping non-Game Line market: Eric Lauer Total Earned Runs Allowed (Category: Runs Allowed)
+[2025-07-19 11:43:11.086]    ⏭️  Skipping non-Game Line market: Vladimir Guerrero Jr. Total Bases (Category: Total Bases)
+[2025-07-19 11:43:11.086]    ⏭️  Skipping non-Game Line market: George Springer Total Bases (Category: Total Bases)
+[2025-07-19 11:43:11.087]    ⏭️  Skipping non-Game Line market: Will Wagner Total Bases (Category: Total Bases)
+[2025-07-19 11:43:11.087]    ⏭️  Skipping non-Game Line market: Addison Barger Total Runs (Category: Runs)
+[2025-07-19 11:43:11.087]    ⏭️  Skipping non-Game Line market: George Springer Stolen Bases (Category: Stolen Bases)
+[2025-07-19 11:43:11.087]    ⏭️  Skipping non-Game Line market: Eric Lauer Total Outs Recorded (Category: Pitcher Outs)
+[2025-07-19 11:43:11.087]    ⏭️  Skipping non-Game Line market: Will Wagner Total Runs (Category: Runs)
+[2025-07-19 11:43:11.087]    ⏭️  Skipping non-Game Line market: Vladimir Guerrero Jr. Stolen Bases (Category: Stolen Bases)
+[2025-07-19 11:43:11.087]    ⏭️  Skipping non-Game Line market: Nathan Lukes Total Hits, Runs & RBIs (Category: Hits + Runs + RBIs)
+[2025-07-19 11:43:11.087]    ⏭️  Skipping non-Game Line market: Vladimir Guerrero Jr. Total Runs (Category: Runs)
+[2025-07-19 11:43:11.087]    ⏭️  Skipping non-Game Line market: Joey Loperfido Total Bases (Category: Total Bases)
+[2025-07-19 11:43:11.087]    ⏭️  Skipping non-Game Line market: Alejandro Kirk Total Hits, Runs & RBIs (Category: Hits + Runs + RBIs)
+[2025-07-19 11:43:11.087]    ⏭️  Skipping non-Game Line market: Vladimir Guerrero Jr. Total RBIs (Category: RBIs)
+[2025-07-19 11:43:11.087]    ⏭️  Skipping non-Game Line market: Joey Loperfido Total Hits, Runs & RBIs (Category: Hits + Runs + RBIs)
+[2025-07-19 11:43:11.087]    ⏭️  Skipping non-Game Line market: Vladimir Guerrero Jr. Total Hits, Runs & RBIs (Category: Hits + Runs + RBIs)
+[2025-07-19 11:43:11.087]    ⏭️  Skipping non-Game Line market: Ernie Clement Total Hits, Runs & RBIs (Category: Hits + Runs + RBIs)
+[2025-07-19 11:43:11.087]    ⏭️  Skipping non-Game Line market: Nathan Lukes Total Runs (Category: Runs)
+[2025-07-19 11:43:11.087]    ⏭️  Skipping non-Game Line market: Bo Bichette Total Runs (Category: Runs)
+[2025-07-19 11:43:11.087]    ⏭️  Skipping non-Game Line market: Eric Lauer Total Pitching Strikeouts (Category: Strikeouts)
+[2025-07-19 11:43:11.087]    ⏭️  Skipping non-Game Line market: Eric Lauer Walks Allowed (Category: Walks Allowed)
+[2025-07-19 11:43:11.087]    ⏭️  Skipping non-Game Line market: Alejandro Kirk Total Bases (Category: Total Bases)
+[2025-07-19 11:43:11.087]    ⏭️  Skipping non-Game Line market: Vladimir Guerrero Jr. Total Hits (Category: Hits)
+[2025-07-19 11:43:11.087]    ⏭️  Skipping non-Game Line market: Ernie Clement Total Hits (Category: Hits)
+[2025-07-19 11:43:11.087]    ⏭️  Skipping non-Game Line market: George Springer Total Hits (Category: Hits)
+[2025-07-19 11:43:11.087]    ⏭️  Skipping non-Game Line market: Vladimir Guerrero Jr. Singles (Category: Singles)
+[2025-07-19 11:43:11.087]    ⏭️  Skipping non-Game Line market: Will Wagner Total Hits (Category: Hits)
+[2025-07-19 11:43:11.087]    ⏭️  Skipping non-Game Line market: Joey Loperfido Total Hits (Category: Hits)
+[2025-07-19 11:43:11.087]    ⏭️  Skipping non-Game Line market: Bo Bichette Singles (Category: Singles)
+[2025-07-19 11:43:11.087]    ⏭️  Skipping non-Game Line market: Alejandro Kirk Total Hits (Category: Hits)
+[2025-07-19 11:43:11.087]    ⏭️  Skipping non-Game Line market: Eric Lauer Total Pitching Strikeouts Milestones (Category: Alt Strikeouts)
+[2025-07-19 11:43:11.087]    ⏭️  Skipping non-Game Line market: Ernie Clement Singles (Category: Singles)
+[2025-07-19 11:43:11.087]    ⏭️  Skipping non-Game Line market: Nathan Lukes Singles (Category: Singles)
+[2025-07-19 11:43:11.087]    ⏭️  Skipping non-Game Line market: Addison Barger Singles (Category: Singles)
+[2025-07-19 11:43:11.087]    ⏭️  Skipping non-Game Line market: Will Wagner Singles (Category: Singles)
+[2025-07-19 11:43:11.087]    ⏭️  Skipping non-Game Line market: Alejandro Kirk Singles (Category: Singles)
+[2025-07-19 11:43:11.087]    ⏭️  Skipping non-Game Line market: Nathan Lukes Total Hits (Category: Hits)
+[2025-07-19 11:43:11.087]    ⏭️  Skipping non-Game Line market: Addison Barger Total Hits (Category: Hits)
+[2025-07-19 11:43:11.087]    ⏭️  Skipping non-Game Line market: Bo Bichette Total Hits (Category: Hits)
+[2025-07-19 11:43:11.088]    ⏭️  Skipping non-Game Line market: Logan Webb Total Pitching Strikeouts (Category: Strikeouts)
+[2025-07-19 11:43:11.088]    ⏭️  Skipping non-Game Line market: Jung Hoo Lee Total Hits (Category: Hits)
+[2025-07-19 11:43:11.088]    ⏭️  Skipping non-Game Line market: Patrick Bailey Total Bases (Category: Total Bases)
+[2025-07-19 11:43:11.088]    ⏭️  Skipping non-Game Line market: Wilmer Flores Singles (Category: Singles)
+[2025-07-19 11:43:11.088]    ⏭️  Skipping non-Game Line market: Willy Adames Total Bases (Category: Total Bases)
+[2025-07-19 11:43:11.088]    ⏭️  Skipping non-Game Line market: Casey Schmitt Total Bases (Category: Total Bases)
+[2025-07-19 11:43:11.088]    ⏭️  Skipping non-Game Line market: Rafael Devers Singles (Category: Singles)
+[2025-07-19 11:43:11.088]    ⏭️  Skipping non-Game Line market: Willy Adames Total Hits (Category: Hits)
+[2025-07-19 11:43:11.088]    ⏭️  Skipping non-Game Line market: Patrick Bailey Singles (Category: Singles)
+[2025-07-19 11:43:11.088]    ⏭️  Skipping non-Game Line market: Casey Schmitt Total Hits (Category: Hits)
+[2025-07-19 11:43:11.088]    ⏭️  Skipping non-Game Line market: Casey Schmitt Singles (Category: Singles)
+[2025-07-19 11:43:11.088]    ⏭️  Skipping non-Game Line market: Jung Hoo Lee Total RBIs (Category: RBIs)
+[2025-07-19 11:43:11.088]    ⏭️  Skipping non-Game Line market: Heliot Ramos Singles (Category: Singles)
+[2025-07-19 11:43:11.088]    ⏭️  Skipping non-Game Line market: Jung Hoo Lee Singles (Category: Singles)
+[2025-07-19 11:43:11.088]    ⏭️  Skipping non-Game Line market: Casey Schmitt Total RBIs (Category: RBIs)
+[2025-07-19 11:43:11.088]    ⏭️  Skipping non-Game Line market: Wilmer Flores Total RBIs (Category: RBIs)
+[2025-07-19 11:43:11.088]    ⏭️  Skipping non-Game Line market: Nathan Lukes Total RBIs (Category: RBIs)
+[2025-07-19 11:43:11.088]    ⏭️  Skipping non-Game Line market: Rafael Devers Total Hits (Category: Hits)
+[2025-07-19 11:43:11.088]    ⏭️  Skipping non-Game Line market: Matt Chapman Total RBIs (Category: RBIs)
+[2025-07-19 11:43:11.088]    ⏭️  Skipping non-Game Line market: Rafael Devers Total Bases (Category: Total Bases)
+[2025-07-19 11:43:11.088]    ⏭️  Skipping non-Game Line market: Matt Chapman Singles (Category: Singles)
+[2025-07-19 11:43:11.088]    ⏭️  Skipping non-Game Line market: Patrick Bailey Total RBIs (Category: RBIs)
+[2025-07-19 11:43:11.088]    ⏭️  Skipping non-Game Line market: Willy Adames Singles (Category: Singles)
+[2025-07-19 11:43:11.088]    ⏭️  Skipping non-Game Line market: Ernie Clement Total RBIs (Category: RBIs)
+[2025-07-19 11:43:11.088]    ⏭️  Skipping non-Game Line market: Willy Adames Total RBIs (Category: RBIs)
+[2025-07-19 11:43:11.088]    ⏭️  Skipping non-Game Line market: Rafael Devers Total RBIs (Category: RBIs)
+[2025-07-19 11:43:11.089]    ⏭️  Skipping non-Game Line market: Matt Chapman Total Hits (Category: Hits)
+[2025-07-19 11:43:11.089]    ⏭️  Skipping non-Game Line market: Wilmer Flores Total Hits (Category: Hits)
+[2025-07-19 11:43:11.089]    ⏭️  Skipping non-Game Line market: Matt Chapman Total Bases (Category: Total Bases)
+[2025-07-19 11:43:11.089]    ⏭️  Skipping non-Game Line market: Jung Hoo Lee Total Bases (Category: Total Bases)
+[2025-07-19 11:43:11.089]    ⏭️  Skipping non-Game Line market: Wilmer Flores Total Bases (Category: Total Bases)
+[2025-07-19 11:43:11.089]    ⏭️  Skipping non-Game Line market: Heliot Ramos Total RBIs (Category: RBIs)
+[2025-07-19 11:43:11.089]    ⏭️  Skipping non-Game Line market: Heliot Ramos Total Hits (Category: Hits)
+[2025-07-19 11:43:11.089]    ⏭️  Skipping non-Game Line market: Heliot Ramos Total Bases (Category: Total Bases)
+[2025-07-19 11:43:11.089]    ⏭️  Skipping non-Game Line market: Patrick Bailey Total Hits (Category: Hits)
+[2025-07-19 11:43:11.089]    ⏭️  Skipping non-Game Line market: Willy Adames Total Fantasy Points (Category: Fantasy Points)
+[2025-07-19 11:43:11.089]    ⏭️  Skipping non-Game Line market: Matt Chapman Total Fantasy Points (Category: Fantasy Points)
+[2025-07-19 11:43:11.089]    ⏭️  Skipping non-Game Line market: Casey Schmitt Total Hits, Runs & RBIs (Category: Hits + Runs + RBIs)
+[2025-07-19 11:43:11.089]    ⏭️  Skipping non-Game Line market: Patrick Bailey Total Walks (Category: Walks)
+[2025-07-19 11:43:11.089]    ⏭️  Skipping non-Game Line market: Rafael Devers Total Hits, Runs & RBIs (Category: Hits + Runs + RBIs)
+[2025-07-19 11:43:11.089]    ⏭️  Skipping non-Game Line market: Luis Matos Stolen Bases (Category: Stolen Bases)
+[2025-07-19 11:43:11.089]    ⏭️  Skipping non-Game Line market: Wilmer Flores Total Walks (Category: Walks)
+[2025-07-19 11:43:11.089]    ⏭️  Skipping non-Game Line market: Willy Adames Total Runs (Category: Runs)
+[2025-07-19 11:43:11.089]    ⏭️  Skipping non-Game Line market: Patrick Bailey Total Runs (Category: Runs)
+[2025-07-19 11:43:11.089]    ⏭️  Skipping non-Game Line market: Logan Webb Total Outs Recorded (Category: Pitcher Outs)
+[2025-07-19 11:43:11.089]    ⏭️  Skipping non-Game Line market: Heliot Ramos Total Hits, Runs & RBIs (Category: Hits + Runs + RBIs)
+[2025-07-19 11:43:11.089]    ⏭️  Skipping non-Game Line market: Casey Schmitt Total Walks (Category: Walks)
+[2025-07-19 11:43:11.089]    ⏭️  Skipping non-Game Line market: Wilmer Flores Total Runs (Category: Runs)
+[2025-07-19 11:43:11.089]    ⏭️  Skipping non-Game Line market: Heliot Ramos Stolen Bases (Category: Stolen Bases)
+[2025-07-19 11:43:11.089]    ⏭️  Skipping non-Game Line market: Jung Hoo Lee Total Walks (Category: Walks)
+[2025-07-19 11:43:11.089]    ⏭️  Skipping non-Game Line market: Jung Hoo Lee Total Hits, Runs & RBIs (Category: Hits + Runs + RBIs)
+[2025-07-19 11:43:11.089]    ⏭️  Skipping non-Game Line market: Matt Chapman Total Hits, Runs & RBIs (Category: Hits + Runs + RBIs)
+[2025-07-19 11:43:11.089]    ⏭️  Skipping non-Game Line market: Rafael Devers Total Walks (Category: Walks)
+[2025-07-19 11:43:11.089]    ⏭️  Skipping non-Game Line market: Heliot Ramos Total Runs (Category: Runs)
+[2025-07-19 11:43:11.089]    ⏭️  Skipping non-Game Line market: Matt Chapman Total Runs (Category: Runs)
+[2025-07-19 11:43:11.089]    ⏭️  Skipping non-Game Line market: Willy Adames Total Walks (Category: Walks)
+[2025-07-19 11:43:11.089]    ⏭️  Skipping non-Game Line market: Luis Matos Total Runs (Category: Runs)
+[2025-07-19 11:43:11.089]    ⏭️  Skipping non-Game Line market: Patrick Bailey Total Hits, Runs & RBIs (Category: Hits + Runs + RBIs)
+[2025-07-19 11:43:11.089]    ⏭️  Skipping non-Game Line market: Matt Chapman Stolen Bases (Category: Stolen Bases)
+[2025-07-19 11:43:11.089]    ⏭️  Skipping non-Game Line market: Wilmer Flores Total Hits, Runs & RBIs (Category: Hits + Runs + RBIs)
+[2025-07-19 11:43:11.089]    ⏭️  Skipping non-Game Line market: Luis Matos Total Hits, Runs & RBIs (Category: Hits + Runs + RBIs)
+[2025-07-19 11:43:11.089]    ⏭️  Skipping non-Game Line market: Heliot Ramos Total Walks (Category: Walks)
+[2025-07-19 11:43:11.089]    ⏭️  Skipping non-Game Line market: Matt Chapman Total Walks (Category: Walks)
+[2025-07-19 11:43:11.089]    ⏭️  Skipping non-Game Line market: Casey Schmitt Total Runs (Category: Runs)
+[2025-07-19 11:43:11.089]    ⏭️  Skipping non-Game Line market: Casey Schmitt Stolen Bases (Category: Stolen Bases)
+[2025-07-19 11:43:11.089]    ⏭️  Skipping non-Game Line market: Logan Webb Total Earned Runs Allowed (Category: Runs Allowed)
+[2025-07-19 11:43:11.089]    ⏭️  Skipping non-Game Line market: Willy Adames Total Hits, Runs & RBIs (Category: Hits + Runs + RBIs)
+[2025-07-19 11:43:11.090]    ⏭️  Skipping non-Game Line market: Willy Adames Stolen Bases (Category: Stolen Bases)
+[2025-07-19 11:43:11.090]    ⏭️  Skipping non-Game Line market: Jung Hoo Lee Stolen Bases (Category: Stolen Bases)
+[2025-07-19 11:43:11.090]    ⏭️  Skipping non-Game Line market: Rafael Devers Total Runs (Category: Runs)
+[2025-07-19 11:43:11.090]    ⏭️  Skipping non-Game Line market: Luis Matos Total Bases (Category: Total Bases)
+[2025-07-19 11:43:11.090]    ⏭️  Skipping non-Game Line market: Jung Hoo Lee Total Runs (Category: Runs)
+[2025-07-19 11:43:11.090]    ⏭️  Skipping non-Game Line market: Logan Webb Hits Allowed (Category: Hits Allowed)
+[2025-07-19 11:43:11.090]    ⏭️  Skipping non-Game Line market: Alejandro Kirk Total Fantasy Points (Category: Fantasy Points)
+[2025-07-19 11:43:11.090]    ⏭️  Skipping non-Game Line market: Luis Matos Total Fantasy Points (Category: Fantasy Points)
+[2025-07-19 11:43:11.090]    ⏭️  Skipping non-Game Line market: Addison Barger Total Home Runs (Category: Home Runs)
+[2025-07-19 11:43:11.090]    ⏭️  Skipping non-Game Line market: Wilmer Flores Total Fantasy Points (Category: Fantasy Points)
+[2025-07-19 11:43:11.090]    ⏭️  Skipping non-Game Line market: Eric Lauer Total Fantasy Points (Category: Fantasy Points)
+[2025-07-19 11:43:11.090]    ⏭️  Skipping non-Game Line market: Casey Schmitt Total Fantasy Points (Category: Fantasy Points)
+[2025-07-19 11:43:11.090]    ⏭️  Skipping non-Game Line market: Vladimir Guerrero Jr. Total Home Runs (Category: Home Runs)
+[2025-07-19 11:43:11.090]    ⏭️  Skipping non-Game Line market: Jung Hoo Lee Total Fantasy Points (Category: Fantasy Points)
+[2025-07-19 11:43:11.090]    ⏭️  Skipping non-Game Line market: George Springer Total Home Runs (Category: Home Runs)
+[2025-07-19 11:43:11.090]    ⏭️  Skipping non-Game Line market: Bo Bichette Total Home Runs (Category: Home Runs)
+[2025-07-19 11:43:11.090]    ⏭️  Skipping non-Game Line market: Ernie Clement Total Fantasy Points (Category: Fantasy Points)
+[2025-07-19 11:43:11.090]    ⏭️  Skipping non-Game Line market: Logan Webb Total Pitching Strikeouts Milestones (Category: Alt Strikeouts)
+[2025-07-19 11:43:11.090]    ⏭️  Skipping non-Game Line market: Luis Matos Total Home Runs (Category: Home Runs)
+[2025-07-19 11:43:11.090]    ⏭️  Skipping non-Game Line market: Patrick Bailey Total Home Runs (Category: Home Runs)
+[2025-07-19 11:43:11.090]    ⏭️  Skipping non-Game Line market: Rafael Devers Total Home Runs (Category: Home Runs)
+[2025-07-19 11:43:11.090]    ⏭️  Skipping non-Game Line market: Heliot Ramos Total Home Runs (Category: Home Runs)
+[2025-07-19 11:43:11.090]    ⏭️  Skipping non-Game Line market: Willy Adames Total Home Runs (Category: Home Runs)
+[2025-07-19 11:43:11.090]    ⏭️  Skipping non-Game Line market: Jung Hoo Lee Total Home Runs (Category: Home Runs)
+[2025-07-19 11:43:11.090]    ⏭️  Skipping non-Game Line market: Wilmer Flores Total Home Runs (Category: Home Runs)
+[2025-07-19 11:43:11.090]    ⏭️  Skipping non-Game Line market: Alejandro Kirk Total Home Runs (Category: Home Runs)
+[2025-07-19 11:43:11.090]    ⏭️  Skipping non-Game Line market: Casey Schmitt Total Home Runs (Category: Home Runs)
+[2025-07-19 11:43:11.091]    ⏭️  Skipping non-Game Line market: Matt Chapman Total Home Runs (Category: Home Runs)
+[2025-07-19 11:43:11.091]    ⏭️  Skipping non-Game Line market: Davis Schneider Total Fantasy Points (Category: Fantasy Points)
+[2025-07-19 11:43:11.091]    ⏭️  Skipping non-Game Line market: Leo Jiménez Total Fantasy Points (Category: Fantasy Points)
+[2025-07-19 11:43:11.091]    ⏭️  Skipping non-Game Line market: Myles Straw Total Fantasy Points (Category: Fantasy Points)
+[2025-07-19 11:43:11.091]    ⏭️  Skipping non-Game Line market: Bo Bichette Doubles (Category: Doubles)
+[2025-07-19 11:43:11.091]    ⏭️  Skipping non-Game Line market: Nathan Lukes Total Batting Strikeouts (Category: Batter Ks)
+[2025-07-19 11:43:11.091]    ⏭️  Skipping non-Game Line market: Nathan Lukes Doubles (Category: Doubles)
+[2025-07-19 11:43:11.091]    ⏭️  Skipping non-Game Line market: Jung Hoo Lee Total Batting Strikeouts (Category: Batter Ks)
+[2025-07-19 11:43:11.091]    ⏭️  Skipping non-Game Line market: Vladimir Guerrero Jr. Doubles (Category: Doubles)
+[2025-07-19 11:43:11.091]    ⏭️  Skipping non-Game Line market: Bo Bichette Total Batting Strikeouts (Category: Batter Ks)
+[2025-07-19 11:43:11.091]    ⏭️  Skipping non-Game Line market: Luis Matos Total Batting Strikeouts (Category: Batter Ks)
+[2025-07-19 11:43:11.093]    ⏭️  Skipping non-Game Line market: George Springer Singles (Category: Singles)
+[2025-07-19 11:43:11.093]    ⏭️  Skipping non-Game Line market: Willy Adames Doubles (Category: Doubles)
+[2025-07-19 11:43:11.093]    ⏭️  Skipping non-Game Line market: Wilmer Flores Doubles (Category: Doubles)
+[2025-07-19 11:43:11.093]    ⏭️  Skipping non-Game Line market: Casey Schmitt Doubles (Category: Doubles)
+[2025-07-19 11:43:11.093]    ⏭️  Skipping non-Game Line market: Alejandro Kirk Doubles (Category: Doubles)
+[2025-07-19 11:43:11.093]    ⏭️  Skipping non-Game Line market: George Springer Doubles (Category: Doubles)
+[2025-07-19 11:43:11.093]    ⏭️  Skipping non-Game Line market: Luis Matos Total Pitching Strikeouts Milestones (Category: Alt Strikeouts)
+[2025-07-19 11:43:11.093]    ⏭️  Skipping non-Game Line market: Rafael Devers Doubles (Category: Doubles)
+[2025-07-19 11:43:11.093]    ⏭️  Skipping non-Game Line market: Heliot Ramos Doubles (Category: Doubles)
+[2025-07-19 11:43:11.093]    ⏭️  Skipping non-Game Line market: Matt Chapman Doubles (Category: Doubles)
+[2025-07-19 11:43:11.093]    ⏭️  Skipping non-Game Line market: Logan Webb Total Fantasy Points (Category: Fantasy Points)
+[2025-07-19 11:43:11.093]    ⏭️  Skipping non-Game Line market: Addison Barger Doubles (Category: Doubles)
+[2025-07-19 11:43:11.093]    ⏭️  Skipping non-Game Line market: Jung Hoo Lee Doubles (Category: Doubles)
+[2025-07-19 11:43:11.093]    ⏭️  Skipping non-Game Line market: Luis Matos Total Hits (Category: Hits)
+[2025-07-19 11:43:11.093]    ⏭️  Skipping non-Game Line market: Joey Loperfido Total RBIs (Category: RBIs)
+[2025-07-19 11:43:11.093]    ⏭️  Skipping non-Game Line market: Joey Loperfido Singles (Category: Singles)
+[2025-07-19 11:43:11.093]    ⏭️  Skipping non-Game Line market: Luis Matos Total RBIs (Category: RBIs)
+[2025-07-19 11:43:11.093]    ⏭️  Skipping non-Game Line market: Rafael Devers Total Batting Strikeouts (Category: Batter Ks)
+[2025-07-19 11:43:11.093]    ⏭️  Skipping non-Game Line market: Vladimir Guerrero Jr. Total Batting Strikeouts (Category: Batter Ks)
+[2025-07-19 11:43:11.093]    ⏭️  Skipping non-Game Line market: Heliot Ramos Total Batting Strikeouts (Category: Batter Ks)
+[2025-07-19 11:43:11.093]    ⏭️  Skipping non-Game Line market: Wilmer Flores Total Batting Strikeouts (Category: Batter Ks)
+[2025-07-19 11:43:11.093]    ⏭️  Skipping non-Game Line market: Will Wagner Total Home Runs (Category: Home Runs)
+[2025-07-19 11:43:11.093]    ⏭️  Skipping non-Game Line market: Joey Loperfido Doubles (Category: Doubles)
+[2025-07-19 11:43:11.093]    ⏭️  Skipping non-Game Line market: Luis Matos Doubles (Category: Doubles)
+[2025-07-19 11:43:11.093]    ⏭️  Skipping non-Game Line market: Joey Loperfido Total Home Runs (Category: Home Runs)
+[2025-07-19 11:43:11.093]    ⏭️  Skipping non-Game Line market: Will Wagner Doubles (Category: Doubles)
+[2025-07-19 11:43:11.093]    ⏭️  Skipping non-Game Line market: Ernie Clement Total Home Runs (Category: Home Runs)
+[2025-07-19 11:43:11.093]    ⏭️  Skipping non-Game Line market: Patrick Bailey Doubles (Category: Doubles)
+[2025-07-19 11:43:11.093]    ⏭️  Skipping non-Game Line market: Nathan Lukes Total Home Runs (Category: Home Runs)
+[2025-07-19 11:43:11.093]    ⏭️  Skipping non-Game Line market: Will Wagner Total RBIs (Category: RBIs)
+[2025-07-19 11:43:11.093]    ⏭️  Skipping non-Game Line market: Ernie Clement Doubles (Category: Doubles)
+[2025-07-19 11:43:11.093]    ⏭️  Skipping non-Game Line market: Luis Matos Singles (Category: Singles)
+[2025-07-19 11:43:11.093]    ⏭️  Skipping non-Game Line market: Logan Webb Walks Allowed (Category: Walks Allowed)
+[2025-07-19 11:43:11.094]    ⏭️  Skipping non-Game Line market: Myles Straw Singles (Category: Singles)
+[2025-07-19 11:43:11.094]    ⏭️  Skipping non-Game Line market: Eric Lauer Total Walks (Category: Walks)
+[2025-07-19 11:43:11.094]    ⏭️  Skipping non-Game Line market: Leo Jiménez Total Hits (Category: Hits)
+[2025-07-19 11:43:11.094]    ⏭️  Skipping non-Game Line market: Leo Jiménez Singles (Category: Singles)
+[2025-07-19 11:43:11.094]    ⏭️  Skipping non-Game Line market: Leo Jiménez Total RBIs (Category: RBIs)
+[2025-07-19 11:43:11.094]    ⏭️  Skipping non-Game Line market: Leo Jiménez Total Bases (Category: Total Bases)
+[2025-07-19 11:43:11.094]    ⏭️  Skipping non-Game Line market: Addison Barger Total Fantasy Points (Category: Fantasy Points)
+[2025-07-19 11:43:11.094]    ⏭️  Skipping non-Game Line market: Nathan Lukes Total Fantasy Points (Category: Fantasy Points)
+[2025-07-19 11:43:11.094]    ⏭️  Skipping non-Game Line market: Matt Chapman Total Batting Strikeouts (Category: Batter Ks)
+[2025-07-19 11:43:11.094]    ⏭️  Skipping non-Game Line market: Eric Lauer Pitcher To Record A Win (Category: Pitcher Win)
+[2025-07-19 11:43:11.094]    ⏭️  Skipping non-Game Line market: Logan Webb Pitcher To Record A Win (Category: Pitcher Win)
+[2025-07-19 11:43:11.094]    ⏭️  Skipping non-Game Line market: Will Wagner Total Fantasy Points (Category: Fantasy Points)
+[2025-07-19 11:43:11.094]    ⏭️  Skipping non-Game Line market: Tyler Heineman Total Home Runs (Category: Home Runs)
+[2025-07-19 11:43:11.094]    ⏭️  Skipping non-Game Line market: Tyler Heineman Singles (Category: Singles)
+[2025-07-19 11:43:11.094]    ⏭️  Skipping non-Game Line market: Tyler Heineman Total Bases (Category: Total Bases)
+[2025-07-19 11:43:11.094]    ⏭️  Skipping non-Game Line market: Tyler Heineman Total RBIs (Category: RBIs)
+[2025-07-19 11:43:11.094]    ⏭️  Skipping non-Game Line market: Nathan Lukes Stolen Bases (Category: Stolen Bases)
+[2025-07-19 11:43:11.094]    ⏭️  Skipping non-Game Line market: Tyler Heineman Doubles (Category: Doubles)
+[2025-07-19 11:43:11.094]    ⏭️  Skipping non-Game Line market: Tyler Heineman Total Runs (Category: Runs)
+[2025-07-19 11:43:11.094]    ⏭️  Skipping non-Game Line market: Tyler Heineman Total Hits, Runs & RBIs (Category: Hits + Runs + RBIs)
+[2025-07-19 11:43:11.094]    ⏭️  Skipping non-Game Line market: Tyler Heineman Total Hits (Category: Hits)
+[2025-07-19 11:43:11.094]    ⏭️  Skipping non-Game Line market: Tyler Heineman Total Walks (Category: Walks)
+[2025-07-19 11:43:11.094]    ⏭️  Skipping non-Game Line market: Tyler Heineman Stolen Bases (Category: Stolen Bases)
+[2025-07-19 11:43:11.094] 🎯 Processing 3 Game Lines markets...
+[2025-07-19 11:43:11.094]    🔧 Parsing market 251: Moneyline (moneyline)
+[2025-07-19 11:43:11.095]       📊 Total lines: 2, Available: 0
+[2025-07-19 11:43:11.095]    ✅ Parsed market: moneyline (2 lines)
+[2025-07-19 11:43:11.095]       📝 Toronto Blue Jays: +0 (line_id: 82f619981f80114f704ddb9b44420c70)
+[2025-07-19 11:43:11.095]       📝 San Francisco Giants: +0 (line_id: 924f14a69d0df401202d0b12069deeee)
+[2025-07-19 11:43:11.095]    🔧 Parsing market 256: Run Line (spread)
+[2025-07-19 11:43:11.095]       📊 Total lines: 2, Available: 2
+[2025-07-19 11:43:11.095]    ✅ Parsed market: spread (2 lines)
+[2025-07-19 11:43:11.095]       📝 Toronto Blue Jays +1.5: -166 @ 1.5 (line_id: c26762e66b2ca975e90e4e374f25ab29)
+[2025-07-19 11:43:11.095]       📝 San Francisco Giants -1.5: +150 @ -1.5 (line_id: a74a2253b9eb6d59f49686c1f4096e67)
+[2025-07-19 11:43:11.095]    🔧 Parsing market 258: Total Runs (total)
+[2025-07-19 11:43:11.096]       📊 Total lines: 6, Available: 2
+[2025-07-19 11:43:11.096]    ✅ Parsed market: total (6 lines)
+[2025-07-19 11:43:11.096]       📝 under 7.5: +0 @ 7.5 (line_id: b4d63218fc0989917b1f9b87b11aa2ab)
+[2025-07-19 11:43:11.096]       📝 over 7.5: +0 @ 7.5 (line_id: 691d1d2df7bd628abeac36ea09cb398e)
+[2025-07-19 11:43:11.096]       📝 under 8: -111 @ 8.0 (line_id: eac46f8b97d1aea73467f8c6b97e419b)
+[2025-07-19 11:43:11.096]       📝 over 8: -101 @ 8.0 (line_id: 45ab87a67ec8d1f5c8df10c31a1965d8)
+[2025-07-19 11:43:11.096]       📝 under 8.5: +0 @ 8.5 (line_id: 570d79f3a17318c6e28306a8b96ca7fa)
+[2025-07-19 11:43:11.096]       📝 over 8.5: +0 @ 8.5 (line_id: 169620c5cc695b72b48b40e37dad4fbd)
+[2025-07-19 11:43:11.096] 🎉 Successfully parsed 3 Game Lines markets for event 10075782
+[2025-07-19 11:43:11.096] ✅ Found 3 markets for event 10075782
+[2025-07-19 11:43:11.096]    📈 moneyline: 2 lines
+[2025-07-19 11:43:11.096]    📈 spread: 2 lines
+[2025-07-19 11:43:11.096]    📈 total: 6 lines
+[2025-07-19 11:43:11.101] 📊 Market matching summary:
+[2025-07-19 11:43:11.101]    Successful matches: 3/3
+[2025-07-19 11:43:11.101]    Overall confidence: 0.980
+[2025-07-19 11:43:11.101]    Blocking issues: 0
+[2025-07-19 11:43:11.101]    Market making opportunities: 0
+[2025-07-19 11:43:11.101]    Ready for trading: True
+[2025-07-19 11:43:11.101] 🎯 Creating market making plan for: San Francisco Giants vs Toronto Blue Jays
+[2025-07-19 11:43:11.101] 📊 Available Pinnacle markets:
+[2025-07-19 11:43:11.101]    Moneyline: 2 outcomes
+[2025-07-19 11:43:11.101]      San Francisco Giants: -117
+[2025-07-19 11:43:11.101]      Toronto Blue Jays: +108
+[2025-07-19 11:43:11.101]    Spreads: 2 outcomes
+[2025-07-19 11:43:11.101]      San Francisco Giants: +140 @ -1.5
+[2025-07-19 11:43:11.101]      Toronto Blue Jays: -155 @ 1.5
+[2025-07-19 11:43:11.101]    Totals: 2 outcomes
+[2025-07-19 11:43:11.101]      Over: -103 @ 8.0
+[2025-07-19 11:43:11.101]      Under: -109 @ 8.0
+[2025-07-19 11:43:11.101] 📋 Processing 3 market matches...
+[2025-07-19 11:43:11.101] 📊 Processing h2h market...
+[2025-07-19 11:43:11.101]       San Francisco Giants: 🟡 INACTIVE (OPPORTUNITY)
+[2025-07-19 11:43:11.101]       Toronto Blue Jays: 🟡 INACTIVE (OPPORTUNITY)
+[2025-07-19 11:43:11.101] ✅ h2h market: Found 2 valid lines for arbitrage
+[2025-07-19 11:43:11.101]    Pinnacle odds: San Francisco Giants -117, Toronto Blue Jays +108
+[2025-07-19 11:43:11.101]    To offer San Francisco Giants -117: We bet Toronto Blue Jays at +117
+[2025-07-19 11:43:11.101]    To offer Toronto Blue Jays +108: We bet San Francisco Giants at -108
+[2025-07-19 11:43:11.101]    Plus side bet: Toronto Blue Jays at +117 → Offers users San Francisco Giants -117
+[2025-07-19 11:43:11.102]    Minus side bet: San Francisco Giants at -108 → Offers users Toronto Blue Jays +108
+[2025-07-19 11:43:11.102]    Margin: |+117| - |-108| = 9
+[2025-07-19 11:43:11.102]    Is profitable: True
+[2025-07-19 11:43:11.102] ✅ h2h market is profitable!
+[2025-07-19 11:43:11.102] ✅ h2h market is arbitrage opportunity!
+[2025-07-19 11:43:11.102]    📊 Calculating exact arbitrage for +117 vs -108
+[2025-07-19 11:43:11.102]    📈 More favorable: +117, Less favorable: -108
+[2025-07-19 11:43:11.102]    💰 $100 bet on +117:
+[2025-07-19 11:43:11.102]       Gross winnings: $117.00
+[2025-07-19 11:43:11.102]       Commission: $3.51
+[2025-07-19 11:43:11.102]       Net winnings: $113.49
+[2025-07-19 11:43:11.102]       Target payout: $213.49
+[2025-07-19 11:43:11.102]    💰 $112.47 bet on -108:
+[2025-07-19 11:43:11.102]       Gross winnings: $104.14
+[2025-07-19 11:43:11.102]       Commission: $3.12
+[2025-07-19 11:43:11.102]       Net winnings: $101.02
+[2025-07-19 11:43:11.102]       Total payout: $213.49
+[2025-07-19 11:43:11.102]    🔍 Payout difference: $0.000000
+[2025-07-19 11:43:11.102]    💰 Total investment: $212.47
+[2025-07-19 11:43:11.102]    💰 Guaranteed profit: $1.02 (0.479%)
+[2025-07-19 11:43:11.102]    Creating betting instructions...
+[2025-07-19 11:43:11.102]      ✅ Plus instruction: Bet Toronto Blue Jays +117 (🟡 PROVIDING FIRST LIQUIDITY)
+[2025-07-19 11:43:11.102]         → Users see: San Francisco Giants -117
+[2025-07-19 11:43:11.102]      ✅ Minus instruction: Bet San Francisco Giants -108 (🟡 PROVIDING FIRST LIQUIDITY)
+[2025-07-19 11:43:11.102]         → Users see: Toronto Blue Jays +108
+[2025-07-19 11:43:11.102]    ✅ Created 2 betting instructions for h2h
+[2025-07-19 11:43:11.102] 📊 Processing spreads market...
+[2025-07-19 11:43:11.102]       San Francisco Giants: 🟢 ACTIVE
+[2025-07-19 11:43:11.102]       Toronto Blue Jays: 🟢 ACTIVE
+[2025-07-19 11:43:11.102] ✅ spreads market: Found 2 valid lines for arbitrage
+[2025-07-19 11:43:11.102]    Pinnacle odds: San Francisco Giants +140, Toronto Blue Jays -155
+[2025-07-19 11:43:11.102]    To offer San Francisco Giants +140: We bet Toronto Blue Jays at -140
+[2025-07-19 11:43:11.102]    To offer Toronto Blue Jays -155: We bet San Francisco Giants at +155
+[2025-07-19 11:43:11.102]    Plus side bet: San Francisco Giants at +155 → Offers users Toronto Blue Jays -155
+[2025-07-19 11:43:11.102]    Minus side bet: Toronto Blue Jays at -140 → Offers users San Francisco Giants +140
+[2025-07-19 11:43:11.102]    Margin: |+155| - |-140| = 15
+[2025-07-19 11:43:11.102]    Is profitable: True
+[2025-07-19 11:43:11.102] ✅ spreads market is profitable!
+[2025-07-19 11:43:11.102] ✅ spreads market is arbitrage opportunity!
+[2025-07-19 11:43:11.102]    📊 Calculating exact arbitrage for +155 vs -140
+[2025-07-19 11:43:11.103]    📈 More favorable: +155, Less favorable: -140
+[2025-07-19 11:43:11.103]    💰 $100 bet on +155:
+[2025-07-19 11:43:11.103]       Gross winnings: $155.00
+[2025-07-19 11:43:11.103]       Commission: $4.65
+[2025-07-19 11:43:11.103]       Net winnings: $150.35
+[2025-07-19 11:43:11.103]       Target payout: $250.35
+[2025-07-19 11:43:11.103]    💰 $147.89 bet on -140:
+[2025-07-19 11:43:11.103]       Gross winnings: $105.63
+[2025-07-19 11:43:11.103]       Commission: $3.17
+[2025-07-19 11:43:11.103]       Net winnings: $102.46
+[2025-07-19 11:43:11.103]       Total payout: $250.35
+[2025-07-19 11:43:11.103]    🔍 Payout difference: $0.000000
+[2025-07-19 11:43:11.103]    💰 Total investment: $247.89
+[2025-07-19 11:43:11.103]    💰 Guaranteed profit: $2.46 (0.994%)
+[2025-07-19 11:43:11.103]    Creating betting instructions...
+[2025-07-19 11:43:11.103]      ✅ Plus instruction: Bet San Francisco Giants -1.5 +154 (existing liquidity)
+[2025-07-19 11:43:11.103]         → Users see: Toronto Blue Jays -155
+[2025-07-19 11:43:11.103]      ✅ Minus instruction: Bet Toronto Blue Jays +1.5 -140 (existing liquidity)
+[2025-07-19 11:43:11.103]         → Users see: San Francisco Giants +140
+[2025-07-19 11:43:11.103]    ✅ Created 2 betting instructions for spreads
+[2025-07-19 11:43:11.103] 📊 Processing totals market...
+[2025-07-19 11:43:11.103]       Over: 🟢 ACTIVE
+[2025-07-19 11:43:11.103]       Under: 🟢 ACTIVE
+[2025-07-19 11:43:11.103] ✅ totals market: Found 2 valid lines for arbitrage
+[2025-07-19 11:43:11.103]    Pinnacle odds: Over -103, Under -109
+[2025-07-19 11:43:11.103]    To offer Over -103: We bet Under at +103
+[2025-07-19 11:43:11.103]    To offer Under -109: We bet Over at +109
+[2025-07-19 11:43:11.103]    📊 Both bets positive: +103, +109
+[2025-07-19 11:43:11.103]    Using +109 as plus side, +103 as minus side
+[2025-07-19 11:43:11.103]    Plus side bet: Over at +109 → Offers users Under -109
+[2025-07-19 11:43:11.103]    Minus side bet: Under at +103 → Offers users Over -103
+[2025-07-19 11:43:11.103]    Margin: |+109| - |+103| = 6
+[2025-07-19 11:43:11.103]    Is profitable: True
+[2025-07-19 11:43:11.103] ✅ totals market is profitable!
+[2025-07-19 11:43:11.103] ✅ totals market is arbitrage opportunity!
+[2025-07-19 11:43:11.103]    📊 Calculating exact arbitrage for +109 vs +103
+[2025-07-19 11:43:11.103]    📈 More favorable: +109, Less favorable: +103
+[2025-07-19 11:43:11.103]    💰 $100 bet on +109:
+[2025-07-19 11:43:11.103]       Gross winnings: $109.00
+[2025-07-19 11:43:11.103]       Commission: $3.27
+[2025-07-19 11:43:11.103]       Net winnings: $105.73
+[2025-07-19 11:43:11.104]       Target payout: $205.73
+[2025-07-19 11:43:11.104]    💰 $102.91 bet on +103:
+[2025-07-19 11:43:11.104]       Gross winnings: $106.00
+[2025-07-19 11:43:11.104]       Commission: $3.18
+[2025-07-19 11:43:11.104]       Net winnings: $102.82
+[2025-07-19 11:43:11.104]       Total payout: $205.73
+[2025-07-19 11:43:11.104]    🔍 Payout difference: $0.000000
+[2025-07-19 11:43:11.104]    💰 Total investment: $202.91
+[2025-07-19 11:43:11.104]    💰 Guaranteed profit: $2.82 (1.389%)
+[2025-07-19 11:43:11.104]    Creating betting instructions...
+[2025-07-19 11:43:11.104]      ✅ Plus instruction: Bet over 8 +109 (existing liquidity)
+[2025-07-19 11:43:11.104]         → Users see: Under -109
+[2025-07-19 11:43:11.104]      ✅ Minus instruction: Bet under 8 +103 (existing liquidity)
+[2025-07-19 11:43:11.104]         → Users see: Over -103
+[2025-07-19 11:43:11.104]    ✅ Created 2 betting instructions for totals
+[2025-07-19 11:43:11.104] 🎉 Created 6 total betting instructions
+[2025-07-19 11:43:11.104] ❌ Error handling market odds change: 'SingleEventLineTester' object has no attribute '_get_market_id_for_line'
+[2025-07-19 11:43:11.105] Traceback (most recent call last):
+[2025-07-19 11:43:11.106]   File "/Users/alex/Desktop/Folders/Sports/market-maker/app/services/single_event_line_tester.py", line 1199, in _handle_market_odds_change
+    instruction_market_id = self._get_market_id_for_line(instruction.line_id)
+                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+[2025-07-19 11:43:11.106] AttributeError: 'SingleEventLineTester' object has no attribute '_get_market_id_for_line'
+[2025-07-19 11:43:11.106] 
+🔄 HANDLING ODDS CHANGE: MONEYLINE Market (ID: 251)
+[2025-07-19 11:43:11.106]    Change: Toronto Blue Jays -101 → +108
+[2025-07-19 11:43:11.106] 🗑️  Cancelling existing bets for market 251
+[2025-07-19 11:43:11.106] 🗑️ Cancelling wagers for event 10075782, market 251 (affects 2 lines)
+[2025-07-19 11:43:11.106]    📏 Toronto Blue Jays
+[2025-07-19 11:43:11.106]    📏 San Francisco Giants
+[2025-07-19 11:43:11.106] 🗑️ Cancelling all wagers for event 10075782, market 251
+[2025-07-19 11:43:11.363] ❌ Cancel request failed: HTTP 404: {"error":"data_not_found","message":"Record not found"}
+[2025-07-19 11:43:11.364] ❌ Failed to cancel market 251: Failed to cancel wagers for event 10075782, market 251
+[2025-07-19 11:43:11.364] 
+🔄 HANDLING ODDS CHANGE: SPREADS Market (ID: 256)
+[2025-07-19 11:43:11.364]    Change: San Francisco Giants +150 → +140
+[2025-07-19 11:43:11.364] 🗑️  Cancelling existing bets for market 256
+[2025-07-19 11:43:11.364] 🗑️ Cancelling wagers for event 10075782, market 256 (affects 2 lines)
+[2025-07-19 11:43:11.364]    📏 San Francisco Giants -1.5
+[2025-07-19 11:43:11.364]    📏 Toronto Blue Jays +1.5
+[2025-07-19 11:43:11.364] 🗑️ Cancelling all wagers for event 10075782, market 256
+[2025-07-19 11:43:11.503] ✅ Successfully cancelled wagers for market 256
+[2025-07-19 11:43:11.503] ✅ Successfully cancelled wagers for event 10075782, market 256
+[2025-07-19 11:43:11.503] ✅ Cancelled unknown bets for market 256
+[2025-07-19 11:43:11.503] ⏳ Waiting 2 seconds for cancellations to process...
+[2025-07-19 11:43:13.504] 📊 Creating new strategy with updated Pinnacle odds
+[2025-07-19 11:43:13.508] 📊 Fetching current odds for event: ed3e13e94c688be2638b4fa08636db33
+[2025-07-19 11:43:13.508] 🔍 Fetching SportKey.BASEBALL odds from The Odds API...
+[2025-07-19 11:43:13.508]    Markets: h2h, spreads, totals
+[2025-07-19 11:43:13.508]    Bookmakers: pinnacle
+[2025-07-19 11:43:13.508]    Estimated credits: 3
+[2025-07-19 11:43:13.684] ✅ Successfully fetched 15 events
+[2025-07-19 11:43:13.684]    Credits used: 3 (Total: 261)
+[2025-07-19 11:43:13.685] 📊 Processed 15 events with pinnacle odds
+[2025-07-19 11:43:13.685] ✅ Found current odds for: San Francisco Giants vs Toronto Blue Jays
+[2025-07-19 11:43:13.685]    Event ID: ed3e13e94c688be2638b4fa08636db33
+[2025-07-19 11:43:13.685]    Commence time: 2025-07-19 19:07:00+00:00
+[2025-07-19 11:43:13.685]    Available markets: moneyline (2 outcomes), spreads (2 outcomes), totals (2 outcomes)
+[2025-07-19 11:43:13.685] 🔗 Finding ProphetX matches for 1 Odds API events...
+[2025-07-19 11:43:13.685]    Confidence threshold: 0.7
+[2025-07-19 11:43:13.685] 🔍 Fetching all upcoming ProphetX baseball events (next 72 hours)...
+[2025-07-19 11:43:13.685] 🏆 Fetching ProphetX tournaments (filter: baseball)...
+[2025-07-19 11:43:13.904] ✅ Found 10 baseball tournaments on ProphetX
+[2025-07-19 11:43:13.904]    📋 MLB Homerun Props (ID: 1600000138)
+[2025-07-19 11:43:13.904]    📋 NPB (ID: 1036)
+[2025-07-19 11:43:13.904]    📋 KBO League (ID: 2541)
+[2025-07-19 11:43:13.904]    📋 MLB (ID: 109)
+[2025-07-19 11:43:13.904]    📋 MLB Up 2 Early Win (ID: 1600000157)
+[2025-07-19 11:43:13.905] 📅 Fetching events for ProphetX tournament 1600000138...
+[2025-07-19 11:43:14.019] ❌ Error fetching events for tournament 1600000138: 404
+[2025-07-19 11:43:14.019] 📅 Fetching events for ProphetX tournament 1036...
+[2025-07-19 11:43:14.139] ❌ Error fetching events for tournament 1036: 404
+[2025-07-19 11:43:14.139] 📅 Fetching events for ProphetX tournament 2541...
+[2025-07-19 11:43:14.254] ❌ Error fetching events for tournament 2541: 404
+[2025-07-19 11:43:14.255] 📅 Fetching events for ProphetX tournament 109...
+[2025-07-19 11:43:14.524]    📝 Extracted teams: San Francisco Giants @ Toronto Blue Jays
+[2025-07-19 11:43:14.525]    📝 Extracted teams: Cincinnati Reds @ New York Mets
+[2025-07-19 11:43:14.525]    📝 Extracted teams: Kansas City Royals @ Miami Marlins
+[2025-07-19 11:43:14.525]    📝 Extracted teams: Los Angeles Angels @ Philadelphia Phillies
+[2025-07-19 11:43:14.525]    📝 Extracted teams: Chicago White Sox @ Pittsburgh Pirates
+[2025-07-19 11:43:14.525]    📝 Extracted teams: San Diego Padres @ Washington Nationals
+[2025-07-19 11:43:14.525]    📝 Extracted teams: Baltimore Orioles @ Tampa Bay Rays
+[2025-07-19 11:43:14.525]    📝 Extracted teams: Detroit Tigers @ Texas Rangers
+[2025-07-19 11:43:14.525]    📝 Extracted teams: Athletics @ Cleveland Guardians
+[2025-07-19 11:43:14.525]    📝 Extracted teams: St. Louis Cardinals @ Arizona Diamondbacks
+[2025-07-19 11:43:14.525]    📝 Extracted teams: Boston Red Sox @ Chicago Cubs
+[2025-07-19 11:43:14.525]    📝 Extracted teams: New York Yankees @ Atlanta Braves
+[2025-07-19 11:43:14.525]    📝 Extracted teams: Minnesota Twins @ Colorado Rockies
+[2025-07-19 11:43:14.525]    📝 Extracted teams: Milwaukee Brewers @ Los Angeles Dodgers
+[2025-07-19 11:43:14.525]    📝 Extracted teams: Houston Astros @ Seattle Mariners
+[2025-07-19 11:43:14.525] ✅ Found 15 upcoming events in tournament 109
+[2025-07-19 11:43:14.528]    ⚾ San Francisco Giants vs Toronto Blue Jays (starts in 2.4h)
+[2025-07-19 11:43:14.528]    ⚾ Cincinnati Reds vs New York Mets (starts in 3.4h)
+[2025-07-19 11:43:14.528]    ⚾ Kansas City Royals vs Miami Marlins (starts in 3.4h)
+[2025-07-19 11:43:14.528] 📅 Fetching events for ProphetX tournament 1600000157...
+[2025-07-19 11:43:14.653] ❌ Error fetching events for tournament 1600000157: 404
+[2025-07-19 11:43:14.653] 📅 Fetching events for ProphetX tournament 1600000162...
+[2025-07-19 11:43:14.781] ❌ Error fetching events for tournament 1600000162: 404
+[2025-07-19 11:43:14.782] 📅 Fetching events for ProphetX tournament 28416...
+[2025-07-19 11:43:15.046] ❌ Error fetching events for tournament 28416: 404
+[2025-07-19 11:43:15.046] 📅 Fetching events for ProphetX tournament 803...
+[2025-07-19 11:43:15.159] ❌ Error fetching events for tournament 803: 404
+[2025-07-19 11:43:15.159] 📅 Fetching events for ProphetX tournament 1500000000...
+[2025-07-19 11:43:15.273] ❌ Error fetching events for tournament 1500000000: 404
+[2025-07-19 11:43:15.273] 📅 Fetching events for ProphetX tournament 1600000159...
+[2025-07-19 11:43:15.537] ❌ Error fetching events for tournament 1600000159: 404
+[2025-07-19 11:43:15.538] ✅ Total upcoming ProphetX baseball events: 15
+[2025-07-19 11:43:15.538] 📋 Found 15 upcoming ProphetX events to match against
+[2025-07-19 11:43:15.538] ✅ Match: San Francisco Giants vs Toronto Blue Jays ↔ San Francisco Giants vs Toronto Blue Jays (confidence: 1.00)
+[2025-07-19 11:43:15.538] 🎯 Successfully matched 1/1 events
+[2025-07-19 11:43:15.538] 🎯 Matching markets for: San Francisco Giants vs Toronto Blue Jays
+[2025-07-19 11:43:15.538] 📊 Fetching ProphetX markets for event 10075782...
+[2025-07-19 11:43:15.730] 📊 Found 244 raw markets for event 10075782
+[2025-07-19 11:43:15.730]    ⏭️  Skipping non-Game Line market: SF: Team Total Runs (Category: Team Totals)
+[2025-07-19 11:43:15.730]    ⏭️  Skipping non-Game Line market: TOR: Team Total Runs (Category: Team Totals)
+[2025-07-19 11:43:15.730]    ⏭️  Skipping non-Game Line market: Innings 1 to 5 - Winner (Category: 1st 5 Innings)
+[2025-07-19 11:43:15.730]    ⏭️  Skipping non-Game Line market: Innings 1 to 5 - handicap (Category: 1st 5 Innings)
+[2025-07-19 11:43:15.730]    ⏭️  Skipping non-Game Line market: Innings 1 to 5 - total (Category: 1st 5 Innings)
+[2025-07-19 11:43:15.730]    ✅ Found Game Line market: Moneyline (ID: 251)
+[2025-07-19 11:43:15.730]    ✅ Found Game Line market: Run Line (ID: 256)
+[2025-07-19 11:43:15.730]    ✅ Found Game Line market: Total Runs (ID: 258)
+[2025-07-19 11:43:15.730]    ⏭️  Skipping non-Game Line market: 1st Inning Moneyline (Category: 1st Inning)
+[2025-07-19 11:43:15.730]    ⏭️  Skipping non-Game Line market: 1st Inning Total Runs (Category: 1st Inning)
+[2025-07-19 11:43:15.730]    ⏭️  Skipping non-Game Line market: 1st Inning Spread (Category: 1st Inning)
+[2025-07-19 11:43:15.730]    ⏭️  Skipping non-Game Line market: Bo Bichette Total Fantasy Points (Category: Fantasy Points)
+[2025-07-19 11:43:15.730]    ⏭️  Skipping non-Game Line market: Rafael Devers Total Fantasy Points (Category: Fantasy Points)
+[2025-07-19 11:43:15.730]    ⏭️  Skipping non-Game Line market: Vladimir Guerrero Jr. Total Fantasy Points (Category: Fantasy Points)
+[2025-07-19 11:43:15.730]    ⏭️  Skipping non-Game Line market: Heliot Ramos Total Fantasy Points (Category: Fantasy Points)
+[2025-07-19 11:43:15.730]    ⏭️  Skipping non-Game Line market: George Springer Total Fantasy Points (Category: Fantasy Points)
+[2025-07-19 11:43:15.730]    ⏭️  Skipping non-Game Line market: Eric Lauer Hits Allowed (Category: Hits Allowed)
+[2025-07-19 11:43:15.730]    ⏭️  Skipping non-Game Line market: Alejandro Kirk Total Walks (Category: Walks)
+[2025-07-19 11:43:15.730]    ⏭️  Skipping non-Game Line market: Bo Bichette Total Bases (Category: Total Bases)
+[2025-07-19 11:43:15.730]    ⏭️  Skipping non-Game Line market: Alejandro Kirk Total RBIs (Category: RBIs)
+[2025-07-19 11:43:15.730]    ⏭️  Skipping non-Game Line market: George Springer Total Hits, Runs & RBIs (Category: Hits + Runs + RBIs)
+[2025-07-19 11:43:15.730]    ⏭️  Skipping non-Game Line market: Addison Barger Total Bases (Category: Total Bases)
+[2025-07-19 11:43:15.730]    ⏭️  Skipping non-Game Line market: Ernie Clement Total Bases (Category: Total Bases)
+[2025-07-19 11:43:15.730]    ⏭️  Skipping non-Game Line market: Ernie Clement Total Runs (Category: Runs)
+[2025-07-19 11:43:15.731]    ⏭️  Skipping non-Game Line market: Ernie Clement Stolen Bases (Category: Stolen Bases)
+[2025-07-19 11:43:15.731]    ⏭️  Skipping non-Game Line market: Will Wagner Total Hits, Runs & RBIs (Category: Hits + Runs + RBIs)
+[2025-07-19 11:43:15.731]    ⏭️  Skipping non-Game Line market: George Springer Total RBIs (Category: RBIs)
+[2025-07-19 11:43:15.731]    ⏭️  Skipping non-Game Line market: Will Wagner Total Walks (Category: Walks)
+[2025-07-19 11:43:15.731]    ⏭️  Skipping non-Game Line market: Alejandro Kirk Total Runs (Category: Runs)
+[2025-07-19 11:43:15.731]    ⏭️  Skipping non-Game Line market: Nathan Lukes Total Bases (Category: Total Bases)
+[2025-07-19 11:43:15.731]    ⏭️  Skipping non-Game Line market: Addison Barger Total RBIs (Category: RBIs)
+[2025-07-19 11:43:15.731]    ⏭️  Skipping non-Game Line market: Joey Loperfido Total Runs (Category: Runs)
+[2025-07-19 11:43:15.731]    ⏭️  Skipping non-Game Line market: Joey Loperfido Stolen Bases (Category: Stolen Bases)
+[2025-07-19 11:43:15.731]    ⏭️  Skipping non-Game Line market: Addison Barger Total Hits, Runs & RBIs (Category: Hits + Runs + RBIs)
+[2025-07-19 11:43:15.731]    ⏭️  Skipping non-Game Line market: Addison Barger Total Walks (Category: Walks)
+[2025-07-19 11:43:15.731]    ⏭️  Skipping non-Game Line market: Vladimir Guerrero Jr. Total Walks (Category: Walks)
+[2025-07-19 11:43:15.731]    ⏭️  Skipping non-Game Line market: Joey Loperfido Total Walks (Category: Walks)
+[2025-07-19 11:43:15.731]    ⏭️  Skipping non-Game Line market: Bo Bichette Total RBIs (Category: RBIs)
+[2025-07-19 11:43:15.731]    ⏭️  Skipping non-Game Line market: Nathan Lukes Total Walks (Category: Walks)
+[2025-07-19 11:43:15.731]    ⏭️  Skipping non-Game Line market: George Springer Total Runs (Category: Runs)
+[2025-07-19 11:43:15.731]    ⏭️  Skipping non-Game Line market: Bo Bichette Stolen Bases (Category: Stolen Bases)
+[2025-07-19 11:43:15.731]    ⏭️  Skipping non-Game Line market: Addison Barger Stolen Bases (Category: Stolen Bases)
+[2025-07-19 11:43:15.731]    ⏭️  Skipping non-Game Line market: Bo Bichette Total Hits, Runs & RBIs (Category: Hits + Runs + RBIs)
+[2025-07-19 11:43:15.731]    ⏭️  Skipping non-Game Line market: George Springer Total Walks (Category: Walks)
+[2025-07-19 11:43:15.731]    ⏭️  Skipping non-Game Line market: Eric Lauer Total Earned Runs Allowed (Category: Runs Allowed)
+[2025-07-19 11:43:15.731]    ⏭️  Skipping non-Game Line market: Vladimir Guerrero Jr. Total Bases (Category: Total Bases)
+[2025-07-19 11:43:15.731]    ⏭️  Skipping non-Game Line market: George Springer Total Bases (Category: Total Bases)
+[2025-07-19 11:43:15.731]    ⏭️  Skipping non-Game Line market: Will Wagner Total Bases (Category: Total Bases)
+[2025-07-19 11:43:15.731]    ⏭️  Skipping non-Game Line market: Addison Barger Total Runs (Category: Runs)
+[2025-07-19 11:43:15.731]    ⏭️  Skipping non-Game Line market: George Springer Stolen Bases (Category: Stolen Bases)
+[2025-07-19 11:43:15.731]    ⏭️  Skipping non-Game Line market: Eric Lauer Total Outs Recorded (Category: Pitcher Outs)
+[2025-07-19 11:43:15.731]    ⏭️  Skipping non-Game Line market: Will Wagner Total Runs (Category: Runs)
+[2025-07-19 11:43:15.731]    ⏭️  Skipping non-Game Line market: Vladimir Guerrero Jr. Stolen Bases (Category: Stolen Bases)
+[2025-07-19 11:43:15.731]    ⏭️  Skipping non-Game Line market: Nathan Lukes Total Hits, Runs & RBIs (Category: Hits + Runs + RBIs)
+[2025-07-19 11:43:15.731]    ⏭️  Skipping non-Game Line market: Vladimir Guerrero Jr. Total Runs (Category: Runs)
+[2025-07-19 11:43:15.731]    ⏭️  Skipping non-Game Line market: Joey Loperfido Total Bases (Category: Total Bases)
+[2025-07-19 11:43:15.731]    ⏭️  Skipping non-Game Line market: Alejandro Kirk Total Hits, Runs & RBIs (Category: Hits + Runs + RBIs)
+[2025-07-19 11:43:15.731]    ⏭️  Skipping non-Game Line market: Vladimir Guerrero Jr. Total RBIs (Category: RBIs)
+[2025-07-19 11:43:15.731]    ⏭️  Skipping non-Game Line market: Joey Loperfido Total Hits, Runs & RBIs (Category: Hits + Runs + RBIs)
+[2025-07-19 11:43:15.731]    ⏭️  Skipping non-Game Line market: Vladimir Guerrero Jr. Total Hits, Runs & RBIs (Category: Hits + Runs + RBIs)
+[2025-07-19 11:43:15.731]    ⏭️  Skipping non-Game Line market: Ernie Clement Total Hits, Runs & RBIs (Category: Hits + Runs + RBIs)
+[2025-07-19 11:43:15.731]    ⏭️  Skipping non-Game Line market: Nathan Lukes Total Runs (Category: Runs)
+[2025-07-19 11:43:15.731]    ⏭️  Skipping non-Game Line market: Bo Bichette Total Runs (Category: Runs)
+[2025-07-19 11:43:15.731]    ⏭️  Skipping non-Game Line market: Eric Lauer Total Pitching Strikeouts (Category: Strikeouts)
+[2025-07-19 11:43:15.731]    ⏭️  Skipping non-Game Line market: Eric Lauer Walks Allowed (Category: Walks Allowed)
+[2025-07-19 11:43:15.731]    ⏭️  Skipping non-Game Line market: Alejandro Kirk Total Bases (Category: Total Bases)
+[2025-07-19 11:43:15.731]    ⏭️  Skipping non-Game Line market: Vladimir Guerrero Jr. Total Hits (Category: Hits)
+[2025-07-19 11:43:15.731]    ⏭️  Skipping non-Game Line market: Ernie Clement Total Hits (Category: Hits)
+[2025-07-19 11:43:15.731]    ⏭️  Skipping non-Game Line market: George Springer Total Hits (Category: Hits)
+[2025-07-19 11:43:15.731]    ⏭️  Skipping non-Game Line market: Vladimir Guerrero Jr. Singles (Category: Singles)
+[2025-07-19 11:43:15.731]    ⏭️  Skipping non-Game Line market: Will Wagner Total Hits (Category: Hits)
+[2025-07-19 11:43:15.731]    ⏭️  Skipping non-Game Line market: Joey Loperfido Total Hits (Category: Hits)
+[2025-07-19 11:43:15.731]    ⏭️  Skipping non-Game Line market: Bo Bichette Singles (Category: Singles)
+[2025-07-19 11:43:15.731]    ⏭️  Skipping non-Game Line market: Alejandro Kirk Total Hits (Category: Hits)
+[2025-07-19 11:43:15.731]    ⏭️  Skipping non-Game Line market: Eric Lauer Total Pitching Strikeouts Milestones (Category: Alt Strikeouts)
+[2025-07-19 11:43:15.731]    ⏭️  Skipping non-Game Line market: Ernie Clement Singles (Category: Singles)
+[2025-07-19 11:43:15.732]    ⏭️  Skipping non-Game Line market: Nathan Lukes Singles (Category: Singles)
+[2025-07-19 11:43:15.732]    ⏭️  Skipping non-Game Line market: Addison Barger Singles (Category: Singles)
+[2025-07-19 11:43:15.732]    ⏭️  Skipping non-Game Line market: Will Wagner Singles (Category: Singles)
+[2025-07-19 11:43:15.732]    ⏭️  Skipping non-Game Line market: Alejandro Kirk Singles (Category: Singles)
+[2025-07-19 11:43:15.732]    ⏭️  Skipping non-Game Line market: Nathan Lukes Total Hits (Category: Hits)
+[2025-07-19 11:43:15.732]    ⏭️  Skipping non-Game Line market: Addison Barger Total Hits (Category: Hits)
+[2025-07-19 11:43:15.732]    ⏭️  Skipping non-Game Line market: Bo Bichette Total Hits (Category: Hits)
+[2025-07-19 11:43:15.732]    ⏭️  Skipping non-Game Line market: Logan Webb Total Pitching Strikeouts (Category: Strikeouts)
+[2025-07-19 11:43:15.732]    ⏭️  Skipping non-Game Line market: Jung Hoo Lee Total Hits (Category: Hits)
+[2025-07-19 11:43:15.732]    ⏭️  Skipping non-Game Line market: Patrick Bailey Total Bases (Category: Total Bases)
+[2025-07-19 11:43:15.732]    ⏭️  Skipping non-Game Line market: Wilmer Flores Singles (Category: Singles)
+[2025-07-19 11:43:15.732]    ⏭️  Skipping non-Game Line market: Willy Adames Total Bases (Category: Total Bases)
+[2025-07-19 11:43:15.732]    ⏭️  Skipping non-Game Line market: Casey Schmitt Total Bases (Category: Total Bases)
+[2025-07-19 11:43:15.732]    ⏭️  Skipping non-Game Line market: Rafael Devers Singles (Category: Singles)
+[2025-07-19 11:43:15.732]    ⏭️  Skipping non-Game Line market: Willy Adames Total Hits (Category: Hits)
+[2025-07-19 11:43:15.732]    ⏭️  Skipping non-Game Line market: Patrick Bailey Singles (Category: Singles)
+[2025-07-19 11:43:15.732]    ⏭️  Skipping non-Game Line market: Casey Schmitt Total Hits (Category: Hits)
+[2025-07-19 11:43:15.732]    ⏭️  Skipping non-Game Line market: Casey Schmitt Singles (Category: Singles)
+[2025-07-19 11:43:15.732]    ⏭️  Skipping non-Game Line market: Jung Hoo Lee Total RBIs (Category: RBIs)
+[2025-07-19 11:43:15.732]    ⏭️  Skipping non-Game Line market: Heliot Ramos Singles (Category: Singles)
+[2025-07-19 11:43:15.732]    ⏭️  Skipping non-Game Line market: Jung Hoo Lee Singles (Category: Singles)
+[2025-07-19 11:43:15.732]    ⏭️  Skipping non-Game Line market: Casey Schmitt Total RBIs (Category: RBIs)
+[2025-07-19 11:43:15.732]    ⏭️  Skipping non-Game Line market: Wilmer Flores Total RBIs (Category: RBIs)
+[2025-07-19 11:43:15.732]    ⏭️  Skipping non-Game Line market: Nathan Lukes Total RBIs (Category: RBIs)
+[2025-07-19 11:43:15.732]    ⏭️  Skipping non-Game Line market: Rafael Devers Total Hits (Category: Hits)
+[2025-07-19 11:43:15.732]    ⏭️  Skipping non-Game Line market: Matt Chapman Total RBIs (Category: RBIs)
+[2025-07-19 11:43:15.732]    ⏭️  Skipping non-Game Line market: Rafael Devers Total Bases (Category: Total Bases)
+[2025-07-19 11:43:15.732]    ⏭️  Skipping non-Game Line market: Matt Chapman Singles (Category: Singles)
+[2025-07-19 11:43:15.732]    ⏭️  Skipping non-Game Line market: Patrick Bailey Total RBIs (Category: RBIs)
+[2025-07-19 11:43:15.732]    ⏭️  Skipping non-Game Line market: Willy Adames Singles (Category: Singles)
+[2025-07-19 11:43:15.732]    ⏭️  Skipping non-Game Line market: Ernie Clement Total RBIs (Category: RBIs)
+[2025-07-19 11:43:15.732]    ⏭️  Skipping non-Game Line market: Willy Adames Total RBIs (Category: RBIs)
+[2025-07-19 11:43:15.732]    ⏭️  Skipping non-Game Line market: Rafael Devers Total RBIs (Category: RBIs)
+[2025-07-19 11:43:15.732]    ⏭️  Skipping non-Game Line market: Matt Chapman Total Hits (Category: Hits)
+[2025-07-19 11:43:15.732]    ⏭️  Skipping non-Game Line market: Wilmer Flores Total Hits (Category: Hits)
+[2025-07-19 11:43:15.732]    ⏭️  Skipping non-Game Line market: Matt Chapman Total Bases (Category: Total Bases)
+[2025-07-19 11:43:15.732]    ⏭️  Skipping non-Game Line market: Jung Hoo Lee Total Bases (Category: Total Bases)
+[2025-07-19 11:43:15.732]    ⏭️  Skipping non-Game Line market: Wilmer Flores Total Bases (Category: Total Bases)
+[2025-07-19 11:43:15.732]    ⏭️  Skipping non-Game Line market: Heliot Ramos Total RBIs (Category: RBIs)
+[2025-07-19 11:43:15.732]    ⏭️  Skipping non-Game Line market: Heliot Ramos Total Hits (Category: Hits)
+[2025-07-19 11:43:15.732]    ⏭️  Skipping non-Game Line market: Heliot Ramos Total Bases (Category: Total Bases)
+[2025-07-19 11:43:15.732]    ⏭️  Skipping non-Game Line market: Patrick Bailey Total Hits (Category: Hits)
+[2025-07-19 11:43:15.732]    ⏭️  Skipping non-Game Line market: Willy Adames Total Fantasy Points (Category: Fantasy Points)
+[2025-07-19 11:43:15.732]    ⏭️  Skipping non-Game Line market: Matt Chapman Total Fantasy Points (Category: Fantasy Points)
+[2025-07-19 11:43:15.732]    ⏭️  Skipping non-Game Line market: Casey Schmitt Total Hits, Runs & RBIs (Category: Hits + Runs + RBIs)
+[2025-07-19 11:43:15.732]    ⏭️  Skipping non-Game Line market: Patrick Bailey Total Walks (Category: Walks)
+[2025-07-19 11:43:15.732]    ⏭️  Skipping non-Game Line market: Rafael Devers Total Hits, Runs & RBIs (Category: Hits + Runs + RBIs)
+[2025-07-19 11:43:15.732]    ⏭️  Skipping non-Game Line market: Luis Matos Stolen Bases (Category: Stolen Bases)
+[2025-07-19 11:43:15.732]    ⏭️  Skipping non-Game Line market: Wilmer Flores Total Walks (Category: Walks)
+[2025-07-19 11:43:15.732]    ⏭️  Skipping non-Game Line market: Willy Adames Total Runs (Category: Runs)
+[2025-07-19 11:43:15.732]    ⏭️  Skipping non-Game Line market: Patrick Bailey Total Runs (Category: Runs)
+[2025-07-19 11:43:15.732]    ⏭️  Skipping non-Game Line market: Logan Webb Total Outs Recorded (Category: Pitcher Outs)
+[2025-07-19 11:43:15.732]    ⏭️  Skipping non-Game Line market: Heliot Ramos Total Hits, Runs & RBIs (Category: Hits + Runs + RBIs)
+[2025-07-19 11:43:15.732]    ⏭️  Skipping non-Game Line market: Casey Schmitt Total Walks (Category: Walks)
+[2025-07-19 11:43:15.732]    ⏭️  Skipping non-Game Line market: Wilmer Flores Total Runs (Category: Runs)
+[2025-07-19 11:43:15.732]    ⏭️  Skipping non-Game Line market: Heliot Ramos Stolen Bases (Category: Stolen Bases)
+[2025-07-19 11:43:15.732]    ⏭️  Skipping non-Game Line market: Jung Hoo Lee Total Walks (Category: Walks)
+[2025-07-19 11:43:15.732]    ⏭️  Skipping non-Game Line market: Jung Hoo Lee Total Hits, Runs & RBIs (Category: Hits + Runs + RBIs)
+[2025-07-19 11:43:15.732]    ⏭️  Skipping non-Game Line market: Matt Chapman Total Hits, Runs & RBIs (Category: Hits + Runs + RBIs)
+[2025-07-19 11:43:15.732]    ⏭️  Skipping non-Game Line market: Rafael Devers Total Walks (Category: Walks)
+[2025-07-19 11:43:15.732]    ⏭️  Skipping non-Game Line market: Heliot Ramos Total Runs (Category: Runs)
+[2025-07-19 11:43:15.732]    ⏭️  Skipping non-Game Line market: Matt Chapman Total Runs (Category: Runs)
+[2025-07-19 11:43:15.733]    ⏭️  Skipping non-Game Line market: Willy Adames Total Walks (Category: Walks)
+[2025-07-19 11:43:15.733]    ⏭️  Skipping non-Game Line market: Luis Matos Total Runs (Category: Runs)
+[2025-07-19 11:43:15.733]    ⏭️  Skipping non-Game Line market: Patrick Bailey Total Hits, Runs & RBIs (Category: Hits + Runs + RBIs)
+[2025-07-19 11:43:15.733]    ⏭️  Skipping non-Game Line market: Matt Chapman Stolen Bases (Category: Stolen Bases)
+[2025-07-19 11:43:15.733]    ⏭️  Skipping non-Game Line market: Wilmer Flores Total Hits, Runs & RBIs (Category: Hits + Runs + RBIs)
+[2025-07-19 11:43:15.733]    ⏭️  Skipping non-Game Line market: Luis Matos Total Hits, Runs & RBIs (Category: Hits + Runs + RBIs)
+[2025-07-19 11:43:15.733]    ⏭️  Skipping non-Game Line market: Heliot Ramos Total Walks (Category: Walks)
+[2025-07-19 11:43:15.733]    ⏭️  Skipping non-Game Line market: Matt Chapman Total Walks (Category: Walks)
+[2025-07-19 11:43:15.733]    ⏭️  Skipping non-Game Line market: Casey Schmitt Total Runs (Category: Runs)
+[2025-07-19 11:43:15.733]    ⏭️  Skipping non-Game Line market: Casey Schmitt Stolen Bases (Category: Stolen Bases)
+[2025-07-19 11:43:15.733]    ⏭️  Skipping non-Game Line market: Logan Webb Total Earned Runs Allowed (Category: Runs Allowed)
+[2025-07-19 11:43:15.733]    ⏭️  Skipping non-Game Line market: Willy Adames Total Hits, Runs & RBIs (Category: Hits + Runs + RBIs)
+[2025-07-19 11:43:15.733]    ⏭️  Skipping non-Game Line market: Willy Adames Stolen Bases (Category: Stolen Bases)
+[2025-07-19 11:43:15.733]    ⏭️  Skipping non-Game Line market: Jung Hoo Lee Stolen Bases (Category: Stolen Bases)
+[2025-07-19 11:43:15.733]    ⏭️  Skipping non-Game Line market: Rafael Devers Total Runs (Category: Runs)
+[2025-07-19 11:43:15.733]    ⏭️  Skipping non-Game Line market: Luis Matos Total Bases (Category: Total Bases)
+[2025-07-19 11:43:15.733]    ⏭️  Skipping non-Game Line market: Jung Hoo Lee Total Runs (Category: Runs)
+[2025-07-19 11:43:15.733]    ⏭️  Skipping non-Game Line market: Logan Webb Hits Allowed (Category: Hits Allowed)
+[2025-07-19 11:43:15.733]    ⏭️  Skipping non-Game Line market: Alejandro Kirk Total Fantasy Points (Category: Fantasy Points)
+[2025-07-19 11:43:15.733]    ⏭️  Skipping non-Game Line market: Luis Matos Total Fantasy Points (Category: Fantasy Points)
+[2025-07-19 11:43:15.733]    ⏭️  Skipping non-Game Line market: Addison Barger Total Home Runs (Category: Home Runs)
+[2025-07-19 11:43:15.733]    ⏭️  Skipping non-Game Line market: Wilmer Flores Total Fantasy Points (Category: Fantasy Points)
+[2025-07-19 11:43:15.733]    ⏭️  Skipping non-Game Line market: Eric Lauer Total Fantasy Points (Category: Fantasy Points)
+[2025-07-19 11:43:15.733]    ⏭️  Skipping non-Game Line market: Casey Schmitt Total Fantasy Points (Category: Fantasy Points)
+[2025-07-19 11:43:15.733]    ⏭️  Skipping non-Game Line market: Vladimir Guerrero Jr. Total Home Runs (Category: Home Runs)
+[2025-07-19 11:43:15.733]    ⏭️  Skipping non-Game Line market: Jung Hoo Lee Total Fantasy Points (Category: Fantasy Points)
+[2025-07-19 11:43:15.733]    ⏭️  Skipping non-Game Line market: George Springer Total Home Runs (Category: Home Runs)
+[2025-07-19 11:43:15.733]    ⏭️  Skipping non-Game Line market: Bo Bichette Total Home Runs (Category: Home Runs)
+[2025-07-19 11:43:15.733]    ⏭️  Skipping non-Game Line market: Ernie Clement Total Fantasy Points (Category: Fantasy Points)
+[2025-07-19 11:43:15.733]    ⏭️  Skipping non-Game Line market: Logan Webb Total Pitching Strikeouts Milestones (Category: Alt Strikeouts)
+[2025-07-19 11:43:15.733]    ⏭️  Skipping non-Game Line market: Luis Matos Total Home Runs (Category: Home Runs)
+[2025-07-19 11:43:15.733]    ⏭️  Skipping non-Game Line market: Patrick Bailey Total Home Runs (Category: Home Runs)
+[2025-07-19 11:43:15.733]    ⏭️  Skipping non-Game Line market: Rafael Devers Total Home Runs (Category: Home Runs)
+[2025-07-19 11:43:15.733]    ⏭️  Skipping non-Game Line market: Heliot Ramos Total Home Runs (Category: Home Runs)
+[2025-07-19 11:43:15.733]    ⏭️  Skipping non-Game Line market: Willy Adames Total Home Runs (Category: Home Runs)
+[2025-07-19 11:43:15.733]    ⏭️  Skipping non-Game Line market: Jung Hoo Lee Total Home Runs (Category: Home Runs)
+[2025-07-19 11:43:15.733]    ⏭️  Skipping non-Game Line market: Wilmer Flores Total Home Runs (Category: Home Runs)
+[2025-07-19 11:43:15.733]    ⏭️  Skipping non-Game Line market: Alejandro Kirk Total Home Runs (Category: Home Runs)
+[2025-07-19 11:43:15.733]    ⏭️  Skipping non-Game Line market: Casey Schmitt Total Home Runs (Category: Home Runs)
+[2025-07-19 11:43:15.733]    ⏭️  Skipping non-Game Line market: Matt Chapman Total Home Runs (Category: Home Runs)
+[2025-07-19 11:43:15.733]    ⏭️  Skipping non-Game Line market: Davis Schneider Total Fantasy Points (Category: Fantasy Points)
+[2025-07-19 11:43:15.733]    ⏭️  Skipping non-Game Line market: Leo Jiménez Total Fantasy Points (Category: Fantasy Points)
+[2025-07-19 11:43:15.733]    ⏭️  Skipping non-Game Line market: Myles Straw Total Fantasy Points (Category: Fantasy Points)
+[2025-07-19 11:43:15.733]    ⏭️  Skipping non-Game Line market: Bo Bichette Doubles (Category: Doubles)
+[2025-07-19 11:43:15.733]    ⏭️  Skipping non-Game Line market: Nathan Lukes Total Batting Strikeouts (Category: Batter Ks)
+[2025-07-19 11:43:15.733]    ⏭️  Skipping non-Game Line market: Nathan Lukes Doubles (Category: Doubles)
+[2025-07-19 11:43:15.733]    ⏭️  Skipping non-Game Line market: Jung Hoo Lee Total Batting Strikeouts (Category: Batter Ks)
+[2025-07-19 11:43:15.733]    ⏭️  Skipping non-Game Line market: Vladimir Guerrero Jr. Doubles (Category: Doubles)
+[2025-07-19 11:43:15.733]    ⏭️  Skipping non-Game Line market: Bo Bichette Total Batting Strikeouts (Category: Batter Ks)
+[2025-07-19 11:43:15.733]    ⏭️  Skipping non-Game Line market: Luis Matos Total Batting Strikeouts (Category: Batter Ks)
+[2025-07-19 11:43:15.733]    ⏭️  Skipping non-Game Line market: George Springer Singles (Category: Singles)
+[2025-07-19 11:43:15.733]    ⏭️  Skipping non-Game Line market: Willy Adames Doubles (Category: Doubles)
+[2025-07-19 11:43:15.733]    ⏭️  Skipping non-Game Line market: Wilmer Flores Doubles (Category: Doubles)
+[2025-07-19 11:43:15.733]    ⏭️  Skipping non-Game Line market: Casey Schmitt Doubles (Category: Doubles)
+[2025-07-19 11:43:15.733]    ⏭️  Skipping non-Game Line market: Alejandro Kirk Doubles (Category: Doubles)
+[2025-07-19 11:43:15.733]    ⏭️  Skipping non-Game Line market: George Springer Doubles (Category: Doubles)
+[2025-07-19 11:43:15.733]    ⏭️  Skipping non-Game Line market: Luis Matos Total Pitching Strikeouts Milestones (Category: Alt Strikeouts)
+[2025-07-19 11:43:15.733]    ⏭️  Skipping non-Game Line market: Rafael Devers Doubles (Category: Doubles)
+[2025-07-19 11:43:15.733]    ⏭️  Skipping non-Game Line market: Heliot Ramos Doubles (Category: Doubles)
+[2025-07-19 11:43:15.733]    ⏭️  Skipping non-Game Line market: Matt Chapman Doubles (Category: Doubles)
+[2025-07-19 11:43:15.733]    ⏭️  Skipping non-Game Line market: Logan Webb Total Fantasy Points (Category: Fantasy Points)
+[2025-07-19 11:43:15.734]    ⏭️  Skipping non-Game Line market: Addison Barger Doubles (Category: Doubles)
+[2025-07-19 11:43:15.734]    ⏭️  Skipping non-Game Line market: Jung Hoo Lee Doubles (Category: Doubles)
+[2025-07-19 11:43:15.734]    ⏭️  Skipping non-Game Line market: Luis Matos Total Hits (Category: Hits)
+[2025-07-19 11:43:15.734]    ⏭️  Skipping non-Game Line market: Joey Loperfido Total RBIs (Category: RBIs)
+[2025-07-19 11:43:15.734]    ⏭️  Skipping non-Game Line market: Joey Loperfido Singles (Category: Singles)
+[2025-07-19 11:43:15.734]    ⏭️  Skipping non-Game Line market: Luis Matos Total RBIs (Category: RBIs)
+[2025-07-19 11:43:15.734]    ⏭️  Skipping non-Game Line market: Rafael Devers Total Batting Strikeouts (Category: Batter Ks)
+[2025-07-19 11:43:15.734]    ⏭️  Skipping non-Game Line market: Vladimir Guerrero Jr. Total Batting Strikeouts (Category: Batter Ks)
+[2025-07-19 11:43:15.734]    ⏭️  Skipping non-Game Line market: Heliot Ramos Total Batting Strikeouts (Category: Batter Ks)
+[2025-07-19 11:43:15.734]    ⏭️  Skipping non-Game Line market: Wilmer Flores Total Batting Strikeouts (Category: Batter Ks)
+[2025-07-19 11:43:15.734]    ⏭️  Skipping non-Game Line market: Will Wagner Total Home Runs (Category: Home Runs)
+[2025-07-19 11:43:15.734]    ⏭️  Skipping non-Game Line market: Joey Loperfido Doubles (Category: Doubles)
+[2025-07-19 11:43:15.734]    ⏭️  Skipping non-Game Line market: Luis Matos Doubles (Category: Doubles)
+[2025-07-19 11:43:15.734]    ⏭️  Skipping non-Game Line market: Joey Loperfido Total Home Runs (Category: Home Runs)
+[2025-07-19 11:43:15.734]    ⏭️  Skipping non-Game Line market: Will Wagner Doubles (Category: Doubles)
+[2025-07-19 11:43:15.734]    ⏭️  Skipping non-Game Line market: Ernie Clement Total Home Runs (Category: Home Runs)
+[2025-07-19 11:43:15.734]    ⏭️  Skipping non-Game Line market: Patrick Bailey Doubles (Category: Doubles)
+[2025-07-19 11:43:15.734]    ⏭️  Skipping non-Game Line market: Nathan Lukes Total Home Runs (Category: Home Runs)
+[2025-07-19 11:43:15.734]    ⏭️  Skipping non-Game Line market: Will Wagner Total RBIs (Category: RBIs)
+[2025-07-19 11:43:15.734]    ⏭️  Skipping non-Game Line market: Ernie Clement Doubles (Category: Doubles)
+[2025-07-19 11:43:15.734]    ⏭️  Skipping non-Game Line market: Luis Matos Singles (Category: Singles)
+[2025-07-19 11:43:15.734]    ⏭️  Skipping non-Game Line market: Logan Webb Walks Allowed (Category: Walks Allowed)
+[2025-07-19 11:43:15.734]    ⏭️  Skipping non-Game Line market: Myles Straw Singles (Category: Singles)
+[2025-07-19 11:43:15.734]    ⏭️  Skipping non-Game Line market: Eric Lauer Total Walks (Category: Walks)
+[2025-07-19 11:43:15.734]    ⏭️  Skipping non-Game Line market: Leo Jiménez Total Hits (Category: Hits)
+[2025-07-19 11:43:15.734]    ⏭️  Skipping non-Game Line market: Leo Jiménez Singles (Category: Singles)
+[2025-07-19 11:43:15.734]    ⏭️  Skipping non-Game Line market: Leo Jiménez Total RBIs (Category: RBIs)
+[2025-07-19 11:43:15.734]    ⏭️  Skipping non-Game Line market: Leo Jiménez Total Bases (Category: Total Bases)
+[2025-07-19 11:43:15.734]    ⏭️  Skipping non-Game Line market: Addison Barger Total Fantasy Points (Category: Fantasy Points)
+[2025-07-19 11:43:15.734]    ⏭️  Skipping non-Game Line market: Nathan Lukes Total Fantasy Points (Category: Fantasy Points)
+[2025-07-19 11:43:15.734]    ⏭️  Skipping non-Game Line market: Matt Chapman Total Batting Strikeouts (Category: Batter Ks)
+[2025-07-19 11:43:15.734]    ⏭️  Skipping non-Game Line market: Eric Lauer Pitcher To Record A Win (Category: Pitcher Win)
+[2025-07-19 11:43:15.734]    ⏭️  Skipping non-Game Line market: Logan Webb Pitcher To Record A Win (Category: Pitcher Win)
+[2025-07-19 11:43:15.734]    ⏭️  Skipping non-Game Line market: Will Wagner Total Fantasy Points (Category: Fantasy Points)
+[2025-07-19 11:43:15.734]    ⏭️  Skipping non-Game Line market: Tyler Heineman Total Home Runs (Category: Home Runs)
+[2025-07-19 11:43:15.734]    ⏭️  Skipping non-Game Line market: Tyler Heineman Singles (Category: Singles)
+[2025-07-19 11:43:15.734]    ⏭️  Skipping non-Game Line market: Tyler Heineman Total Bases (Category: Total Bases)
+[2025-07-19 11:43:15.734]    ⏭️  Skipping non-Game Line market: Tyler Heineman Total RBIs (Category: RBIs)
+[2025-07-19 11:43:15.734]    ⏭️  Skipping non-Game Line market: Nathan Lukes Stolen Bases (Category: Stolen Bases)
+[2025-07-19 11:43:15.734]    ⏭️  Skipping non-Game Line market: Tyler Heineman Doubles (Category: Doubles)
+[2025-07-19 11:43:15.735]    ⏭️  Skipping non-Game Line market: Tyler Heineman Total Runs (Category: Runs)
+[2025-07-19 11:43:15.736]    ⏭️  Skipping non-Game Line market: Tyler Heineman Total Hits, Runs & RBIs (Category: Hits + Runs + RBIs)
+[2025-07-19 11:43:15.736]    ⏭️  Skipping non-Game Line market: Tyler Heineman Total Hits (Category: Hits)
+[2025-07-19 11:43:15.736]    ⏭️  Skipping non-Game Line market: Tyler Heineman Total Walks (Category: Walks)
+[2025-07-19 11:43:15.736]    ⏭️  Skipping non-Game Line market: Tyler Heineman Stolen Bases (Category: Stolen Bases)
+[2025-07-19 11:43:15.736] 🎯 Processing 3 Game Lines markets...
+[2025-07-19 11:43:15.736]    🔧 Parsing market 251: Moneyline (moneyline)
+[2025-07-19 11:43:15.736]       📊 Total lines: 2, Available: 0
+[2025-07-19 11:43:15.736]    ✅ Parsed market: moneyline (2 lines)
+[2025-07-19 11:43:15.736]       📝 Toronto Blue Jays: +0 (line_id: 82f619981f80114f704ddb9b44420c70)
+[2025-07-19 11:43:15.736]       📝 San Francisco Giants: +0 (line_id: 924f14a69d0df401202d0b12069deeee)
+[2025-07-19 11:43:15.736]    🔧 Parsing market 256: Run Line (spread)
+[2025-07-19 11:43:15.736]       📊 Total lines: 2, Available: 0
+[2025-07-19 11:43:15.736]    ✅ Parsed market: spread (2 lines)
+[2025-07-19 11:43:15.736]       📝 Toronto Blue Jays +1.5: +0 @ 1.5 (line_id: c26762e66b2ca975e90e4e374f25ab29)
+[2025-07-19 11:43:15.736]       📝 San Francisco Giants -1.5: +0 @ -1.5 (line_id: a74a2253b9eb6d59f49686c1f4096e67)
+[2025-07-19 11:43:15.736]    🔧 Parsing market 258: Total Runs (total)
+[2025-07-19 11:43:15.737]       📊 Total lines: 6, Available: 2
+[2025-07-19 11:43:15.737]    ✅ Parsed market: total (6 lines)
+[2025-07-19 11:43:15.737]       📝 under 7.5: +0 @ 7.5 (line_id: b4d63218fc0989917b1f9b87b11aa2ab)
+[2025-07-19 11:43:15.737]       📝 over 7.5: +0 @ 7.5 (line_id: 691d1d2df7bd628abeac36ea09cb398e)
+[2025-07-19 11:43:15.737]       📝 under 8: -111 @ 8.0 (line_id: eac46f8b97d1aea73467f8c6b97e419b)
+[2025-07-19 11:43:15.737]       📝 over 8: -101 @ 8.0 (line_id: 45ab87a67ec8d1f5c8df10c31a1965d8)
+[2025-07-19 11:43:15.737]       📝 under 8.5: +0 @ 8.5 (line_id: 570d79f3a17318c6e28306a8b96ca7fa)
+[2025-07-19 11:43:15.737]       📝 over 8.5: +0 @ 8.5 (line_id: 169620c5cc695b72b48b40e37dad4fbd)
+[2025-07-19 11:43:15.737] 🎉 Successfully parsed 3 Game Lines markets for event 10075782
+[2025-07-19 11:43:15.737] ✅ Found 3 markets for event 10075782
+[2025-07-19 11:43:15.737]    📈 moneyline: 2 lines
+[2025-07-19 11:43:15.737]    📈 spread: 2 lines
+[2025-07-19 11:43:15.737]    📈 total: 6 lines
+[2025-07-19 11:43:15.740] 📊 Market matching summary:
+[2025-07-19 11:43:15.740]    Successful matches: 3/3
+[2025-07-19 11:43:15.740]    Overall confidence: 0.980
+[2025-07-19 11:43:15.740]    Blocking issues: 0
+[2025-07-19 11:43:15.740]    Market making opportunities: 0
+[2025-07-19 11:43:15.740]    Ready for trading: True
+[2025-07-19 11:43:15.741] 🎯 Creating market making plan for: San Francisco Giants vs Toronto Blue Jays
+[2025-07-19 11:43:15.741] 📊 Available Pinnacle markets:
+[2025-07-19 11:43:15.741]    Moneyline: 2 outcomes
+[2025-07-19 11:43:15.741]      San Francisco Giants: -117
+[2025-07-19 11:43:15.741]      Toronto Blue Jays: +108
+[2025-07-19 11:43:15.741]    Spreads: 2 outcomes
+[2025-07-19 11:43:15.741]      San Francisco Giants: +140 @ -1.5
+[2025-07-19 11:43:15.741]      Toronto Blue Jays: -155 @ 1.5
+[2025-07-19 11:43:15.741]    Totals: 2 outcomes
+[2025-07-19 11:43:15.741]      Over: -103 @ 8.0
+[2025-07-19 11:43:15.741]      Under: -109 @ 8.0
+[2025-07-19 11:43:15.741] 📋 Processing 3 market matches...
+[2025-07-19 11:43:15.741] 📊 Processing h2h market...
+[2025-07-19 11:43:15.741]       San Francisco Giants: 🟡 INACTIVE (OPPORTUNITY)
+[2025-07-19 11:43:15.741]       Toronto Blue Jays: 🟡 INACTIVE (OPPORTUNITY)
+[2025-07-19 11:43:15.741] ✅ h2h market: Found 2 valid lines for arbitrage
+[2025-07-19 11:43:15.741]    Pinnacle odds: San Francisco Giants -117, Toronto Blue Jays +108
+[2025-07-19 11:43:15.741]    To offer San Francisco Giants -117: We bet Toronto Blue Jays at +117
+[2025-07-19 11:43:15.741]    To offer Toronto Blue Jays +108: We bet San Francisco Giants at -108
+[2025-07-19 11:43:15.741]    Plus side bet: Toronto Blue Jays at +117 → Offers users San Francisco Giants -117
+[2025-07-19 11:43:15.741]    Minus side bet: San Francisco Giants at -108 → Offers users Toronto Blue Jays +108
+[2025-07-19 11:43:15.742]    Margin: |+117| - |-108| = 9
+[2025-07-19 11:43:15.742]    Is profitable: True
+[2025-07-19 11:43:15.742] ✅ h2h market is profitable!
+[2025-07-19 11:43:15.742] ✅ h2h market is arbitrage opportunity!
+[2025-07-19 11:43:15.742]    📊 Calculating exact arbitrage for +117 vs -108
+[2025-07-19 11:43:15.742]    📈 More favorable: +117, Less favorable: -108
+[2025-07-19 11:43:15.742]    💰 $100 bet on +117:
+[2025-07-19 11:43:15.742]       Gross winnings: $117.00
+[2025-07-19 11:43:15.742]       Commission: $3.51
+[2025-07-19 11:43:15.742]       Net winnings: $113.49
+[2025-07-19 11:43:15.742]       Target payout: $213.49
+[2025-07-19 11:43:15.742]    💰 $112.47 bet on -108:
+[2025-07-19 11:43:15.742]       Gross winnings: $104.14
+[2025-07-19 11:43:15.742]       Commission: $3.12
+[2025-07-19 11:43:15.742]       Net winnings: $101.02
+[2025-07-19 11:43:15.742]       Total payout: $213.49
+[2025-07-19 11:43:15.742]    🔍 Payout difference: $0.000000
+[2025-07-19 11:43:15.742]    💰 Total investment: $212.47
+[2025-07-19 11:43:15.742]    💰 Guaranteed profit: $1.02 (0.479%)
+[2025-07-19 11:43:15.742]    Creating betting instructions...
+[2025-07-19 11:43:15.742]      ✅ Plus instruction: Bet Toronto Blue Jays +117 (🟡 PROVIDING FIRST LIQUIDITY)
+[2025-07-19 11:43:15.742]         → Users see: San Francisco Giants -117
+[2025-07-19 11:43:15.743]      ✅ Minus instruction: Bet San Francisco Giants -108 (🟡 PROVIDING FIRST LIQUIDITY)
+[2025-07-19 11:43:15.743]         → Users see: Toronto Blue Jays +108
+[2025-07-19 11:43:15.743]    ✅ Created 2 betting instructions for h2h
+[2025-07-19 11:43:15.743] 📊 Processing spreads market...
+[2025-07-19 11:43:15.743]       San Francisco Giants: 🟡 INACTIVE (OPPORTUNITY)
+[2025-07-19 11:43:15.743]       Toronto Blue Jays: 🟡 INACTIVE (OPPORTUNITY)
+[2025-07-19 11:43:15.743] ✅ spreads market: Found 2 valid lines for arbitrage
+[2025-07-19 11:43:15.743]    Pinnacle odds: San Francisco Giants +140, Toronto Blue Jays -155
+[2025-07-19 11:43:15.743]    To offer San Francisco Giants +140: We bet Toronto Blue Jays at -140
+[2025-07-19 11:43:15.743]    To offer Toronto Blue Jays -155: We bet San Francisco Giants at +155
+[2025-07-19 11:43:15.743]    Plus side bet: San Francisco Giants at +155 → Offers users Toronto Blue Jays -155
+[2025-07-19 11:43:15.743]    Minus side bet: Toronto Blue Jays at -140 → Offers users San Francisco Giants +140
+[2025-07-19 11:43:15.743]    Margin: |+155| - |-140| = 15
+[2025-07-19 11:43:15.743]    Is profitable: True
+[2025-07-19 11:43:15.743] ✅ spreads market is profitable!
+[2025-07-19 11:43:15.743] ✅ spreads market is arbitrage opportunity!
+[2025-07-19 11:43:15.743]    📊 Calculating exact arbitrage for +155 vs -140
+[2025-07-19 11:43:15.743]    📈 More favorable: +155, Less favorable: -140
+[2025-07-19 11:43:15.743]    💰 $100 bet on +155:
+[2025-07-19 11:43:15.743]       Gross winnings: $155.00
+[2025-07-19 11:43:15.743]       Commission: $4.65
+[2025-07-19 11:43:15.743]       Net winnings: $150.35
+[2025-07-19 11:43:15.743]       Target payout: $250.35
+[2025-07-19 11:43:15.743]    💰 $147.89 bet on -140:
+[2025-07-19 11:43:15.743]       Gross winnings: $105.63
+[2025-07-19 11:43:15.743]       Commission: $3.17
+[2025-07-19 11:43:15.743]       Net winnings: $102.46
+[2025-07-19 11:43:15.743]       Total payout: $250.35
+[2025-07-19 11:43:15.743]    🔍 Payout difference: $0.000000
+[2025-07-19 11:43:15.743]    💰 Total investment: $247.89
+[2025-07-19 11:43:15.743]    💰 Guaranteed profit: $2.46 (0.994%)
+[2025-07-19 11:43:15.743]    Creating betting instructions...
+[2025-07-19 11:43:15.743]      ✅ Plus instruction: Bet San Francisco Giants -1.5 +154 (🟡 PROVIDING FIRST LIQUIDITY)
+[2025-07-19 11:43:15.743]         → Users see: Toronto Blue Jays -155
+[2025-07-19 11:43:15.743]      ✅ Minus instruction: Bet Toronto Blue Jays +1.5 -140 (🟡 PROVIDING FIRST LIQUIDITY)
+[2025-07-19 11:43:15.743]         → Users see: San Francisco Giants +140
+[2025-07-19 11:43:15.743]    ✅ Created 2 betting instructions for spreads
+[2025-07-19 11:43:15.743] 📊 Processing totals market...
+[2025-07-19 11:43:15.743]       Over: 🟢 ACTIVE
+[2025-07-19 11:43:15.743]       Under: 🟢 ACTIVE
+[2025-07-19 11:43:15.743] ✅ totals market: Found 2 valid lines for arbitrage
+[2025-07-19 11:43:15.743]    Pinnacle odds: Over -103, Under -109
+[2025-07-19 11:43:15.743]    To offer Over -103: We bet Under at +103
+[2025-07-19 11:43:15.743]    To offer Under -109: We bet Over at +109
+[2025-07-19 11:43:15.743]    📊 Both bets positive: +103, +109
+[2025-07-19 11:43:15.743]    Using +109 as plus side, +103 as minus side
+[2025-07-19 11:43:15.743]    Plus side bet: Over at +109 → Offers users Under -109
+[2025-07-19 11:43:15.743]    Minus side bet: Under at +103 → Offers users Over -103
+[2025-07-19 11:43:15.743]    Margin: |+109| - |+103| = 6
+[2025-07-19 11:43:15.743]    Is profitable: True
+[2025-07-19 11:43:15.743] ✅ totals market is profitable!
+[2025-07-19 11:43:15.743] ✅ totals market is arbitrage opportunity!
+[2025-07-19 11:43:15.743]    📊 Calculating exact arbitrage for +109 vs +103
+[2025-07-19 11:43:15.743]    📈 More favorable: +109, Less favorable: +103
+[2025-07-19 11:43:15.744]    💰 $100 bet on +109:
+[2025-07-19 11:43:15.744]       Gross winnings: $109.00
+[2025-07-19 11:43:15.744]       Commission: $3.27
+[2025-07-19 11:43:15.744]       Net winnings: $105.73
+[2025-07-19 11:43:15.744]       Target payout: $205.73
+[2025-07-19 11:43:15.744]    💰 $102.91 bet on +103:
+[2025-07-19 11:43:15.744]       Gross winnings: $106.00
+[2025-07-19 11:43:15.744]       Commission: $3.18
+[2025-07-19 11:43:15.744]       Net winnings: $102.82
+[2025-07-19 11:43:15.744]       Total payout: $205.73
+[2025-07-19 11:43:15.744]    🔍 Payout difference: $0.000000
+[2025-07-19 11:43:15.744]    💰 Total investment: $202.91
+[2025-07-19 11:43:15.744]    💰 Guaranteed profit: $2.82 (1.389%)
+[2025-07-19 11:43:15.744]    Creating betting instructions...
+[2025-07-19 11:43:15.744]      ✅ Plus instruction: Bet over 8 +109 (existing liquidity)
+[2025-07-19 11:43:15.744]         → Users see: Under -109
+[2025-07-19 11:43:15.744]      ✅ Minus instruction: Bet under 8 +103 (existing liquidity)
+[2025-07-19 11:43:15.744]         → Users see: Over -103
+[2025-07-19 11:43:15.744]    ✅ Created 2 betting instructions for totals
+[2025-07-19 11:43:15.744] 🎉 Created 6 total betting instructions
+[2025-07-19 11:43:15.744] ❌ Error handling market odds change: 'SingleEventLineTester' object has no attribute '_get_market_id_for_line'
+[2025-07-19 11:43:15.744] Traceback (most recent call last):
+[2025-07-19 11:43:15.744]   File "/Users/alex/Desktop/Folders/Sports/market-maker/app/services/single_event_line_tester.py", line 1199, in _handle_market_odds_change
+    instruction_market_id = self._get_market_id_for_line(instruction.line_id)
+                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+[2025-07-19 11:43:15.744] AttributeError: 'SingleEventLineTester' object has no attribute '_get_market_id_for_line'
+[2025-07-19 11:43:15.744] 
+🔄 HANDLING ODDS CHANGE: SPREADS Market (ID: 256)
+[2025-07-19 11:43:15.744]    Change: Toronto Blue Jays -167 → -155
+[2025-07-19 11:43:15.744] 🗑️  Cancelling existing bets for market 256
+[2025-07-19 11:43:15.744] 🗑️ Cancelling wagers for event 10075782, market 256 (affects 2 lines)
+[2025-07-19 11:43:15.744]    📏 San Francisco Giants -1.5
+[2025-07-19 11:43:15.744]    📏 Toronto Blue Jays +1.5
+[2025-07-19 11:43:15.745] 🗑️ Cancelling all wagers for event 10075782, market 256
+[2025-07-19 11:43:16.001] ❌ Cancel request failed: HTTP 404: {"error":"data_not_found","message":"Record not found"}
+[2025-07-19 11:43:16.002] ❌ Failed to cancel market 256: Failed to cancel wagers for event 10075782, market 256
+[2025-07-19 11:43:16.002] 
+🔄 HANDLING ODDS CHANGE: TOTALS Market (ID: 258)
+[2025-07-19 11:43:16.002]    Change: Over -101 → -103
+[2025-07-19 11:43:16.002] 🗑️  Cancelling existing bets for market 258
+[2025-07-19 11:43:16.002] 🗑️ Cancelling wagers for event 10075782, market 258 (affects 2 lines)
+[2025-07-19 11:43:16.002]    📏 over 8
+[2025-07-19 11:43:16.002]    📏 under 8
+[2025-07-19 11:43:16.002] 🗑️ Cancelling all wagers for event 10075782, market 258
+[2025-07-19 11:43:16.137] ✅ Successfully cancelled wagers for market 258
+[2025-07-19 11:43:16.138] ✅ Successfully cancelled wagers for event 10075782, market 258
+[2025-07-19 11:43:16.138] ✅ Cancelled unknown bets for market 258
+[2025-07-19 11:43:16.138] ⏳ Waiting 2 seconds for cancellations to process...
+[2025-07-19 11:43:18.138] 📊 Creating new strategy with updated Pinnacle odds
+[2025-07-19 11:43:18.139] 📊 Fetching current odds for event: ed3e13e94c688be2638b4fa08636db33
+[2025-07-19 11:43:18.139] 🔍 Fetching SportKey.BASEBALL odds from The Odds API...
+[2025-07-19 11:43:18.139]    Markets: h2h, spreads, totals
+[2025-07-19 11:43:18.139]    Bookmakers: pinnacle
+[2025-07-19 11:43:18.139]    Estimated credits: 3
+[2025-07-19 11:43:18.320] ✅ Successfully fetched 15 events
+[2025-07-19 11:43:18.320]    Credits used: 3 (Total: 264)
+[2025-07-19 11:43:18.321] 📊 Processed 15 events with pinnacle odds
+[2025-07-19 11:43:18.321] ✅ Found current odds for: San Francisco Giants vs Toronto Blue Jays
+[2025-07-19 11:43:18.321]    Event ID: ed3e13e94c688be2638b4fa08636db33
+[2025-07-19 11:43:18.321]    Commence time: 2025-07-19 19:07:00+00:00
+[2025-07-19 11:43:18.321]    Available markets: moneyline (2 outcomes), spreads (2 outcomes), totals (2 outcomes)
+[2025-07-19 11:43:18.321] 🔗 Finding ProphetX matches for 1 Odds API events...
+[2025-07-19 11:43:18.321]    Confidence threshold: 0.7
+[2025-07-19 11:43:18.321] 🔍 Fetching all upcoming ProphetX baseball events (next 72 hours)...
+[2025-07-19 11:43:18.321] 🏆 Fetching ProphetX tournaments (filter: baseball)...
+[2025-07-19 11:43:18.623] ✅ Found 10 baseball tournaments on ProphetX
+[2025-07-19 11:43:18.623]    📋 MLB All Star Game (ID: 803)
+[2025-07-19 11:43:18.623]    📋 MLB Homerun Props (ID: 1600000138)
+[2025-07-19 11:43:18.623]    📋 Bet Against Mattress Mack (ID: 1500000000)
+[2025-07-19 11:43:18.623]    📋 KBO League (ID: 2541)
+[2025-07-19 11:43:18.623]    📋 NCAA (ID: 28416)
+[2025-07-19 11:43:18.623] 📅 Fetching events for ProphetX tournament 803...
+[2025-07-19 11:43:18.733] ❌ Error fetching events for tournament 803: 404
+[2025-07-19 11:43:18.734] 📅 Fetching events for ProphetX tournament 1600000138...
+[2025-07-19 11:43:18.849] ❌ Error fetching events for tournament 1600000138: 404
+[2025-07-19 11:43:18.849] 📅 Fetching events for ProphetX tournament 1500000000...
+[2025-07-19 11:43:18.969] ❌ Error fetching events for tournament 1500000000: 404
+[2025-07-19 11:43:18.970] 📅 Fetching events for ProphetX tournament 2541...
+[2025-07-19 11:43:19.256] ❌ Error fetching events for tournament 2541: 404
+[2025-07-19 11:43:19.258] 📅 Fetching events for ProphetX tournament 28416...
+[2025-07-19 11:43:19.411] ❌ Error fetching events for tournament 28416: 404
+[2025-07-19 11:43:19.411] 📅 Fetching events for ProphetX tournament 1600000159...
+[2025-07-19 11:43:19.669] ❌ Error fetching events for tournament 1600000159: 404
+[2025-07-19 11:43:19.669] 📅 Fetching events for ProphetX tournament 1600000162...
+[2025-07-19 11:43:19.791] ❌ Error fetching events for tournament 1600000162: 404
+[2025-07-19 11:43:19.792] 📅 Fetching events for ProphetX tournament 1600000157...
+[2025-07-19 11:43:19.904] ❌ Error fetching events for tournament 1600000157: 404
+[2025-07-19 11:43:19.904] 📅 Fetching events for ProphetX tournament 1036...
+[2025-07-19 11:43:20.012] ❌ Error fetching events for tournament 1036: 404
+[2025-07-19 11:43:20.012] 📅 Fetching events for ProphetX tournament 109...
+[2025-07-19 11:43:20.269]    📝 Extracted teams: San Francisco Giants @ Toronto Blue Jays
+[2025-07-19 11:43:20.269]    📝 Extracted teams: Cincinnati Reds @ New York Mets
+[2025-07-19 11:43:20.269]    📝 Extracted teams: Kansas City Royals @ Miami Marlins
+[2025-07-19 11:43:20.269]    📝 Extracted teams: Los Angeles Angels @ Philadelphia Phillies
+[2025-07-19 11:43:20.269]    📝 Extracted teams: Chicago White Sox @ Pittsburgh Pirates
+[2025-07-19 11:43:20.269]    📝 Extracted teams: San Diego Padres @ Washington Nationals
+[2025-07-19 11:43:20.269]    📝 Extracted teams: Baltimore Orioles @ Tampa Bay Rays
+[2025-07-19 11:43:20.269]    📝 Extracted teams: Detroit Tigers @ Texas Rangers
+[2025-07-19 11:43:20.269]    📝 Extracted teams: Athletics @ Cleveland Guardians
+[2025-07-19 11:43:20.270]    📝 Extracted teams: St. Louis Cardinals @ Arizona Diamondbacks
+[2025-07-19 11:43:20.270]    📝 Extracted teams: Boston Red Sox @ Chicago Cubs
+[2025-07-19 11:43:20.270]    📝 Extracted teams: New York Yankees @ Atlanta Braves
+[2025-07-19 11:43:20.270]    📝 Extracted teams: Minnesota Twins @ Colorado Rockies
+[2025-07-19 11:43:20.270]    📝 Extracted teams: Milwaukee Brewers @ Los Angeles Dodgers
+[2025-07-19 11:43:20.270]    📝 Extracted teams: Houston Astros @ Seattle Mariners
+[2025-07-19 11:43:20.270] ✅ Found 15 upcoming events in tournament 109
+[2025-07-19 11:43:20.270]    ⚾ San Francisco Giants vs Toronto Blue Jays (starts in 2.4h)
+[2025-07-19 11:43:20.270]    ⚾ Cincinnati Reds vs New York Mets (starts in 3.4h)
+[2025-07-19 11:43:20.270]    ⚾ Kansas City Royals vs Miami Marlins (starts in 3.4h)
+[2025-07-19 11:43:20.270] ✅ Total upcoming ProphetX baseball events: 15
+[2025-07-19 11:43:20.270] 📋 Found 15 upcoming ProphetX events to match against
+[2025-07-19 11:43:20.270] ✅ Match: San Francisco Giants vs Toronto Blue Jays ↔ San Francisco Giants vs Toronto Blue Jays (confidence: 1.00)
+[2025-07-19 11:43:20.270] 🎯 Successfully matched 1/1 events
+[2025-07-19 11:43:20.270] 🎯 Matching markets for: San Francisco Giants vs Toronto Blue Jays
+[2025-07-19 11:43:20.270] 📊 Fetching ProphetX markets for event 10075782...
+[2025-07-19 11:43:20.481] 📊 Found 244 raw markets for event 10075782
+[2025-07-19 11:43:20.481]    ⏭️  Skipping non-Game Line market: SF: Team Total Runs (Category: Team Totals)
+[2025-07-19 11:43:20.481]    ⏭️  Skipping non-Game Line market: TOR: Team Total Runs (Category: Team Totals)
+[2025-07-19 11:43:20.481]    ⏭️  Skipping non-Game Line market: Innings 1 to 5 - Winner (Category: 1st 5 Innings)
+[2025-07-19 11:43:20.481]    ⏭️  Skipping non-Game Line market: Innings 1 to 5 - handicap (Category: 1st 5 Innings)
+[2025-07-19 11:43:20.481]    ⏭️  Skipping non-Game Line market: Innings 1 to 5 - total (Category: 1st 5 Innings)
+[2025-07-19 11:43:20.481]    ✅ Found Game Line market: Moneyline (ID: 251)
+[2025-07-19 11:43:20.481]    ✅ Found Game Line market: Run Line (ID: 256)
+[2025-07-19 11:43:20.481]    ✅ Found Game Line market: Total Runs (ID: 258)
+[2025-07-19 11:43:20.481]    ⏭️  Skipping non-Game Line market: 1st Inning Moneyline (Category: 1st Inning)
+[2025-07-19 11:43:20.481]    ⏭️  Skipping non-Game Line market: 1st Inning Total Runs (Category: 1st Inning)
+[2025-07-19 11:43:20.481]    ⏭️  Skipping non-Game Line market: 1st Inning Spread (Category: 1st Inning)
+[2025-07-19 11:43:20.481]    ⏭️  Skipping non-Game Line market: Bo Bichette Total Fantasy Points (Category: Fantasy Points)
+[2025-07-19 11:43:20.481]    ⏭️  Skipping non-Game Line market: Rafael Devers Total Fantasy Points (Category: Fantasy Points)
+[2025-07-19 11:43:20.481]    ⏭️  Skipping non-Game Line market: Vladimir Guerrero Jr. Total Fantasy Points (Category: Fantasy Points)
+[2025-07-19 11:43:20.481]    ⏭️  Skipping non-Game Line market: Heliot Ramos Total Fantasy Points (Category: Fantasy Points)
+[2025-07-19 11:43:20.481]    ⏭️  Skipping non-Game Line market: George Springer Total Fantasy Points (Category: Fantasy Points)
+[2025-07-19 11:43:20.481]    ⏭️  Skipping non-Game Line market: Eric Lauer Hits Allowed (Category: Hits Allowed)
+[2025-07-19 11:43:20.481]    ⏭️  Skipping non-Game Line market: Alejandro Kirk Total Walks (Category: Walks)
+[2025-07-19 11:43:20.481]    ⏭️  Skipping non-Game Line market: Bo Bichette Total Bases (Category: Total Bases)
+[2025-07-19 11:43:20.481]    ⏭️  Skipping non-Game Line market: Alejandro Kirk Total RBIs (Category: RBIs)
+[2025-07-19 11:43:20.481]    ⏭️  Skipping non-Game Line market: George Springer Total Hits, Runs & RBIs (Category: Hits + Runs + RBIs)
+[2025-07-19 11:43:20.481]    ⏭️  Skipping non-Game Line market: Addison Barger Total Bases (Category: Total Bases)
+[2025-07-19 11:43:20.481]    ⏭️  Skipping non-Game Line market: Ernie Clement Total Bases (Category: Total Bases)
+[2025-07-19 11:43:20.481]    ⏭️  Skipping non-Game Line market: Ernie Clement Total Runs (Category: Runs)
+[2025-07-19 11:43:20.481]    ⏭️  Skipping non-Game Line market: Ernie Clement Stolen Bases (Category: Stolen Bases)
+[2025-07-19 11:43:20.481]    ⏭️  Skipping non-Game Line market: Will Wagner Total Hits, Runs & RBIs (Category: Hits + Runs + RBIs)
+[2025-07-19 11:43:20.481]    ⏭️  Skipping non-Game Line market: George Springer Total RBIs (Category: RBIs)
+[2025-07-19 11:43:20.481]    ⏭️  Skipping non-Game Line market: Will Wagner Total Walks (Category: Walks)
+[2025-07-19 11:43:20.481]    ⏭️  Skipping non-Game Line market: Alejandro Kirk Total Runs (Category: Runs)
+[2025-07-19 11:43:20.482]    ⏭️  Skipping non-Game Line market: Nathan Lukes Total Bases (Category: Total Bases)
+[2025-07-19 11:43:20.482]    ⏭️  Skipping non-Game Line market: Addison Barger Total RBIs (Category: RBIs)
+[2025-07-19 11:43:20.482]    ⏭️  Skipping non-Game Line market: Joey Loperfido Total Runs (Category: Runs)
+[2025-07-19 11:43:20.482]    ⏭️  Skipping non-Game Line market: Joey Loperfido Stolen Bases (Category: Stolen Bases)
+[2025-07-19 11:43:20.482]    ⏭️  Skipping non-Game Line market: Addison Barger Total Hits, Runs & RBIs (Category: Hits + Runs + RBIs)
+[2025-07-19 11:43:20.482]    ⏭️  Skipping non-Game Line market: Addison Barger Total Walks (Category: Walks)
+[2025-07-19 11:43:20.482]    ⏭️  Skipping non-Game Line market: Vladimir Guerrero Jr. Total Walks (Category: Walks)
+[2025-07-19 11:43:20.482]    ⏭️  Skipping non-Game Line market: Joey Loperfido Total Walks (Category: Walks)
+[2025-07-19 11:43:20.482]    ⏭️  Skipping non-Game Line market: Bo Bichette Total RBIs (Category: RBIs)
+[2025-07-19 11:43:20.482]    ⏭️  Skipping non-Game Line market: Nathan Lukes Total Walks (Category: Walks)
+[2025-07-19 11:43:20.482]    ⏭️  Skipping non-Game Line market: George Springer Total Runs (Category: Runs)
+[2025-07-19 11:43:20.482]    ⏭️  Skipping non-Game Line market: Bo Bichette Stolen Bases (Category: Stolen Bases)
+[2025-07-19 11:43:20.482]    ⏭️  Skipping non-Game Line market: Addison Barger Stolen Bases (Category: Stolen Bases)
+[2025-07-19 11:43:20.482]    ⏭️  Skipping non-Game Line market: Bo Bichette Total Hits, Runs & RBIs (Category: Hits + Runs + RBIs)
+[2025-07-19 11:43:20.482]    ⏭️  Skipping non-Game Line market: George Springer Total Walks (Category: Walks)
+[2025-07-19 11:43:20.482]    ⏭️  Skipping non-Game Line market: Eric Lauer Total Earned Runs Allowed (Category: Runs Allowed)
+[2025-07-19 11:43:20.482]    ⏭️  Skipping non-Game Line market: Vladimir Guerrero Jr. Total Bases (Category: Total Bases)
+[2025-07-19 11:43:20.482]    ⏭️  Skipping non-Game Line market: George Springer Total Bases (Category: Total Bases)
+[2025-07-19 11:43:20.482]    ⏭️  Skipping non-Game Line market: Will Wagner Total Bases (Category: Total Bases)
+[2025-07-19 11:43:20.482]    ⏭️  Skipping non-Game Line market: Addison Barger Total Runs (Category: Runs)
+[2025-07-19 11:43:20.482]    ⏭️  Skipping non-Game Line market: George Springer Stolen Bases (Category: Stolen Bases)
+[2025-07-19 11:43:20.482]    ⏭️  Skipping non-Game Line market: Eric Lauer Total Outs Recorded (Category: Pitcher Outs)
+[2025-07-19 11:43:20.482]    ⏭️  Skipping non-Game Line market: Will Wagner Total Runs (Category: Runs)
+[2025-07-19 11:43:20.482]    ⏭️  Skipping non-Game Line market: Vladimir Guerrero Jr. Stolen Bases (Category: Stolen Bases)
+[2025-07-19 11:43:20.482]    ⏭️  Skipping non-Game Line market: Nathan Lukes Total Hits, Runs & RBIs (Category: Hits + Runs + RBIs)
+[2025-07-19 11:43:20.482]    ⏭️  Skipping non-Game Line market: Vladimir Guerrero Jr. Total Runs (Category: Runs)
+[2025-07-19 11:43:20.482]    ⏭️  Skipping non-Game Line market: Joey Loperfido Total Bases (Category: Total Bases)
+[2025-07-19 11:43:20.482]    ⏭️  Skipping non-Game Line market: Alejandro Kirk Total Hits, Runs & RBIs (Category: Hits + Runs + RBIs)
+[2025-07-19 11:43:20.482]    ⏭️  Skipping non-Game Line market: Vladimir Guerrero Jr. Total RBIs (Category: RBIs)
+[2025-07-19 11:43:20.482]    ⏭️  Skipping non-Game Line market: Joey Loperfido Total Hits, Runs & RBIs (Category: Hits + Runs + RBIs)
+[2025-07-19 11:43:20.482]    ⏭️  Skipping non-Game Line market: Vladimir Guerrero Jr. Total Hits, Runs & RBIs (Category: Hits + Runs + RBIs)
+[2025-07-19 11:43:20.482]    ⏭️  Skipping non-Game Line market: Ernie Clement Total Hits, Runs & RBIs (Category: Hits + Runs + RBIs)
+[2025-07-19 11:43:20.482]    ⏭️  Skipping non-Game Line market: Nathan Lukes Total Runs (Category: Runs)
+[2025-07-19 11:43:20.482]    ⏭️  Skipping non-Game Line market: Bo Bichette Total Runs (Category: Runs)
+[2025-07-19 11:43:20.482]    ⏭️  Skipping non-Game Line market: Eric Lauer Total Pitching Strikeouts (Category: Strikeouts)
+[2025-07-19 11:43:20.482]    ⏭️  Skipping non-Game Line market: Eric Lauer Walks Allowed (Category: Walks Allowed)
+[2025-07-19 11:43:20.482]    ⏭️  Skipping non-Game Line market: Alejandro Kirk Total Bases (Category: Total Bases)
+[2025-07-19 11:43:20.482]    ⏭️  Skipping non-Game Line market: Vladimir Guerrero Jr. Total Hits (Category: Hits)
+[2025-07-19 11:43:20.482]    ⏭️  Skipping non-Game Line market: Ernie Clement Total Hits (Category: Hits)
+[2025-07-19 11:43:20.482]    ⏭️  Skipping non-Game Line market: George Springer Total Hits (Category: Hits)
+[2025-07-19 11:43:20.482]    ⏭️  Skipping non-Game Line market: Vladimir Guerrero Jr. Singles (Category: Singles)
+[2025-07-19 11:43:20.482]    ⏭️  Skipping non-Game Line market: Will Wagner Total Hits (Category: Hits)
+[2025-07-19 11:43:20.482]    ⏭️  Skipping non-Game Line market: Joey Loperfido Total Hits (Category: Hits)
+[2025-07-19 11:43:20.482]    ⏭️  Skipping non-Game Line market: Bo Bichette Singles (Category: Singles)
+[2025-07-19 11:43:20.482]    ⏭️  Skipping non-Game Line market: Alejandro Kirk Total Hits (Category: Hits)
+[2025-07-19 11:43:20.482]    ⏭️  Skipping non-Game Line market: Eric Lauer Total Pitching Strikeouts Milestones (Category: Alt Strikeouts)
+[2025-07-19 11:43:20.482]    ⏭️  Skipping non-Game Line market: Ernie Clement Singles (Category: Singles)
+[2025-07-19 11:43:20.482]    ⏭️  Skipping non-Game Line market: Nathan Lukes Singles (Category: Singles)
+[2025-07-19 11:43:20.482]    ⏭️  Skipping non-Game Line market: Addison Barger Singles (Category: Singles)
+[2025-07-19 11:43:20.482]    ⏭️  Skipping non-Game Line market: Will Wagner Singles (Category: Singles)
+[2025-07-19 11:43:20.482]    ⏭️  Skipping non-Game Line market: Alejandro Kirk Singles (Category: Singles)
+[2025-07-19 11:43:20.482]    ⏭️  Skipping non-Game Line market: Nathan Lukes Total Hits (Category: Hits)
+[2025-07-19 11:43:20.482]    ⏭️  Skipping non-Game Line market: Addison Barger Total Hits (Category: Hits)
+[2025-07-19 11:43:20.482]    ⏭️  Skipping non-Game Line market: Bo Bichette Total Hits (Category: Hits)
+[2025-07-19 11:43:20.482]    ⏭️  Skipping non-Game Line market: Logan Webb Total Pitching Strikeouts (Category: Strikeouts)
+[2025-07-19 11:43:20.482]    ⏭️  Skipping non-Game Line market: Jung Hoo Lee Total Hits (Category: Hits)
+[2025-07-19 11:43:20.482]    ⏭️  Skipping non-Game Line market: Patrick Bailey Total Bases (Category: Total Bases)
+[2025-07-19 11:43:20.482]    ⏭️  Skipping non-Game Line market: Wilmer Flores Singles (Category: Singles)
+[2025-07-19 11:43:20.482]    ⏭️  Skipping non-Game Line market: Willy Adames Total Bases (Category: Total Bases)
+[2025-07-19 11:43:20.483]    ⏭️  Skipping non-Game Line market: Casey Schmitt Total Bases (Category: Total Bases)
+[2025-07-19 11:43:20.483]    ⏭️  Skipping non-Game Line market: Rafael Devers Singles (Category: Singles)
+[2025-07-19 11:43:20.483]    ⏭️  Skipping non-Game Line market: Willy Adames Total Hits (Category: Hits)
+[2025-07-19 11:43:20.483]    ⏭️  Skipping non-Game Line market: Patrick Bailey Singles (Category: Singles)
+[2025-07-19 11:43:20.483]    ⏭️  Skipping non-Game Line market: Casey Schmitt Total Hits (Category: Hits)
+[2025-07-19 11:43:20.483]    ⏭️  Skipping non-Game Line market: Casey Schmitt Singles (Category: Singles)
+[2025-07-19 11:43:20.483]    ⏭️  Skipping non-Game Line market: Jung Hoo Lee Total RBIs (Category: RBIs)
+[2025-07-19 11:43:20.483]    ⏭️  Skipping non-Game Line market: Heliot Ramos Singles (Category: Singles)
+[2025-07-19 11:43:20.483]    ⏭️  Skipping non-Game Line market: Jung Hoo Lee Singles (Category: Singles)
+[2025-07-19 11:43:20.483]    ⏭️  Skipping non-Game Line market: Casey Schmitt Total RBIs (Category: RBIs)
+[2025-07-19 11:43:20.483]    ⏭️  Skipping non-Game Line market: Wilmer Flores Total RBIs (Category: RBIs)
+[2025-07-19 11:43:20.483]    ⏭️  Skipping non-Game Line market: Nathan Lukes Total RBIs (Category: RBIs)
+[2025-07-19 11:43:20.483]    ⏭️  Skipping non-Game Line market: Rafael Devers Total Hits (Category: Hits)
+[2025-07-19 11:43:20.483]    ⏭️  Skipping non-Game Line market: Matt Chapman Total RBIs (Category: RBIs)
+[2025-07-19 11:43:20.483]    ⏭️  Skipping non-Game Line market: Rafael Devers Total Bases (Category: Total Bases)
+[2025-07-19 11:43:20.483]    ⏭️  Skipping non-Game Line market: Matt Chapman Singles (Category: Singles)
+[2025-07-19 11:43:20.483]    ⏭️  Skipping non-Game Line market: Patrick Bailey Total RBIs (Category: RBIs)
+[2025-07-19 11:43:20.483]    ⏭️  Skipping non-Game Line market: Willy Adames Singles (Category: Singles)
+[2025-07-19 11:43:20.483]    ⏭️  Skipping non-Game Line market: Ernie Clement Total RBIs (Category: RBIs)
+[2025-07-19 11:43:20.483]    ⏭️  Skipping non-Game Line market: Willy Adames Total RBIs (Category: RBIs)
+[2025-07-19 11:43:20.483]    ⏭️  Skipping non-Game Line market: Rafael Devers Total RBIs (Category: RBIs)
+[2025-07-19 11:43:20.483]    ⏭️  Skipping non-Game Line market: Matt Chapman Total Hits (Category: Hits)
+[2025-07-19 11:43:20.483]    ⏭️  Skipping non-Game Line market: Wilmer Flores Total Hits (Category: Hits)
+[2025-07-19 11:43:20.483]    ⏭️  Skipping non-Game Line market: Matt Chapman Total Bases (Category: Total Bases)
+[2025-07-19 11:43:20.483]    ⏭️  Skipping non-Game Line market: Jung Hoo Lee Total Bases (Category: Total Bases)
+[2025-07-19 11:43:20.483]    ⏭️  Skipping non-Game Line market: Wilmer Flores Total Bases (Category: Total Bases)
+[2025-07-19 11:43:20.483]    ⏭️  Skipping non-Game Line market: Heliot Ramos Total RBIs (Category: RBIs)
+[2025-07-19 11:43:20.483]    ⏭️  Skipping non-Game Line market: Heliot Ramos Total Hits (Category: Hits)
+[2025-07-19 11:43:20.483]    ⏭️  Skipping non-Game Line market: Heliot Ramos Total Bases (Category: Total Bases)
+[2025-07-19 11:43:20.483]    ⏭️  Skipping non-Game Line market: Patrick Bailey Total Hits (Category: Hits)
+[2025-07-19 11:43:20.483]    ⏭️  Skipping non-Game Line market: Willy Adames Total Fantasy Points (Category: Fantasy Points)
+[2025-07-19 11:43:20.483]    ⏭️  Skipping non-Game Line market: Matt Chapman Total Fantasy Points (Category: Fantasy Points)
+[2025-07-19 11:43:20.483]    ⏭️  Skipping non-Game Line market: Casey Schmitt Total Hits, Runs & RBIs (Category: Hits + Runs + RBIs)
+[2025-07-19 11:43:20.483]    ⏭️  Skipping non-Game Line market: Patrick Bailey Total Walks (Category: Walks)
+[2025-07-19 11:43:20.483]    ⏭️  Skipping non-Game Line market: Rafael Devers Total Hits, Runs & RBIs (Category: Hits + Runs + RBIs)
+[2025-07-19 11:43:20.483]    ⏭️  Skipping non-Game Line market: Luis Matos Stolen Bases (Category: Stolen Bases)
+[2025-07-19 11:43:20.483]    ⏭️  Skipping non-Game Line market: Wilmer Flores Total Walks (Category: Walks)
+[2025-07-19 11:43:20.483]    ⏭️  Skipping non-Game Line market: Willy Adames Total Runs (Category: Runs)
+[2025-07-19 11:43:20.483]    ⏭️  Skipping non-Game Line market: Patrick Bailey Total Runs (Category: Runs)
+[2025-07-19 11:43:20.483]    ⏭️  Skipping non-Game Line market: Logan Webb Total Outs Recorded (Category: Pitcher Outs)
+[2025-07-19 11:43:20.483]    ⏭️  Skipping non-Game Line market: Heliot Ramos Total Hits, Runs & RBIs (Category: Hits + Runs + RBIs)
+[2025-07-19 11:43:20.483]    ⏭️  Skipping non-Game Line market: Casey Schmitt Total Walks (Category: Walks)
+[2025-07-19 11:43:20.483]    ⏭️  Skipping non-Game Line market: Wilmer Flores Total Runs (Category: Runs)
+[2025-07-19 11:43:20.483]    ⏭️  Skipping non-Game Line market: Heliot Ramos Stolen Bases (Category: Stolen Bases)
+[2025-07-19 11:43:20.483]    ⏭️  Skipping non-Game Line market: Jung Hoo Lee Total Walks (Category: Walks)
+[2025-07-19 11:43:20.483]    ⏭️  Skipping non-Game Line market: Jung Hoo Lee Total Hits, Runs & RBIs (Category: Hits + Runs + RBIs)
+[2025-07-19 11:43:20.483]    ⏭️  Skipping non-Game Line market: Matt Chapman Total Hits, Runs & RBIs (Category: Hits + Runs + RBIs)
+[2025-07-19 11:43:20.483]    ⏭️  Skipping non-Game Line market: Rafael Devers Total Walks (Category: Walks)
+[2025-07-19 11:43:20.483]    ⏭️  Skipping non-Game Line market: Heliot Ramos Total Runs (Category: Runs)
+[2025-07-19 11:43:20.483]    ⏭️  Skipping non-Game Line market: Matt Chapman Total Runs (Category: Runs)
+[2025-07-19 11:43:20.483]    ⏭️  Skipping non-Game Line market: Willy Adames Total Walks (Category: Walks)
+[2025-07-19 11:43:20.483]    ⏭️  Skipping non-Game Line market: Luis Matos Total Runs (Category: Runs)
+[2025-07-19 11:43:20.484]    ⏭️  Skipping non-Game Line market: Patrick Bailey Total Hits, Runs & RBIs (Category: Hits + Runs + RBIs)
+[2025-07-19 11:43:20.484]    ⏭️  Skipping non-Game Line market: Matt Chapman Stolen Bases (Category: Stolen Bases)
+[2025-07-19 11:43:20.484]    ⏭️  Skipping non-Game Line market: Wilmer Flores Total Hits, Runs & RBIs (Category: Hits + Runs + RBIs)
+[2025-07-19 11:43:20.484]    ⏭️  Skipping non-Game Line market: Luis Matos Total Hits, Runs & RBIs (Category: Hits + Runs + RBIs)
+[2025-07-19 11:43:20.484]    ⏭️  Skipping non-Game Line market: Heliot Ramos Total Walks (Category: Walks)
+[2025-07-19 11:43:20.484]    ⏭️  Skipping non-Game Line market: Matt Chapman Total Walks (Category: Walks)
+[2025-07-19 11:43:20.484]    ⏭️  Skipping non-Game Line market: Casey Schmitt Total Runs (Category: Runs)
+[2025-07-19 11:43:20.484]    ⏭️  Skipping non-Game Line market: Casey Schmitt Stolen Bases (Category: Stolen Bases)
+[2025-07-19 11:43:20.484]    ⏭️  Skipping non-Game Line market: Logan Webb Total Earned Runs Allowed (Category: Runs Allowed)
+[2025-07-19 11:43:20.484]    ⏭️  Skipping non-Game Line market: Willy Adames Total Hits, Runs & RBIs (Category: Hits + Runs + RBIs)
+[2025-07-19 11:43:20.484]    ⏭️  Skipping non-Game Line market: Willy Adames Stolen Bases (Category: Stolen Bases)
+[2025-07-19 11:43:20.484]    ⏭️  Skipping non-Game Line market: Jung Hoo Lee Stolen Bases (Category: Stolen Bases)
+[2025-07-19 11:43:20.484]    ⏭️  Skipping non-Game Line market: Rafael Devers Total Runs (Category: Runs)
+[2025-07-19 11:43:20.484]    ⏭️  Skipping non-Game Line market: Luis Matos Total Bases (Category: Total Bases)
+[2025-07-19 11:43:20.484]    ⏭️  Skipping non-Game Line market: Jung Hoo Lee Total Runs (Category: Runs)
+[2025-07-19 11:43:20.484]    ⏭️  Skipping non-Game Line market: Logan Webb Hits Allowed (Category: Hits Allowed)
+[2025-07-19 11:43:20.484]    ⏭️  Skipping non-Game Line market: Alejandro Kirk Total Fantasy Points (Category: Fantasy Points)
+[2025-07-19 11:43:20.484]    ⏭️  Skipping non-Game Line market: Luis Matos Total Fantasy Points (Category: Fantasy Points)
+[2025-07-19 11:43:20.484]    ⏭️  Skipping non-Game Line market: Addison Barger Total Home Runs (Category: Home Runs)
+[2025-07-19 11:43:20.484]    ⏭️  Skipping non-Game Line market: Wilmer Flores Total Fantasy Points (Category: Fantasy Points)
+[2025-07-19 11:43:20.484]    ⏭️  Skipping non-Game Line market: Eric Lauer Total Fantasy Points (Category: Fantasy Points)
+[2025-07-19 11:43:20.484]    ⏭️  Skipping non-Game Line market: Casey Schmitt Total Fantasy Points (Category: Fantasy Points)
+[2025-07-19 11:43:20.484]    ⏭️  Skipping non-Game Line market: Vladimir Guerrero Jr. Total Home Runs (Category: Home Runs)
+[2025-07-19 11:43:20.484]    ⏭️  Skipping non-Game Line market: Jung Hoo Lee Total Fantasy Points (Category: Fantasy Points)
+[2025-07-19 11:43:20.484]    ⏭️  Skipping non-Game Line market: George Springer Total Home Runs (Category: Home Runs)
+[2025-07-19 11:43:20.484]    ⏭️  Skipping non-Game Line market: Bo Bichette Total Home Runs (Category: Home Runs)
+[2025-07-19 11:43:20.484]    ⏭️  Skipping non-Game Line market: Ernie Clement Total Fantasy Points (Category: Fantasy Points)
+[2025-07-19 11:43:20.484]    ⏭️  Skipping non-Game Line market: Logan Webb Total Pitching Strikeouts Milestones (Category: Alt Strikeouts)
+[2025-07-19 11:43:20.484]    ⏭️  Skipping non-Game Line market: Luis Matos Total Home Runs (Category: Home Runs)
+[2025-07-19 11:43:20.484]    ⏭️  Skipping non-Game Line market: Patrick Bailey Total Home Runs (Category: Home Runs)
+[2025-07-19 11:43:20.484]    ⏭️  Skipping non-Game Line market: Rafael Devers Total Home Runs (Category: Home Runs)
+[2025-07-19 11:43:20.484]    ⏭️  Skipping non-Game Line market: Heliot Ramos Total Home Runs (Category: Home Runs)
+[2025-07-19 11:43:20.484]    ⏭️  Skipping non-Game Line market: Willy Adames Total Home Runs (Category: Home Runs)
+[2025-07-19 11:43:20.484]    ⏭️  Skipping non-Game Line market: Jung Hoo Lee Total Home Runs (Category: Home Runs)
+[2025-07-19 11:43:20.484]    ⏭️  Skipping non-Game Line market: Wilmer Flores Total Home Runs (Category: Home Runs)
+[2025-07-19 11:43:20.484]    ⏭️  Skipping non-Game Line market: Alejandro Kirk Total Home Runs (Category: Home Runs)
+[2025-07-19 11:43:20.484]    ⏭️  Skipping non-Game Line market: Casey Schmitt Total Home Runs (Category: Home Runs)
+[2025-07-19 11:43:20.484]    ⏭️  Skipping non-Game Line market: Matt Chapman Total Home Runs (Category: Home Runs)
+[2025-07-19 11:43:20.484]    ⏭️  Skipping non-Game Line market: Davis Schneider Total Fantasy Points (Category: Fantasy Points)
+[2025-07-19 11:43:20.484]    ⏭️  Skipping non-Game Line market: Leo Jiménez Total Fantasy Points (Category: Fantasy Points)
+[2025-07-19 11:43:20.484]    ⏭️  Skipping non-Game Line market: Myles Straw Total Fantasy Points (Category: Fantasy Points)
+[2025-07-19 11:43:20.484]    ⏭️  Skipping non-Game Line market: Bo Bichette Doubles (Category: Doubles)
+[2025-07-19 11:43:20.484]    ⏭️  Skipping non-Game Line market: Nathan Lukes Total Batting Strikeouts (Category: Batter Ks)
+[2025-07-19 11:43:20.485]    ⏭️  Skipping non-Game Line market: Nathan Lukes Doubles (Category: Doubles)
+[2025-07-19 11:43:20.485]    ⏭️  Skipping non-Game Line market: Jung Hoo Lee Total Batting Strikeouts (Category: Batter Ks)
+[2025-07-19 11:43:20.485]    ⏭️  Skipping non-Game Line market: Vladimir Guerrero Jr. Doubles (Category: Doubles)
+[2025-07-19 11:43:20.485]    ⏭️  Skipping non-Game Line market: Bo Bichette Total Batting Strikeouts (Category: Batter Ks)
+[2025-07-19 11:43:20.485]    ⏭️  Skipping non-Game Line market: Luis Matos Total Batting Strikeouts (Category: Batter Ks)
+[2025-07-19 11:43:20.485]    ⏭️  Skipping non-Game Line market: George Springer Singles (Category: Singles)
+[2025-07-19 11:43:20.485]    ⏭️  Skipping non-Game Line market: Willy Adames Doubles (Category: Doubles)
+[2025-07-19 11:43:20.485]    ⏭️  Skipping non-Game Line market: Wilmer Flores Doubles (Category: Doubles)
+[2025-07-19 11:43:20.485]    ⏭️  Skipping non-Game Line market: Casey Schmitt Doubles (Category: Doubles)
+[2025-07-19 11:43:20.485]    ⏭️  Skipping non-Game Line market: Alejandro Kirk Doubles (Category: Doubles)
+[2025-07-19 11:43:20.485]    ⏭️  Skipping non-Game Line market: George Springer Doubles (Category: Doubles)
+[2025-07-19 11:43:20.485]    ⏭️  Skipping non-Game Line market: Luis Matos Total Pitching Strikeouts Milestones (Category: Alt Strikeouts)
+[2025-07-19 11:43:20.485]    ⏭️  Skipping non-Game Line market: Rafael Devers Doubles (Category: Doubles)
+[2025-07-19 11:43:20.485]    ⏭️  Skipping non-Game Line market: Heliot Ramos Doubles (Category: Doubles)
+[2025-07-19 11:43:20.485]    ⏭️  Skipping non-Game Line market: Matt Chapman Doubles (Category: Doubles)
+[2025-07-19 11:43:20.485]    ⏭️  Skipping non-Game Line market: Logan Webb Total Fantasy Points (Category: Fantasy Points)
+[2025-07-19 11:43:20.485]    ⏭️  Skipping non-Game Line market: Addison Barger Doubles (Category: Doubles)
+[2025-07-19 11:43:20.485]    ⏭️  Skipping non-Game Line market: Jung Hoo Lee Doubles (Category: Doubles)
+[2025-07-19 11:43:20.485]    ⏭️  Skipping non-Game Line market: Luis Matos Total Hits (Category: Hits)
+[2025-07-19 11:43:20.485]    ⏭️  Skipping non-Game Line market: Joey Loperfido Total RBIs (Category: RBIs)
+[2025-07-19 11:43:20.485]    ⏭️  Skipping non-Game Line market: Joey Loperfido Singles (Category: Singles)
+[2025-07-19 11:43:20.485]    ⏭️  Skipping non-Game Line market: Luis Matos Total RBIs (Category: RBIs)
+[2025-07-19 11:43:20.485]    ⏭️  Skipping non-Game Line market: Rafael Devers Total Batting Strikeouts (Category: Batter Ks)
+[2025-07-19 11:43:20.485]    ⏭️  Skipping non-Game Line market: Vladimir Guerrero Jr. Total Batting Strikeouts (Category: Batter Ks)
+[2025-07-19 11:43:20.485]    ⏭️  Skipping non-Game Line market: Heliot Ramos Total Batting Strikeouts (Category: Batter Ks)
+[2025-07-19 11:43:20.485]    ⏭️  Skipping non-Game Line market: Wilmer Flores Total Batting Strikeouts (Category: Batter Ks)
+[2025-07-19 11:43:20.485]    ⏭️  Skipping non-Game Line market: Will Wagner Total Home Runs (Category: Home Runs)
+[2025-07-19 11:43:20.485]    ⏭️  Skipping non-Game Line market: Joey Loperfido Doubles (Category: Doubles)
+[2025-07-19 11:43:20.485]    ⏭️  Skipping non-Game Line market: Luis Matos Doubles (Category: Doubles)
+[2025-07-19 11:43:20.485]    ⏭️  Skipping non-Game Line market: Joey Loperfido Total Home Runs (Category: Home Runs)
+[2025-07-19 11:43:20.485]    ⏭️  Skipping non-Game Line market: Will Wagner Doubles (Category: Doubles)
+[2025-07-19 11:43:20.485]    ⏭️  Skipping non-Game Line market: Ernie Clement Total Home Runs (Category: Home Runs)
+[2025-07-19 11:43:20.485]    ⏭️  Skipping non-Game Line market: Patrick Bailey Doubles (Category: Doubles)
+[2025-07-19 11:43:20.485]    ⏭️  Skipping non-Game Line market: Nathan Lukes Total Home Runs (Category: Home Runs)
+[2025-07-19 11:43:20.485]    ⏭️  Skipping non-Game Line market: Will Wagner Total RBIs (Category: RBIs)
+[2025-07-19 11:43:20.485]    ⏭️  Skipping non-Game Line market: Ernie Clement Doubles (Category: Doubles)
+[2025-07-19 11:43:20.485]    ⏭️  Skipping non-Game Line market: Luis Matos Singles (Category: Singles)
+[2025-07-19 11:43:20.485]    ⏭️  Skipping non-Game Line market: Logan Webb Walks Allowed (Category: Walks Allowed)
+[2025-07-19 11:43:20.485]    ⏭️  Skipping non-Game Line market: Myles Straw Singles (Category: Singles)
+[2025-07-19 11:43:20.485]    ⏭️  Skipping non-Game Line market: Eric Lauer Total Walks (Category: Walks)
+[2025-07-19 11:43:20.485]    ⏭️  Skipping non-Game Line market: Leo Jiménez Total Hits (Category: Hits)
+[2025-07-19 11:43:20.485]    ⏭️  Skipping non-Game Line market: Leo Jiménez Singles (Category: Singles)
+[2025-07-19 11:43:20.485]    ⏭️  Skipping non-Game Line market: Leo Jiménez Total RBIs (Category: RBIs)
+[2025-07-19 11:43:20.485]    ⏭️  Skipping non-Game Line market: Leo Jiménez Total Bases (Category: Total Bases)
+[2025-07-19 11:43:20.486]    ⏭️  Skipping non-Game Line market: Addison Barger Total Fantasy Points (Category: Fantasy Points)
+[2025-07-19 11:43:20.486]    ⏭️  Skipping non-Game Line market: Nathan Lukes Total Fantasy Points (Category: Fantasy Points)
+[2025-07-19 11:43:20.486]    ⏭️  Skipping non-Game Line market: Matt Chapman Total Batting Strikeouts (Category: Batter Ks)
+[2025-07-19 11:43:20.486]    ⏭️  Skipping non-Game Line market: Eric Lauer Pitcher To Record A Win (Category: Pitcher Win)
+[2025-07-19 11:43:20.486]    ⏭️  Skipping non-Game Line market: Logan Webb Pitcher To Record A Win (Category: Pitcher Win)
+[2025-07-19 11:43:20.486]    ⏭️  Skipping non-Game Line market: Will Wagner Total Fantasy Points (Category: Fantasy Points)
+[2025-07-19 11:43:20.486]    ⏭️  Skipping non-Game Line market: Tyler Heineman Total Home Runs (Category: Home Runs)
+[2025-07-19 11:43:20.486]    ⏭️  Skipping non-Game Line market: Tyler Heineman Singles (Category: Singles)
+[2025-07-19 11:43:20.486]    ⏭️  Skipping non-Game Line market: Tyler Heineman Total Bases (Category: Total Bases)
+[2025-07-19 11:43:20.486]    ⏭️  Skipping non-Game Line market: Tyler Heineman Total RBIs (Category: RBIs)
+[2025-07-19 11:43:20.486]    ⏭️  Skipping non-Game Line market: Nathan Lukes Stolen Bases (Category: Stolen Bases)
+[2025-07-19 11:43:20.486]    ⏭️  Skipping non-Game Line market: Tyler Heineman Doubles (Category: Doubles)
+[2025-07-19 11:43:20.487]    ⏭️  Skipping non-Game Line market: Tyler Heineman Total Runs (Category: Runs)
+[2025-07-19 11:43:20.487]    ⏭️  Skipping non-Game Line market: Tyler Heineman Total Hits, Runs & RBIs (Category: Hits + Runs + RBIs)
+[2025-07-19 11:43:20.487]    ⏭️  Skipping non-Game Line market: Tyler Heineman Total Hits (Category: Hits)
+[2025-07-19 11:43:20.487]    ⏭️  Skipping non-Game Line market: Tyler Heineman Total Walks (Category: Walks)
+[2025-07-19 11:43:20.487]    ⏭️  Skipping non-Game Line market: Tyler Heineman Stolen Bases (Category: Stolen Bases)
+[2025-07-19 11:43:20.487] 🎯 Processing 3 Game Lines markets...
+[2025-07-19 11:43:20.487]    🔧 Parsing market 251: Moneyline (moneyline)
+[2025-07-19 11:43:20.487]       📊 Total lines: 2, Available: 0
+[2025-07-19 11:43:20.487]    ✅ Parsed market: moneyline (2 lines)
+[2025-07-19 11:43:20.487]       📝 Toronto Blue Jays: +0 (line_id: 82f619981f80114f704ddb9b44420c70)
+[2025-07-19 11:43:20.487]       📝 San Francisco Giants: +0 (line_id: 924f14a69d0df401202d0b12069deeee)
+[2025-07-19 11:43:20.487]    🔧 Parsing market 256: Run Line (spread)
+[2025-07-19 11:43:20.487]       📊 Total lines: 2, Available: 0
+[2025-07-19 11:43:20.487]    ✅ Parsed market: spread (2 lines)
+[2025-07-19 11:43:20.487]       📝 Toronto Blue Jays +1.5: +0 @ 1.5 (line_id: c26762e66b2ca975e90e4e374f25ab29)
+[2025-07-19 11:43:20.487]       📝 San Francisco Giants -1.5: +0 @ -1.5 (line_id: a74a2253b9eb6d59f49686c1f4096e67)
+[2025-07-19 11:43:20.487]    🔧 Parsing market 258: Total Runs (total)
+[2025-07-19 11:43:20.487]       📊 Total lines: 6, Available: 0
+[2025-07-19 11:43:20.487]    ✅ Parsed market: total (6 lines)
+[2025-07-19 11:43:20.487]       📝 under 7.5: +0 @ 7.5 (line_id: b4d63218fc0989917b1f9b87b11aa2ab)
+[2025-07-19 11:43:20.487]       📝 over 7.5: +0 @ 7.5 (line_id: 691d1d2df7bd628abeac36ea09cb398e)
+[2025-07-19 11:43:20.487]       📝 under 8: +0 @ 8.0 (line_id: eac46f8b97d1aea73467f8c6b97e419b)
+[2025-07-19 11:43:20.487]       📝 over 8: +0 @ 8.0 (line_id: 45ab87a67ec8d1f5c8df10c31a1965d8)
+[2025-07-19 11:43:20.487]       📝 under 8.5: +0 @ 8.5 (line_id: 570d79f3a17318c6e28306a8b96ca7fa)
+[2025-07-19 11:43:20.487]       📝 over 8.5: +0 @ 8.5 (line_id: 169620c5cc695b72b48b40e37dad4fbd)
+[2025-07-19 11:43:20.487] 🎉 Successfully parsed 3 Game Lines markets for event 10075782
+[2025-07-19 11:43:20.487] ✅ Found 3 markets for event 10075782
+[2025-07-19 11:43:20.487]    📈 moneyline: 2 lines
+[2025-07-19 11:43:20.487]    📈 spread: 2 lines
+[2025-07-19 11:43:20.487]    📈 total: 6 lines
+[2025-07-19 11:43:20.490] 📊 Market matching summary:
+[2025-07-19 11:43:20.490]    Successful matches: 3/3
+[2025-07-19 11:43:20.490]    Overall confidence: 0.980
+[2025-07-19 11:43:20.490]    Blocking issues: 0
+[2025-07-19 11:43:20.490]    Market making opportunities: 0
+[2025-07-19 11:43:20.490]    Ready for trading: True
+[2025-07-19 11:43:20.490] 🎯 Creating market making plan for: San Francisco Giants vs Toronto Blue Jays
+[2025-07-19 11:43:20.490] 📊 Available Pinnacle markets:
+[2025-07-19 11:43:20.490]    Moneyline: 2 outcomes
+[2025-07-19 11:43:20.490]      San Francisco Giants: -117
+[2025-07-19 11:43:20.490]      Toronto Blue Jays: +108
+[2025-07-19 11:43:20.490]    Spreads: 2 outcomes
+[2025-07-19 11:43:20.490]      San Francisco Giants: +140 @ -1.5
+[2025-07-19 11:43:20.490]      Toronto Blue Jays: -155 @ 1.5
+[2025-07-19 11:43:20.490]    Totals: 2 outcomes
+[2025-07-19 11:43:20.490]      Over: -103 @ 8.0
+[2025-07-19 11:43:20.490]      Under: -109 @ 8.0
+[2025-07-19 11:43:20.490] 📋 Processing 3 market matches...
+[2025-07-19 11:43:20.490] 📊 Processing h2h market...
+[2025-07-19 11:43:20.490]       San Francisco Giants: 🟡 INACTIVE (OPPORTUNITY)
+[2025-07-19 11:43:20.490]       Toronto Blue Jays: 🟡 INACTIVE (OPPORTUNITY)
+[2025-07-19 11:43:20.490] ✅ h2h market: Found 2 valid lines for arbitrage
+[2025-07-19 11:43:20.490]    Pinnacle odds: San Francisco Giants -117, Toronto Blue Jays +108
+[2025-07-19 11:43:20.490]    To offer San Francisco Giants -117: We bet Toronto Blue Jays at +117
+[2025-07-19 11:43:20.490]    To offer Toronto Blue Jays +108: We bet San Francisco Giants at -108
+[2025-07-19 11:43:20.490]    Plus side bet: Toronto Blue Jays at +117 → Offers users San Francisco Giants -117
+[2025-07-19 11:43:20.490]    Minus side bet: San Francisco Giants at -108 → Offers users Toronto Blue Jays +108
+[2025-07-19 11:43:20.490]    Margin: |+117| - |-108| = 9
+[2025-07-19 11:43:20.491]    Is profitable: True
+[2025-07-19 11:43:20.491] ✅ h2h market is profitable!
+[2025-07-19 11:43:20.491] ✅ h2h market is arbitrage opportunity!
+[2025-07-19 11:43:20.491]    📊 Calculating exact arbitrage for +117 vs -108
+[2025-07-19 11:43:20.491]    📈 More favorable: +117, Less favorable: -108
+[2025-07-19 11:43:20.491]    💰 $100 bet on +117:
+[2025-07-19 11:43:20.491]       Gross winnings: $117.00
+[2025-07-19 11:43:20.491]       Commission: $3.51
+[2025-07-19 11:43:20.491]       Net winnings: $113.49
+[2025-07-19 11:43:20.491]       Target payout: $213.49
+[2025-07-19 11:43:20.491]    💰 $112.47 bet on -108:
+[2025-07-19 11:43:20.491]       Gross winnings: $104.14
+[2025-07-19 11:43:20.491]       Commission: $3.12
+[2025-07-19 11:43:20.491]       Net winnings: $101.02
+[2025-07-19 11:43:20.491]       Total payout: $213.49
+[2025-07-19 11:43:20.491]    🔍 Payout difference: $0.000000
+[2025-07-19 11:43:20.491]    💰 Total investment: $212.47
+[2025-07-19 11:43:20.491]    💰 Guaranteed profit: $1.02 (0.479%)
+[2025-07-19 11:43:20.491]    Creating betting instructions...
+[2025-07-19 11:43:20.491]      ✅ Plus instruction: Bet Toronto Blue Jays +117 (🟡 PROVIDING FIRST LIQUIDITY)
+[2025-07-19 11:43:20.491]         → Users see: San Francisco Giants -117
+[2025-07-19 11:43:20.491]      ✅ Minus instruction: Bet San Francisco Giants -108 (🟡 PROVIDING FIRST LIQUIDITY)
+[2025-07-19 11:43:20.491]         → Users see: Toronto Blue Jays +108
+[2025-07-19 11:43:20.491]    ✅ Created 2 betting instructions for h2h
+[2025-07-19 11:43:20.491] 📊 Processing spreads market...
+[2025-07-19 11:43:20.491]       San Francisco Giants: 🟡 INACTIVE (OPPORTUNITY)
+[2025-07-19 11:43:20.491]       Toronto Blue Jays: 🟡 INACTIVE (OPPORTUNITY)
+[2025-07-19 11:43:20.491] ✅ spreads market: Found 2 valid lines for arbitrage
+[2025-07-19 11:43:20.491]    Pinnacle odds: San Francisco Giants +140, Toronto Blue Jays -155
+[2025-07-19 11:43:20.491]    To offer San Francisco Giants +140: We bet Toronto Blue Jays at -140
+[2025-07-19 11:43:20.491]    To offer Toronto Blue Jays -155: We bet San Francisco Giants at +155
+[2025-07-19 11:43:20.491]    Plus side bet: San Francisco Giants at +155 → Offers users Toronto Blue Jays -155
+[2025-07-19 11:43:20.491]    Minus side bet: Toronto Blue Jays at -140 → Offers users San Francisco Giants +140
+[2025-07-19 11:43:20.491]    Margin: |+155| - |-140| = 15
+[2025-07-19 11:43:20.491]    Is profitable: True
+[2025-07-19 11:43:20.491] ✅ spreads market is profitable!
+[2025-07-19 11:43:20.491] ✅ spreads market is arbitrage opportunity!
+[2025-07-19 11:43:20.491]    📊 Calculating exact arbitrage for +155 vs -140
+[2025-07-19 11:43:20.491]    📈 More favorable: +155, Less favorable: -140
+[2025-07-19 11:43:20.491]    💰 $100 bet on +155:
+[2025-07-19 11:43:20.491]       Gross winnings: $155.00
+[2025-07-19 11:43:20.491]       Commission: $4.65
+[2025-07-19 11:43:20.491]       Net winnings: $150.35
+[2025-07-19 11:43:20.491]       Target payout: $250.35
+[2025-07-19 11:43:20.491]    💰 $147.89 bet on -140:
+[2025-07-19 11:43:20.491]       Gross winnings: $105.63
+[2025-07-19 11:43:20.491]       Commission: $3.17
+[2025-07-19 11:43:20.491]       Net winnings: $102.46
+[2025-07-19 11:43:20.491]       Total payout: $250.35
+[2025-07-19 11:43:20.491]    🔍 Payout difference: $0.000000
+[2025-07-19 11:43:20.491]    💰 Total investment: $247.89
+[2025-07-19 11:43:20.491]    💰 Guaranteed profit: $2.46 (0.994%)
+[2025-07-19 11:43:20.492]    Creating betting instructions...
+[2025-07-19 11:43:20.492]      ✅ Plus instruction: Bet San Francisco Giants -1.5 +154 (🟡 PROVIDING FIRST LIQUIDITY)
+[2025-07-19 11:43:20.492]         → Users see: Toronto Blue Jays -155
+[2025-07-19 11:43:20.492]      ✅ Minus instruction: Bet Toronto Blue Jays +1.5 -140 (🟡 PROVIDING FIRST LIQUIDITY)
+[2025-07-19 11:43:20.492]         → Users see: San Francisco Giants +140
+[2025-07-19 11:43:20.492]    ✅ Created 2 betting instructions for spreads
+[2025-07-19 11:43:20.492] 📊 Processing totals market...
+[2025-07-19 11:43:20.492]       Over: 🟡 INACTIVE (OPPORTUNITY)
+[2025-07-19 11:43:20.492]       Under: 🟡 INACTIVE (OPPORTUNITY)
+[2025-07-19 11:43:20.492] ✅ totals market: Found 2 valid lines for arbitrage
+[2025-07-19 11:43:20.492]    Pinnacle odds: Over -103, Under -109
+[2025-07-19 11:43:20.492]    To offer Over -103: We bet Under at +103
+[2025-07-19 11:43:20.492]    To offer Under -109: We bet Over at +109
+[2025-07-19 11:43:20.492]    📊 Both bets positive: +103, +109
+[2025-07-19 11:43:20.492]    Using +109 as plus side, +103 as minus side
+[2025-07-19 11:43:20.492]    Plus side bet: Over at +109 → Offers users Under -109
+[2025-07-19 11:43:20.492]    Minus side bet: Under at +103 → Offers users Over -103
+[2025-07-19 11:43:20.492]    Margin: |+109| - |+103| = 6
+[2025-07-19 11:43:20.492]    Is profitable: True
+[2025-07-19 11:43:20.492] ✅ totals market is profitable!
+[2025-07-19 11:43:20.492] ✅ totals market is arbitrage opportunity!
+[2025-07-19 11:43:20.492]    📊 Calculating exact arbitrage for +109 vs +103
+[2025-07-19 11:43:20.492]    📈 More favorable: +109, Less favorable: +103
+[2025-07-19 11:43:20.492]    💰 $100 bet on +109:
+[2025-07-19 11:43:20.492]       Gross winnings: $109.00
+[2025-07-19 11:43:20.492]       Commission: $3.27
+[2025-07-19 11:43:20.492]       Net winnings: $105.73
+[2025-07-19 11:43:20.492]       Target payout: $205.73
+[2025-07-19 11:43:20.492]    💰 $102.91 bet on +103:
+[2025-07-19 11:43:20.492]       Gross winnings: $106.00
+[2025-07-19 11:43:20.492]       Commission: $3.18
+[2025-07-19 11:43:20.492]       Net winnings: $102.82
+[2025-07-19 11:43:20.492]       Total payout: $205.73
+[2025-07-19 11:43:20.492]    🔍 Payout difference: $0.000000
+[2025-07-19 11:43:20.492]    💰 Total investment: $202.91
+[2025-07-19 11:43:20.492]    💰 Guaranteed profit: $2.82 (1.389%)
+[2025-07-19 11:43:20.492]    Creating betting instructions...
+[2025-07-19 11:43:20.492]      ✅ Plus instruction: Bet over 8 +109 (🟡 PROVIDING FIRST LIQUIDITY)
+[2025-07-19 11:43:20.492]         → Users see: Under -109
+[2025-07-19 11:43:20.492]      ✅ Minus instruction: Bet under 8 +103 (🟡 PROVIDING FIRST LIQUIDITY)
+[2025-07-19 11:43:20.492]         → Users see: Over -103
+[2025-07-19 11:43:20.492]    ✅ Created 2 betting instructions for totals
+[2025-07-19 11:43:20.492] 🎉 Created 6 total betting instructions
+[2025-07-19 11:43:20.492] ❌ Error handling market odds change: 'SingleEventLineTester' object has no attribute '_get_market_id_for_line'
+[2025-07-19 11:43:20.493] Traceback (most recent call last):
+[2025-07-19 11:43:20.493]   File "/Users/alex/Desktop/Folders/Sports/market-maker/app/services/single_event_line_tester.py", line 1199, in _handle_market_odds_change
+    instruction_market_id = self._get_market_id_for_line(instruction.line_id)
+                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+[2025-07-19 11:43:20.493] AttributeError: 'SingleEventLineTester' object has no attribute '_get_market_id_for_line'
+[2025-07-19 11:43:20.493] 
+🔄 HANDLING ODDS CHANGE: TOTALS Market (ID: 258)
+[2025-07-19 11:43:20.493]    Change: Under -111 → -109
+[2025-07-19 11:43:20.493] 🗑️  Cancelling existing bets for market 258
+[2025-07-19 11:43:20.493] 🗑️ Cancelling wagers for event 10075782, market 258 (affects 2 lines)
+[2025-07-19 11:43:20.493]    📏 over 8
+[2025-07-19 11:43:20.493]    📏 under 8
+[2025-07-19 11:43:20.493] 🗑️ Cancelling all wagers for event 10075782, market 258
+[2025-07-19 11:43:20.718] ❌ Cancel request failed: HTTP 404: {"error":"data_not_found","message":"Record not found"}
+[2025-07-19 11:43:20.719] ❌ Failed to cancel market 258: Failed to cancel wagers for event 10075782, market 258
+[2025-07-19 11:43:20.719] ✅ All odds changes processed
+[2025-07-19 11:43:20.719] \n📈 CYCLE #29 COMPLETE
+[2025-07-19 11:43:20.719]    Duration: 19.3s
+[2025-07-19 11:43:20.719]    New incremental bets: 6
+[2025-07-19 11:43:20.719]    Next cycle in: 60s
